@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sample data</title>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../data/site_data.js"></script>
+<script src="../assets/panel.js"></script>
+</head>
+<body>
+<div class="panel wide">
+  <h1>Sample data</h1>
+  <p class="lede" id="lede"></p>
+  <div class="toolbar">
+    <a class="btn" href="../deliverables/data.xlsx" download>Download data.xlsx</a>
+    <a class="btn" href="../index.html#files" target="_top">Generator script</a>
+  </div>
+  <div class="data-layout">
+    <nav class="picker" id="picker" aria-label="Tables"></nav>
+    <section>
+      <h2 id="tname" style="margin-top:0"></h2>
+      <p class="note" id="tdesc" style="max-width:72ch"></p>
+      <div class="toolbar">
+        <label for="filter" class="note">Filter rows</label>
+        <input id="filter" class="filter" type="search" placeholder="e.g. 4817 or jazz">
+        <span class="note" id="count"></span>
+      </div>
+      <div class="tablewrap"><table class="grid" id="grid"></table></div>
+    </section>
+  </div>
+</div>
+<script>
+(function () {
+  var S = window.SITE, el = CF.el;
+  var ents = S.tables.filter(function (t) { return !t.associative; });
+  var nEnt = ents.reduce(function (a, t) { return a + t.rows.length; }, 0);
+  document.getElementById("lede").textContent =
+    nEnt + " records across the six entities, against a minimum of 50 overall and 5 in each. " +
+    "The four associative tables add " + (S.tables.reduce(function (a, t) { return a + t.rows.length; }, 0) - nEnt) +
+    " more. Every derived value was computed from the rows it depends on, and every integrity rule was checked before the file was written.";
+
+  // lead paragraph of each table's dictionary section
+  var dict = document.createElement("div"); dict.innerHTML = S.dictionary.html;
+  function slug(n) { return n.toLowerCase().replace(/\s+/g, "-"); }
+  function lead(name) {
+    var h = dict.querySelector("h2#" + slug(name)); if (!h) return "";
+    var p = h.nextElementSibling; return p && p.tagName === "P" ? p.textContent : "";
+  }
+
+  var picker = document.getElementById("picker"), buttons = {};
+  [["Entities", false], ["Associative entities", true]].forEach(function (grp) {
+    picker.appendChild(el("h3", { text: grp[0] }));
+    S.tables.filter(function (t) { return t.associative === grp[1]; }).forEach(function (t) {
+      var b = el("button", { "aria-pressed": "false" }, [t.name, el("span", { text: String(t.rows.length) })]);
+      b.onclick = function () { location.hash = slug(t.name); };
+      buttons[t.name] = b; picker.appendChild(b);
+    });
+  });
+
+  var cur = null, filter = document.getElementById("filter");
+  function render() {
+    var t = cur, q = filter.value.trim().toLowerCase(), keys = CF.KEYS[t.name] || {};
+    var grid = document.getElementById("grid"); grid.innerHTML = "";
+    var head = el("tr");
+    t.header.forEach(function (h) {
+      head.appendChild(el("th", { scope: "col" }, [h, keys[h] ? el("span", { "class": "key", text: keys[h] }) : null]));
+    });
+    grid.appendChild(el("thead", {}, [head]));
+    var body = el("tbody"), shown = 0;
+    t.rows.forEach(function (r) {
+      if (q && r.join(" ").toLowerCase().indexOf(q) < 0) return;
+      shown++;
+      var tr = el("tr");
+      r.forEach(function (v) {
+        var num = v !== null && /^-?\d+(\.\d+)?$/.test(v);
+        tr.appendChild(el("td", { "class": v === null ? "null" : (num ? "num" : ""), text: v === null ? "null" : v }));
+      });
+      body.appendChild(tr);
+    });
+    grid.appendChild(body);
+    document.getElementById("count").textContent = q ? shown + " of " + t.rows.length + " rows" : t.rows.length + " rows";
+  }
+  function select() {
+    var id = location.hash.replace("#", "");
+    var t = S.tables.filter(function (x) { return slug(x.name) === id; })[0] || S.tables[0];
+    cur = t;
+    Object.keys(buttons).forEach(function (n) { buttons[n].setAttribute("aria-pressed", n === t.name); });
+    document.getElementById("tname").textContent = t.name;
+    var d = document.getElementById("tdesc"); d.innerHTML = "";
+    d.appendChild(document.createTextNode(lead(t.name) + " "));
+    d.appendChild(el("a", { href: "../index.html#dictionary/" + slug(t.name), target: "_top", text: "What each column is for" }));
+    filter.value = ""; render();
+  }
+  filter.addEventListener("input", render);
+  window.addEventListener("hashchange", select);
+  select();
+})();
+</script>
+</body>
+</html>

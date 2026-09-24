@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conceptual model</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="panel wide">
+  <h1>Conceptual model</h1>
+  <p class="lede">Crow's foot notation. Entity names and relationships only: attributes and keys belong to the physical model, as the course's Unit 2 table specifies.</p>
+  <div class="toolbar" role="group" aria-label="Zoom">
+    <button class="btn" id="fit" aria-pressed="true">Fit to width</button>
+    <button class="btn" id="full" aria-pressed="false">Actual size</button>
+    <a class="btn" href="../deliverables/conceptual_data_model.png" download>Download PNG</a>
+  </div>
+  <div class="figure fit" id="fig"><img src="../deliverables/conceptual_data_model.png" alt="Crow's foot conceptual data model of CROSSFADE: six entities (Artist, Track, Genre, Listener, Scoring Model, Station) and four associative entities (Track Score, Genre Probability, Station Blend, Play) with their relationships."></div>
+  <div class="prose">
+    <h2>Reading it</h2>
+    <p>Blue boxes are entities; double-bordered orange boxes are associative entities. Every line reads parent to child. The symbol at each end says how many rows on that side relate to one row on the other: a double bar is exactly one, a bar with a crow's foot is one or many, and a circle makes that side optional (zero).</p>
+    <p>Two of the associative entities sit on three relationships, which the professor called ternary structures. Track Score joins Track and Scoring Model and names a top Genre. Play joins Listener and Track and may name the Station that surfaced it.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var fig = document.getElementById("fig"), fit = document.getElementById("fit"), full = document.getElementById("full");
+  function set(isFit) {
+    fig.classList.toggle("fit", isFit);
+    fit.setAttribute("aria-pressed", isFit); full.setAttribute("aria-pressed", !isFit);
+  }
+  fit.onclick = function () { set(true); }; full.onclick = function () { set(false); };
+})();
+</script>
+</body>
+</html>

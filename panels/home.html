@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home</title>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../data/site_data.js"></script>
+<script src="../assets/panel.js"></script>
+</head>
+<body>
+<div class="panel">
+  <h1 class="headline">A streaming service for independent artists, indexed by where a track sits between genres.</h1>
+
+  <h2 id="hero-title"></h2>
+  <div class="blend" id="blend" aria-describedby="blend-note"></div>
+  <div class="legend" id="legend"></div>
+  <p class="note" id="blend-note" style="max-width:72ch;margin-top:14px">Each bar is one Track Score and its ten Genre Probability rows. The models agree the track is mostly jazz with a large hip hop share, which is exactly the kind of track a station like "Late Jazz Hop" (60% jazz, 40% hip hop) is built to find. Entropy is the ambiguity stations filter on; divergence is how far each model sits from the others.</p>
+
+  <h2>How it works</h2>
+  <div class="prose">
+    <p>Artists upload recordings directly under their own licence, so the catalogue is almost entirely new material. Every track is scored at upload by several versions of the <a href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">BEARDOWN</a> genre classifier, each returning a probability for all ten genres. Listeners don't browse genre names. They build stations from a target blend and an allowed range of ambiguity, and a track uploaded an hour ago is as findable as one with a million plays.</p>
+    <p>The database holds the artist roster and catalogue, the model versions and every result they produced, listener accounts and their stations, and every play, which is both the taste signal and the billable event for royalties.</p>
+  </div>
+
+  <h2>Deliverables</h2>
+  <table class="status" id="status"></table>
+
+  <h2>Professor's feedback</h2>
+  <div class="callout">
+    <p>The business plan was well received. The one correction: <strong>the primary key of an associative table is formed from the foreign keys it connects</strong>, not a surrogate ID.</p>
+    <p>Resolved in mk2. Track Score, Genre Probability, Station Blend and Play now use composite keys. Play adds its start time to the key, because a listener can replay a track. The full history is in the <a href="../index.html#changes" target="_top">change log</a>.</p>
+  </div>
+
+  <h2>Where the models come from</h2>
+  <div class="prose">
+    <p>The five Scoring Model records are real deployed versions from two earlier projects: BEARDOWN (INFO 510, <a href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">repository</a>) and the FORGE posterior observatory (INFO 698, <a href="https://n-herling-mk1.github.io/INFO_698_documentation/" target="_blank" rel="noopener">documentation</a>, <a href="https://forge-observatory.com" target="_blank" rel="noopener">site</a>).</p>
+  </div>
+</div>
+<script>
+(function () {
+  var S = window.SITE, h = S.hero, el = CF.el;
+  document.getElementById("hero-title").textContent =
+    "\u201c" + h.title + "\u201d by " + h.artist + ", as four models hear it";
+
+  var blend = document.getElementById("blend");
+  h.models.forEach(function (m) {
+    var bar = el("div", { "class": "bar", role: "img",
+      "aria-label": m.label + ": " + m.probs.map(function (p, i) { return h.genres[i] + " " + Math.round(p * 100) + "%"; })
+        .filter(function (_, i) { return m.probs[i] >= 0.05; }).join(", ") });
+    m.probs.forEach(function (p, i) {
+      if (p <= 0) return;
+      var seg = el("div", { "class": "seg", style: "width:" + (p * 100) + "%;background:" + CF.genreColor(i),
+        title: h.genres[i] + " " + (p * 100).toFixed(1) + "%" });
+      if (p >= 0.05) seg.dataset.label = h.genres[i] + " " + Math.round(p * 100) + "%";
+      bar.appendChild(seg);
+    });
+    var nums = el("div", { "class": "nums" }, [
+      "entropy " + m.entropy, el("br"), "divergence " + (m.divergence || "\u2013")
+    ]);
+    blend.appendChild(el("div", { "class": "blend-row" }, [el("div", { "class": "who", text: m.label }), bar, nums]));
+  });
+  // show a segment's label only where it fits whole
+  function fitLabels() {
+    Array.prototype.forEach.call(blend.querySelectorAll(".seg[data-label]"), function (s) {
+      s.textContent = s.dataset.label;
+      if (s.scrollWidth > s.clientWidth) s.textContent = "";
+    });
+  }
+  fitLabels(); window.addEventListener("resize", fitLabels);
+
+  var legend = document.getElementById("legend");
+  h.genres.forEach(function (g, i) { legend.appendChild(el("span", { style: "--c:" + CF.genreColor(i), text: g })); });
+
+  var rows = [
+    ["requirements_analysis.pdf", "requirements"], ["conceptual_data_model.png", "conceptual"],
+    ["data.xlsx", "data"], ["physical_data_model.png", "physical"]
+  ];
+  var st = document.getElementById("status");
+  rows.forEach(function (r) {
+    var done = !!S.status[r[0]];
+    st.appendChild(el("tr", {}, [
+      el("td", {}, [el("a", { href: "../index.html#" + r[1], target: "_top", text: r[0] })]),
+      el("td", { "class": done ? "done" : "todo", text: done ? "Done" : "Next up" })
+    ]));
+  });
+})();
+</script>
+</body>
+</html>

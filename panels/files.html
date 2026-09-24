@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Files</title>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../data/site_data.js"></script>
+<script src="../assets/panel.js"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Files</h1>
+  <p class="lede">Every file in the repository, grouped by what it is. The submission zip is built from <code>deliverables/</code> only.</p>
+  <div id="groups"></div>
+  <div class="prose">
+    <h2>Rebuilding</h2>
+    <p>Each generated file has a script beside its source. Run them from the repository root.</p>
+    <table>
+      <tr><th>Output</th><th>Command</th></tr>
+      <tr><td>requirements_analysis.pdf</td><td><code>pdflatex requirements_analysis.tex</code> (twice)</td></tr>
+      <tr><td>conceptual_data_model.png</td><td><code>python source/conceptual_model/build_cdm.py</code></td></tr>
+      <tr><td>data.xlsx</td><td><code>python source/data/gen_data.py</code></td></tr>
+      <tr><td>this site's data</td><td><code>python scripts/build_site.py</code></td></tr>
+    </table>
+  </div>
+</div>
+<script>
+(function () {
+  var S = window.SITE, el = CF.el, groups = document.getElementById("groups");
+  var DESC = {
+    "deliverables": "The four graded files.",
+    "docs": "Reference documents.",
+    "source": "Everything the deliverables are built from.",
+    "scripts": "Site tooling."
+  };
+  Object.keys(DESC).forEach(function (g) {
+    var files = S.files.filter(function (f) { return f.path.indexOf(g + "/") === 0; });
+    if (!files.length) return;
+    groups.appendChild(el("h2", { text: g + "/" }));
+    groups.appendChild(el("p", { "class": "note", text: DESC[g] }));
+    var t = el("table", { "class": "status" });
+    files.forEach(function (f) {
+      t.appendChild(el("tr", {}, [
+        el("td", {}, [el("a", { href: "../" + f.path, target: "_blank", rel: "noopener", text: f.path.slice(g.length + 1) })]),
+        el("td", { "class": "note", style: "text-align:right;font-family:var(--mono)", text: CF.kb(f.bytes) })
+      ]));
+    });
+    groups.appendChild(t);
+  });
+})();
+</script>
+</body>
+</html>

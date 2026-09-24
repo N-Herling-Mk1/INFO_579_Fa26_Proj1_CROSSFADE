@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data dictionary</title>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../data/site_data.js"></script>
+<script src="../assets/panel.js"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Data dictionary</h1>
+  <p class="lede">What every one of the 61 columns is for, and why it is typed and constrained the way it is.</p>
+  <div class="toolbar"><a class="btn" href="../docs/DATA_DICTIONARY.md" target="_blank" rel="noopener">View as Markdown</a></div>
+  <div class="doc-layout">
+    <nav class="toc" id="toc" aria-label="Sections"></nav>
+    <article class="prose" id="doc"></article>
+  </div>
+</div>
+<script>
+(function () {
+  var d = window.SITE.dictionary;
+  document.getElementById("doc").innerHTML = d.html;
+  var toc = document.getElementById("toc");
+  d.toc.forEach(function (t) { toc.appendChild(CF.el("a", { href: "#" + t.id, text: t.name })); });
+  if (location.hash) { var target = document.getElementById(location.hash.slice(1)); if (target) target.scrollIntoView(); }
+})();
+</script>
+</body>
+</html>
