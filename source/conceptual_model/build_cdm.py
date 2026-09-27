@@ -1,4 +1,7 @@
-"""CROSSFADE conceptual data model (crow's foot) -> conceptual_data_model.png"""
+"""CROSSFADE conceptual data model draft (crow's foot) -> conceptual_data_model_draft.png
+
+The graded deliverables/conceptual_data_model.png is the partner-drawn official
+version (mk8). This script only rebuilds the draft it was checked against."""
 import subprocess, sys
 I = 72  # points per inch (neato -n2)
 ENT, ASC = "#1F5FA8", "#B35C00"
@@ -63,7 +66,7 @@ L.append('}')
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOT = os.path.join(HERE, "cdm.dot")
-PNG = os.path.normpath(os.path.join(HERE, "..", "..", "deliverables", "conceptual_data_model.png"))
+PNG = os.path.normpath(os.path.join(HERE, "conceptual_data_model_draft.png"))
 open(DOT,"w").write("\n".join(L))
 print("[1/2] wrote cdm.dot"); sys.stdout.flush()
 subprocess.run(["neato","-n2","-Tpng","-Gdpi=200",DOT,"-o",PNG],check=True)

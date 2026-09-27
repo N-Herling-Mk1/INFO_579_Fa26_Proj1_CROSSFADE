@@ -28,7 +28,7 @@ deliverables/            the four graded files
 docs/DATA_DICTIONARY.md  what every column is for
 source/                  LaTeX, diagram and data-generator sources
 scripts/build_site.py    rebuilds data/site_data.js
-CHANGES.md               mk1 → mk7 history
+CHANGES.md               mk1 → mk8 history
 ```
 
 ## Rebuilding
@@ -37,7 +37,7 @@ From the repository root:
 
 ```
 pdflatex requirements_analysis.tex          # in source/requirements_analysis/, run twice
-python source/conceptual_model/build_cdm.py  # conceptual_data_model.png (needs graphviz)
+python source/conceptual_model/build_cdm.py  # draft conceptual model only; the deliverable is hand-drawn (needs graphviz)
 python source/data/gen_data.py               # data.xlsx, with integrity self-checks
 python scripts/build_site.py                 # refresh the site after any of the above
 ```

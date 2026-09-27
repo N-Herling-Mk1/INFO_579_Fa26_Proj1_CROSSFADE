@@ -1,11 +1,11 @@
-# CROSSFADE — INFO 579 Project 1 — mk7
+# CROSSFADE — INFO 579 Project 1 — mk8
 
 ## Package status
 
 | Deliverable | Status |
 |---|---|
 | `requirements_analysis.pdf` | Done (unchanged since mk5, 22 pp) |
-| `conceptual_data_model.png` | Done (unchanged since mk3) |
+| `conceptual_data_model.png` | Done (official partner version, mk8) |
 | `data.xlsx` | Done (mk6) |
 | `physical_data_model.png` | **Not started** |
 
@@ -23,11 +23,11 @@ docs/DATA_DICTIONARY.md         what every column is for
 boot_site.ps1                   local preview server
 deliverables/   requirements_analysis.pdf, conceptual_data_model.png, data.xlsx
 source/requirements_analysis/   requirements_analysis.tex, img/, mk1_to_mk5.diff, mk4_to_mk5.diff
-source/conceptual_model/        build_cdm.py (graphviz, neato -n2), cdm.dot
+source/conceptual_model/        build_cdm.py (graphviz, neato -n2), cdm.dot, conceptual_data_model_draft.png
 source/data/                    gen_data.py (seeded generator + integrity self-check -> data.xlsx)
 ```
 
-Rebuild: `pdflatex requirements_analysis.tex` (run twice); `python3 build_cdm.py`; `python3 gen_data.py`; then `python3 scripts/build_site.py` so the site picks up the changes.
+Rebuild: `pdflatex requirements_analysis.tex` (run twice); `python3 build_cdm.py` (draft only); `python3 gen_data.py`; then `python3 scripts/build_site.py` so the site picks up the changes.
 
 ## mk2 — professor's feedback (associative-table keys)
 
@@ -151,3 +151,10 @@ The deliverables are unchanged from mk6. This version turns the package into the
    - identifying relationships as solid lines, non-identifying as dashed
 3. Group code for the submission zip name.
 4. Enable GitHub Pages: Settings → Pages → Deploy from branch → `main` / root.
+
+## mk8 — official conceptual model
+
+- `deliverables/conceptual_data_model.png` is now the diagram drawn by the project partner.
+- Checked against the mk3 draft before replacing it: same 10 entities (6 plain, 4 associative), same 13 relationships and verbs, same cardinality at all 26 line ends. No model change.
+- The generated draft moved to `source/conceptual_model/conceptual_data_model_draft.png`; `build_cdm.py` now writes there so a rebuild cannot overwrite the official file.
+- Site: course logo on the home panel; favicon set in `assets/images/`.

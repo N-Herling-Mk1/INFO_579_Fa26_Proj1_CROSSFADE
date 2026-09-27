@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Conceptual model</title>
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
 <body>
@@ -15,11 +19,13 @@
     <button class="btn" id="full" aria-pressed="false">Actual size</button>
     <a class="btn" href="../deliverables/conceptual_data_model.png" download>Download PNG</a>
   </div>
-  <div class="figure fit" id="fig"><img src="../deliverables/conceptual_data_model.png" alt="Crow's foot conceptual data model of CROSSFADE: six entities (Artist, Track, Genre, Listener, Scoring Model, Station) and four associative entities (Track Score, Genre Probability, Station Blend, Play) with their relationships."></div>
+  <div class="figure fit" id="fig"><img src="../deliverables/conceptual_data_model.png" alt="Crow's foot conceptual data model of CROSSFADE (official version, drawn by the project partner): six entities (Artist, Track, Genre, Listener, Scoring Model, Station) and four associative entities (Track Score, Genre Probability, Station Blend, Play) with their relationships."></div>
   <div class="prose">
     <h2>Reading it</h2>
-    <p>Blue boxes are entities; double-bordered orange boxes are associative entities. Every line reads parent to child. The symbol at each end says how many rows on that side relate to one row on the other: a double bar is exactly one, a bar with a crow's foot is one or many, and a circle makes that side optional (zero).</p>
+    <p>White boxes are entities; pink boxes are associative entities. Each relationship is labelled with a verb read from the parent (the "exactly one" end) to the child. The symbol at each end says how many rows on that side relate to one row on the other: a double bar is exactly one, a bar with a crow's foot is one or many, and a circle makes that side optional (zero).</p>
     <p>Two of the associative entities sit on three relationships, which the professor called ternary structures. Track Score joins Track and Scoring Model and names a top Genre. Play joins Listener and Track and may name the Station that surfaced it.</p>
+    <h2>Checked against the draft</h2>
+    <p>This is the official diagram, drawn by the project partner. Before it replaced the generated draft it was checked line by line: the same ten entities (six plain, four associative), the same thirteen relationships with the same verbs, and the same cardinality at every one of the 26 line ends. The draft is kept at <code>source/conceptual_model/conceptual_data_model_draft.png</code>.</p>
   </div>
 </div>
 <script>
