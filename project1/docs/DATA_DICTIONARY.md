@@ -479,7 +479,7 @@ One streaming event, and the fastest-growing table: every stream adds a row. It 
 
 - **Values:** `2026-05-18 02:17:16` to `2026-08-29 06:44:37` in the sample; the type allows 1000-01-01 to 9999-12-31, to the second; typical `2026-06-28 06:05:04`.
 - **Why this type:** A moment to the second: DATETIME. This is the one knowing trade of bytes for correctness. TIMESTAMP is smaller (4 bytes) and Played At is in the key of the largest table, but TIMESTAMP ends on 2038-01-19 and a play after that must still be payable. The slides give DATETIME 8 bytes; MySQL 5.6.4 and later stores it in 5, so the real cost is one byte per play.
-- **What it holds:** When the stream began. A listener replays tracks, so the two foreign keys alone cannot identify a play; the start time completes the key, like a weak entity's partial key. It also orders listening history, assigns the play to a billing period, and exposes a duplicated event, which is how double-counted royalties get caught.
+- **What it holds:** When the stream began, recorded in UTC so a daylight-saving change never repeats a value. A listener replays tracks, so the two foreign keys alone cannot identify a play; the start time completes the key, like a weak entity's partial key. It also orders listening history, assigns the play to a billing period, and exposes a duplicated event, which is how double-counted royalties get caught. Both foreign keys are in the key, as the professor's rule requires; Played At is the one added column, the same pattern as Year and Sem in the Unit 2 grades example.
 
 ### Station ID · `INT UNSIGNED` · FK to Station · optional
 

@@ -201,7 +201,7 @@ ENTITIES = [
   "What was streamed."),
  ("Played At",
   "A moment to the second: DATETIME. This is the one knowing trade of bytes for correctness. TIMESTAMP is smaller (4 bytes) and Played At is in the key of the largest table, but TIMESTAMP ends on 2038-01-19 and a play after that must still be payable. The slides give DATETIME 8 bytes; MySQL 5.6.4 and later stores it in 5, so the real cost is one byte per play.",
-  "When the stream began. A listener replays tracks, so the two foreign keys alone cannot identify a play; the start time completes the key, like a weak entity's partial key. It also orders listening history, assigns the play to a billing period, and exposes a duplicated event, which is how double-counted royalties get caught."),
+  "When the stream began, recorded in UTC so a daylight-saving change never repeats a value. A listener replays tracks, so the two foreign keys alone cannot identify a play; the start time completes the key, like a weak entity's partial key. It also orders listening history, assigns the play to a billing period, and exposes a duplicated event, which is how double-counted royalties get caught. Both foreign keys are in the key, as the professor's rule requires; Played At is the one added column, the same pattern as Year and Sem in the Unit 2 grades example."),
  ("Station ID",
   "Matches Station.Station ID, INT UNSIGNED. Optional (NULL) when no station was involved.",
   "The station that surfaced the play, credited in station analytics. Empty when the listener picked the track directly, which is why it cannot be in the key. It may be another listener's shared station (I6)."),

@@ -103,6 +103,10 @@
 \newcommand{\rae}[1]{\textcolor{ascc}{#1}}
 \newcommand{\swatch}[1]{\textcolor{#1}{\rule{0.9em}{0.9em}}}
 
+% link to one entity's section of the online data dictionary
+\newcommand{\dictbase}{https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/project1/\#dictionary/}
+\newcommand{\dictnote}[2]{\newline{\small\itshape Types, value ranges and the reason for each type:} {\small\href{\dictbase #1}{data dictionary, #2}}}
+
 \begin{document}
 
 {\LARGE\bfseries INFO 579 Project 1 --- Requirements Analysis}
@@ -139,6 +143,14 @@ BEARDOWN repository (INFO 510) & \url{https://github.com/N-Herling-Mk1/INFO_510_
 FORGE documentation (INFO 698) & \url{https://n-herling-mk1.github.io/INFO_698_documentation/} & \rule{0pt}{1.05in}\includegraphics[width=1.75in]{og_forge_docs.png} \\ \hline
 FORGE official website & \url{https://forge-observatory.com} & \rule{0pt}{1.05in}\includegraphics[width=1.75in]{og_forge_site.png} \\ \hline
 \end{longtable}}
+
+\vspace{6pt}
+\noindent\fcolorbox{headblue}{headblue!6}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{%
+\textbf{Data dictionary.} Every column in this document, 59 in all, is documented in the project's
+data dictionary: its data type and size in bytes, the extreme or typical values in \texttt{data.xlsx},
+why the type is the smallest correct choice, and what the column holds. Online at
+\href{https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/project1/\#dictionary}{the CROSSFADE site, Data dictionary};
+in the repository as \texttt{project1/docs/DATA\_DICTIONARY.md}. Each entity table in this document links to its section.}}
 
 \clearpage
 \section{Overview}\label{sec:ra}
@@ -182,7 +194,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \section{Entities}\label{sec:entities}
 
 \begin{entitytable}
-\entityhead{Artist}{An independent musician or group that has registered with the service to upload recordings under a direct streaming licence, and is paid a per stream royalty on plays of those recordings. An artist may be registered before uploading a first recording.}
+\entityhead{Artist}{An independent musician or group that has registered with the service to upload recordings under a direct streaming licence, and is paid a per stream royalty on plays of those recordings. An artist may be registered before uploading a first recording.\dictnote{artist}{Artist}}
 \attr{Artist ID}{MEDIUMINT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier assigned to each artist when their registration is accepted, used to attribute catalogue and royalty records to that artist.}
 \attr{Stage Name}{VARCHAR(64)}{No}{Yes}{No}%
@@ -198,7 +210,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Track}{A single audio recording uploaded by an artist, held in the catalogue and made available for streaming once it has been scored by at least one model. The audio file itself is held in an object store under a key computed from the Track ID, so no column stores its location.}
+\entityhead{Track}{A single audio recording uploaded by an artist, held in the catalogue and made available for streaming once it has been scored by at least one model. The audio file itself is held in an object store under a key computed from the Track ID, so no column stores its location.\dictnote{track}{Track}}
 \attr{Track ID}{INT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier assigned to each recording on upload, used to reference that recording across scoring and play records.}
 \attr{Artist ID}{MEDIUMINT UNSIGNED}{No}{No}{No}%
@@ -216,7 +228,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Genre}{One of the fixed set of musical categories over which every scoring model produces its probability distribution, forming the coordinate system in which listeners describe the blend they want.}
+\entityhead{Genre}{One of the fixed set of musical categories over which every scoring model produces its probability distribution, forming the coordinate system in which listeners describe the blend they want.\dictnote{genre}{Genre}}
 \attr{Genre ID}{TINYINT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier for each genre in the fixed set, equal to the class index the scoring models output for that genre, so that a prediction is stored without translation and model output always refers to a controlled category rather than free text. The set is fixed at ten genres, assigned as follows: 0 blues, 1 classical, 2 country, 3 disco, 4 hiphop, 5 jazz, 6 metal, 7 pop, 8 reggae, 9 rock.}
 \attr{Name}{VARCHAR(9)}{No}{Yes}{No}%
@@ -226,7 +238,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Listener}{A registered subscriber who streams recordings from the catalogue and defines the stations through which they discover new material.}
+\entityhead{Listener}{A registered subscriber who streams recordings from the catalogue and defines the stations through which they discover new material.\dictnote{listener}{Listener}}
 \attr{Listener ID}{INT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier assigned to each subscriber at sign up, used to associate stations and play history with that subscriber.}
 \attr{Email}{VARCHAR(254)}{No}{Yes}{No}%
@@ -240,7 +252,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Scoring Model}{A specific trained and deployed version of the machine learning system that places recordings in genre space. Several versions are in service at once because they differ in architecture and therefore disagree with one another, and that disagreement is itself used as a signal.}
+\entityhead{Scoring Model}{A specific trained and deployed version of the machine learning system that places recordings in genre space. Several versions are in service at once because they differ in architecture and therefore disagree with one another, and that disagreement is itself used as a signal.\dictnote{scoring-model}{Scoring Model}}
 \attr{Model ID}{TINYINT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier for each deployed model version, assigned in order of deployment starting at one, carried on every score so that no result is ever separated from the model that produced it.}
 \attr{Version Label}{VARCHAR(32)}{No}{Yes}{No}%
@@ -260,7 +272,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Station}{A standing description of a region of genre space created by a listener. A station stores the blend and the ambiguity range the listener wants rather than a fixed list of recordings, so its contents change as the catalogue grows.}
+\entityhead{Station}{A standing description of a region of genre space created by a listener. A station stores the blend and the ambiguity range the listener wants rather than a fixed list of recordings, so its contents change as the catalogue grows.\dictnote{station}{Station}}
 \attr{Station ID}{INT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier for each station, used to record which station was responsible for surfacing a given play.}
 \attr{Listener ID}{INT UNSIGNED}{No}{No}{No}%
@@ -280,22 +292,32 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \clearpage
 \section{Associative entities}\label{sec:assoc}
 
-The primary key of each associative entity is composed of the primary keys of the entities it connects,
-so each one participates in two identifying relationships. Genre Probability connects Track Score to
-Genre, so its key is the two-part key of Track Score followed by Genre ID. No associative entity has a key of its own.
-Each key component is marked Unique = No, because a single component repeats freely; only the
-combination is unique. Two of the associative entities also carry a third relationship, which gives
-the model its two ternary structures: Track, Scoring Model and Genre meet at Track Score, and Listener,
-Track and Station meet at Play. In both cases the third foreign key stays outside the primary key.
-Genre ID is excluded because the top genre is determined by the pair of recording and model, so adding
-it to the key would permit two top genres for one pair. Station ID is excluded because it is optional,
-and a primary key column can never be empty. Play is the one entity whose foreign keys alone do not
-identify a row, because a listener can stream the same recording many times. Played At completes its
-key, in the same way that a partial key completes the key of a weak entity.
+The primary key of each associative entity is formed from its foreign keys, the primary keys of
+the entities it connects, and no associative entity has a surrogate key. Track Score, Station Blend
+and Genre Probability follow that rule exactly, so each participates in two identifying
+relationships. Genre Probability connects Track Score to Genre, so its key is the two-part key of
+Track Score followed by Genre ID. Each key component is marked Unique = No, because a single
+component repeats freely; only the combination is unique. Two of the associative entities also carry
+a third relationship, which gives the model its two ternary structures: Track, Scoring Model and
+Genre meet at Track Score, and Listener, Track and Station meet at Play. In both cases the third
+foreign key stays outside the primary key. Genre ID is excluded because the top genre is determined
+by the pair of recording and model, so adding it to the key would permit two top genres for one
+pair. Station ID is excluded because it is optional, and a primary key column can never be empty.
+
+Play follows the rule and adds exactly one column. Its foreign keys, Listener ID and Track ID, are
+both in its key, but together they cannot identify a play, because a listener streams the same
+recording many times. A surrogate Play ID would solve that only by abandoning the rule, which is
+what the feedback on the first draft corrected. Played At, the moment the stream began, completes
+the key instead. The course's own Unit 2 example uses the same pattern: in its student grades table,
+student 12345678 takes Computing Mathematics in 2019 and again in 2020, so a grade is identified by
+student and course only together with Year and Sem. The key is unique under two stated rules.
+Played At is recorded in UTC, so a daylight-saving change can never repeat a time. A second event
+with the same listener, recording and start time is a duplicate report of the same play, and the
+key rejects it, which is what keeps a double-counted royalty out of the ledger.
 
 
 \begin{entitytable}
-\entityhead{Track Score}{The result one scoring model produced for one recording. This is the associative entity that resolves the many to many relationship between recordings and scoring models, and it is the parent record for every model output: the full genre distribution is held in Genre Probability rows that belong to it. No genre is ever recorded against a recording on its own, because a placement is a property of the pair of recording and model and not of the recording alone. The full distribution is held in Genre Probability; Genre ID, Top Probability, Posterior Entropy and Model Divergence are summaries derived from it and stored on this row so that stations can filter without reading ten rows per score. A result is written once, in the same transaction as its distribution, and is replaced whole on a rescore, so the stored summaries cannot drift from the distribution. The model's vector representation of the recording is held in a vector store under a key computed from the same Track ID and Model ID, so no column stores it.}
+\entityhead{Track Score}{The result one scoring model produced for one recording. This is the associative entity that resolves the many to many relationship between recordings and scoring models, and it is the parent record for every model output: the full genre distribution is held in Genre Probability rows that belong to it. No genre is ever recorded against a recording on its own, because a placement is a property of the pair of recording and model and not of the recording alone. The full distribution is held in Genre Probability; Genre ID, Top Probability, Posterior Entropy and Model Divergence are summaries derived from it and stored on this row so that stations can filter without reading ten rows per score. A result is written once, in the same transaction as its distribution, and is replaced whole on a rescore, so the stored summaries cannot drift from the distribution. The model's vector representation of the recording is held in a vector store under a key computed from the same Track ID and Model ID, so no column stores it.\dictnote{track-score}{Track Score}}
 \attr{Track ID}{INT UNSIGNED}{No}{No}{Yes}%
      {Part of the composite primary key; foreign key referencing Track. The recording that was scored.}
 \attr{Model ID}{TINYINT UNSIGNED}{No}{No}{Yes}%
@@ -315,13 +337,13 @@ key, in the same way that a partial key completes the key of a weak entity.
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Play}{A single occasion on which a listener streamed a recording. This is the associative entity that resolves the many to many relationship between listeners and recordings, and it serves two purposes at once: it is the record from which listener taste is inferred and it is the billable event on which the artist royalty is calculated.}
+\entityhead{Play}{A single occasion on which a listener streamed a recording. This is the associative entity that resolves the many to many relationship between listeners and recordings, and it serves two purposes at once: it is the record from which listener taste is inferred and it is the billable event on which the artist royalty is calculated.\dictnote{play}{Play}}
 \attr{Listener ID}{INT UNSIGNED}{No}{No}{Yes}%
      {Part of the composite primary key; foreign key referencing Listener. The subscriber who streamed the recording.}
 \attr{Track ID}{INT UNSIGNED}{No}{No}{Yes}%
      {Part of the composite primary key; foreign key referencing Track. The recording that was streamed.}
 \attr{Played At}{DATETIME}{No}{No}{Yes}%
-     {Part of the composite primary key. The moment the stream began, used to order listening history and to assign the play to a billing period. A listener may stream the same recording many times, so Listener ID and Track ID alone do not identify a play; the start time completes the key, and a repeated event with the same three values is rejected as a duplicate when the royalty ledger is reconciled.}
+     {Part of the composite primary key. The moment the stream began, recorded in UTC so that a daylight-saving change never repeats a value, and used to order listening history and to assign the play to a billing period. A listener may stream the same recording many times, so Listener ID and Track ID alone do not identify a play; the start time completes the key, and a repeated event with the same three values is rejected as a duplicate when the royalty ledger is reconciled.}
 \attr{Station ID}{INT UNSIGNED}{Yes}{No}{No}%
      {Foreign key referencing Station, not part of the primary key. The station that surfaced the recording, left empty when the listener chose it directly. Because stations can be shared, the station may belong to a different listener from the one recorded on the play.}
 \attr{Seconds Played}{SMALLINT UNSIGNED}{No}{No}{No}%
@@ -335,7 +357,7 @@ key, in the same way that a partial key completes the key of a weak entity.
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Station Blend}{The weight one station gives to one genre. This is the associative entity that resolves the many to many relationship between stations and genres: a station blends several genres and a genre appears in many stations. Holding one weight per row keeps every value atomic, which a single multi-valued blend field on the station could not.}
+\entityhead{Station Blend}{The weight one station gives to one genre. This is the associative entity that resolves the many to many relationship between stations and genres: a station blends several genres and a genre appears in many stations. Holding one weight per row keeps every value atomic, which a single multi-valued blend field on the station could not.\dictnote{station-blend}{Station Blend}}
 \attr{Station ID}{INT UNSIGNED}{No}{No}{Yes}%
      {Part of the composite primary key; foreign key referencing Station. The station whose blend this row belongs to.}
 \attr{Genre ID}{TINYINT UNSIGNED}{No}{No}{Yes}%
@@ -345,7 +367,7 @@ key, in the same way that a partial key completes the key of a weak entity.
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Genre Probability}{The probability one scoring model assigned to one genre for one recording. This is the associative entity that resolves the many to many relationship between scoring results and genres: a result assigns a probability to every genre, and a genre receives a probability in every result. It holds the full distribution that stations match against, which the single top genre on Track Score cannot express.}
+\entityhead{Genre Probability}{The probability one scoring model assigned to one genre for one recording. This is the associative entity that resolves the many to many relationship between scoring results and genres: a result assigns a probability to every genre, and a genre receives a probability in every result. It holds the full distribution that stations match against, which the single top genre on Track Score cannot express.\dictnote{genre-probability}{Genre Probability}}
 \attr{Track ID}{INT UNSIGNED}{No}{No}{Yes}%
      {Part of the composite primary key. Together with Model ID it forms a composite foreign key referencing Track Score, so a probability can only be recorded for a recording and model pair that has a scoring result.}
 \attr{Model ID}{TINYINT UNSIGNED}{No}{No}{Yes}%

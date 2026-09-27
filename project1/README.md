@@ -41,6 +41,7 @@ pdflatex requirements_analysis.tex          # in source/requirements_analysis/, 
 python source/conceptual_model/build_cdm.py  # draft conceptual model only; the deliverable is hand-drawn (needs graphviz)
 python source/data/gen_data.py               # data.xlsx, with integrity self-checks
 python scripts/build_dictionary.py           # regenerate docs/DATA_DICTIONARY.md (prose in scripts/dictionary_text.py)
+python scripts/check_consistency.py         # cross-check every column: RA vs data.xlsx vs dictionary
 python scripts/build_site.py                 # refresh the site after any of the above
 ```
 
