@@ -149,19 +149,19 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 {\footnotesize\renewcommand{\arraystretch}{1.15}
 \begin{longtable}{|L{0.25in}|L{1.75in}|L{0.62in}|L{3.68in}|}
 \hline
-\rowcolor{hdrgray}\textbf{\#} & \textbf{Entity (n=10)} & \textbf{Non-key attributes (n=40)} & \textbf{Attributes} \\ \hline
+\rowcolor{hdrgray}\textbf{\#} & \textbf{Entity (n=10)} & \textbf{Non-key attributes (n=38)} & \textbf{Attributes} \\ \hline
 1 & \rae{Artist} & 5 & Artist ID (PK), Stage Name, Country, Joined Date, Payout Rate, Verified \\ \hline
-2 & \rae{Track} & 6 & Track ID (PK), Artist ID (FK), Title, Duration, Release Date, Audio URI, Audio Checksum, Ingest Status \\ \hline
+2 & \rae{Track} & 5 & Track ID (PK), Artist ID (FK), Title, Duration, Release Date, Audio Checksum, Ingest Status \\ \hline
 3 & \rae{Genre} & 2 & Genre ID (PK), Name, Description \\ \hline
 4 & \rae{Listener} & 4 & Listener ID (PK), Email, Display Name, Plan Tier, Signup Date \\ \hline
 5 & \rae{Scoring Model} & 7 & Model ID (PK), Version Label, Fusion Type, Embedding Dimension, Segment Length, Training Corpus, Holdout Accuracy, Deployed On \\ \hline
 6 & \rae{Station} & 4 & Station ID (PK), Listener ID (FK), Model ID (FK), Name, Minimum Ambiguity, Maximum Ambiguity, Created On \\ \hline
-7 & \rae{Track Score} {\small (associative)} & 6 & Track ID (PK, FK), Model ID (PK, FK), Genre ID (FK), Top Probability, Posterior Entropy, Model Divergence, Segment Variance, Embedding Reference, Scored On \\ \hline
+7 & \rae{Track Score} {\small (associative)} & 5 & Track ID (PK, FK), Model ID (PK, FK), Genre ID (FK), Top Probability, Posterior Entropy, Model Divergence, Segment Variance, Scored On \\ \hline
 8 & \rae{Play} {\small (associative)} & 4 & Listener ID (PK, FK), Track ID (PK, FK), Played At (PK), Station ID (FK, optional), Seconds Played, Completed, Reaction, Royalty Amount \\ \hline
 9 & \rae{Station Blend} {\small (associative)} & 1 & Station ID (PK, FK), Genre ID (PK, FK), Weight \\ \hline
 10 & \rae{Genre Probability} {\small (associative)} & 1 & Track ID (PK, FK), Model ID (PK, FK), Genre ID (PK, FK), Probability \\ \hline
 \end{longtable}}
-\vspace{-10pt}{\small The second column counts attributes, not records; it excludes primary key (PK) and foreign key (FK) attributes.}
+\vspace{-10pt}{\small The third column counts attributes, not records; it excludes primary key (PK) and foreign key (FK) attributes.}
 
 \subsection{Relationships}
 {\small\begin{multicols}{3}
@@ -198,7 +198,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \end{entitytable}
 
 \begin{entitytable}
-\entityhead{Track}{A single audio recording uploaded by an artist, held in the catalogue and made available for streaming once it has been scored by at least one model.}
+\entityhead{Track}{A single audio recording uploaded by an artist, held in the catalogue and made available for streaming once it has been scored by at least one model. The audio file itself is held in an object store under a key computed from the Track ID, so no column stores its location.}
 \attr{Track ID}{INT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier assigned to each recording on upload, used to reference that recording across scoring and play records.}
 \attr{Artist ID}{MEDIUMINT UNSIGNED}{No}{No}{No}%
@@ -209,8 +209,6 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
      {The playing length of the recording in whole seconds, used to decide whether a play qualifies for royalty and to estimate station running time.}
 \attr{Release Date}{DATE}{No}{No}{No}%
      {The date on which the recording became available to listeners, which may be later than the date it was uploaded.}
-\attr{Audio URI}{VARCHAR(128)}{No}{Yes}{No}%
-     {The key the service generates for the stored audio file in its object store; the database holds this reference rather than the audio itself.}
 \attr{Audio Checksum}{BINARY(32)}{No}{Yes}{No}%
      {The SHA-256 digest of the audio file, used to detect duplicate uploads and to confirm that the stored file has not been altered since it was scored.}
 \attr{Ingest Status}{ENUM(\q{awaiting scoring}, \q{scored}, \q{rejected})}{No}{No}{No}%
@@ -221,10 +219,10 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \entityhead{Genre}{One of the fixed set of musical categories over which every scoring model produces its probability distribution, forming the coordinate system in which listeners describe the blend they want.}
 \attr{Genre ID}{TINYINT UNSIGNED}{No}{Yes}{Yes}%
      {A unique identifier for each genre in the fixed set, equal to the class index the scoring models output for that genre, so that a prediction is stored without translation and model output always refers to a controlled category rather than free text. The set is fixed at ten genres, assigned as follows: 0 blues, 1 classical, 2 country, 3 disco, 4 hiphop, 5 jazz, 6 metal, 7 pop, 8 reggae, 9 rock.}
-\attr{Name}{VARCHAR(20)}{No}{Yes}{No}%
-     {The label by which the genre is known to listeners, for example jazz, metal or reggae.}
-\attr{Description}{VARCHAR(255)}{Yes}{No}{No}%
-     {A short account of the musical characteristics the category covers, shown to listeners when they are composing a station blend.}
+\attr{Name}{VARCHAR(9)}{No}{Yes}{No}%
+     {The label by which the genre is known to listeners, for example jazz, metal or reggae. The ten names are fixed by the scoring models' output classes; the longest, classical, has nine characters.}
+\attr{Description}{VARCHAR(80)}{Yes}{No}{No}%
+     {A short account of the musical characteristics the category covers, shown to listeners when they are composing a station blend, and kept to one line of 80 characters.}
 \end{entitytable}
 
 \begin{entitytable}
@@ -253,8 +251,8 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
      {The width of the representation the model produces for a recording, which determines the geometry of the space in which similarity is measured.}
 \attr{Segment Length}{TINYINT UNSIGNED}{No}{No}{No}%
      {The length in whole seconds of the audio window the model scores at a time; shorter windows allow a recording to be shown to shift in character across its own duration.}
-\attr{Training Corpus}{VARCHAR(64)}{No}{No}{No}%
-     {The name of the labelled collection the model version was trained on, recorded so that results from differently trained versions are never silently compared.}
+\attr{Training Corpus}{VARCHAR(16)}{No}{No}{No}%
+     {The name of the labelled collection the model version was trained on, recorded so that results from differently trained versions are never silently compared. Corpus names are short identifiers such as GTZAN; 16 characters covers the common public sets.}
 \attr{Holdout Accuracy}{DECIMAL(5,4)}{No}{No}{No}%
      {The proportion of held out recordings the model version classified correctly, used to decide how much weight its output carries in a blended placement.}
 \attr{Deployed On}{DATE}{No}{No}{No}%
@@ -297,7 +295,7 @@ key, in the same way that a partial key completes the key of a weak entity.
 
 
 \begin{entitytable}
-\entityhead{Track Score}{The result one scoring model produced for one recording. This is the associative entity that resolves the many to many relationship between recordings and scoring models, and it is the parent record for every model output: the full genre distribution is held in Genre Probability rows that belong to it. No genre is ever recorded against a recording on its own, because a placement is a property of the pair of recording and model and not of the recording alone. The full distribution is held in Genre Probability; Genre ID, Top Probability, Posterior Entropy and Model Divergence are summaries derived from it and stored on this row so that stations can filter without reading ten rows per score. A result is written once, in the same transaction as its distribution, and is replaced whole on a rescore, so the stored summaries cannot drift from the distribution.}
+\entityhead{Track Score}{The result one scoring model produced for one recording. This is the associative entity that resolves the many to many relationship between recordings and scoring models, and it is the parent record for every model output: the full genre distribution is held in Genre Probability rows that belong to it. No genre is ever recorded against a recording on its own, because a placement is a property of the pair of recording and model and not of the recording alone. The full distribution is held in Genre Probability; Genre ID, Top Probability, Posterior Entropy and Model Divergence are summaries derived from it and stored on this row so that stations can filter without reading ten rows per score. A result is written once, in the same transaction as its distribution, and is replaced whole on a rescore, so the stored summaries cannot drift from the distribution. The model's vector representation of the recording is held in a vector store under a key computed from the same Track ID and Model ID, so no column stores it.}
 \attr{Track ID}{INT UNSIGNED}{No}{No}{Yes}%
      {Part of the composite primary key; foreign key referencing Track. The recording that was scored.}
 \attr{Model ID}{TINYINT UNSIGNED}{No}{No}{Yes}%
@@ -312,8 +310,6 @@ key, in the same way that a partial key completes the key of a weak entity.
      {How far this model's distribution sits from those produced by the other model versions that have scored the same recording. It is the mean, over every other result for that recording, of the Jensen--Shannon divergence in base two between the two distributions; each divergence lies between zero and one, so the mean does too. It is empty while only one model has scored the recording, because there is nothing to compare against, and zero would wrongly claim perfect agreement. This is the cross model disagreement signal referred to in the Scoring Model definition. Derived from the distributions in Genre Probability; because it depends on the other models' results for the same recording, it is recomputed for every result of that recording whenever any model scores it.}
 \attr{Segment Variance}{DECIMAL(4,4)}{Yes}{No}{No}%
      {How much the placement moves between one audio window and the next within the same recording, measured as the variance of the top genre probability across windows and therefore never above one quarter, which identifies tracks that change character partway through.}
-\attr{Embedding Reference}{VARCHAR(64)}{No}{Yes}{No}%
-     {The key under which this recording's representation for this model is held in the vector store; the representation itself is too large and too unlike a scalar to belong in a relational table.}
 \attr{Scored On}{DATETIME}{No}{No}{No}%
      {The moment the scoring run completed, used to establish which results predate a model redeployment and must be recomputed.}
 \end{entitytable}
@@ -421,7 +417,7 @@ The same colour marks a name wherever it appears in these tables.
 \rowcolor{entbg}\multicolumn{6}{|l|}{\cellcolor{entbg}\textcolor{entc}{\textbf{Table 1 --- Entities (6)}}\label{tab:ent}} \\ \hline
 \rowcolor{hdrgray}\textbf{\#} & \textbf{Name} & \textbf{Attributes} & \textbf{Primary Key} & \textbf{Key Type} & \textbf{Example} \\ \hline
 E1 & \ent{Artist} & 5 & Artist ID & MEDIUMINT UNSIGNED & 1042 (Velvet Static) \\ \hline
-E2 & \ent{Track} & 6 & Track ID & INT UNSIGNED & 4817 (Low Tide Signal) \\ \hline
+E2 & \ent{Track} & 5 & Track ID & INT UNSIGNED & 4817 (Low Tide Signal) \\ \hline
 E3 & \ent{Genre} & 2 & Genre ID & TINYINT UNSIGNED & 5 (jazz) \\ \hline
 E4 & \ent{Listener} & 4 & Listener ID & INT UNSIGNED & 20931 (jrivera) \\ \hline
 E5 & \ent{Scoring Model} & 7 & Model ID & TINYINT UNSIGNED & 5 (beardown\_3sec) \\ \hline
@@ -458,7 +454,7 @@ index the scoring models output. Model ID is assigned in order of deployment.
 \hline
 \rowcolor{ascbg}\multicolumn{5}{|l|}{\cellcolor{ascbg}\textcolor{ascc}{\textbf{Table 3 --- Associative entities (4)}}\label{tab:asc}} \\ \hline
 \rowcolor{hdrgray}\textbf{\#} & \textbf{Name} & \textbf{Attributes} & \textbf{Primary Key} & \textbf{Resolves} \\ \hline
-A1 & \asc{Track Score} & 6 & Track ID + Model ID & \ent{Track} M:N \ent{Scoring Model} (R2) \\ \hline
+A1 & \asc{Track Score} & 5 & Track ID + Model ID & \ent{Track} M:N \ent{Scoring Model} (R2) \\ \hline
 A2 & \asc{Play} & 4 & Listener ID + Track ID + Played At & \ent{Listener} M:N \ent{Track} (R4) \\ \hline
 A3 & \asc{Station Blend} & 1 & Station ID + Genre ID & \ent{Station} M:N \ent{Genre} (R8) \\ \hline
 A4 & \asc{Genre Probability} & 1 & Track ID + Model ID + Genre ID & \asc{Track Score} M:N \ent{Genre} (R9) \\ \hline
@@ -551,15 +547,15 @@ Document inventory & \pageref{sec:inv} \\ \hline
 \rowcolor{hdrgray}\multicolumn{5}{|l|}{\cellcolor{hdrgray}\textbf{Table 7 --- Design requirement checks}\label{tab:chk}} \\ \hline
 \rowcolor{hdrgray}\textbf{Requirement} & \textbf{Required} & \textbf{This design} & \textbf{Status} & \textbf{Evidence} \\ \hline
 Non-associative entities & 5 to 7 & 6 & \textcolor{relc}{\textbf{Met}} & Table 1 \\ \hline
-Attributes, excluding primary and foreign keys & $\geq$ 20 & 40 & \textcolor{relc}{\textbf{Met}} & Table 8 \\ \hline
+Attributes, excluding primary and foreign keys & $\geq$ 20 & 38 & \textcolor{relc}{\textbf{Met}} & Table 8 \\ \hline
 Many-to-many relationships resolved with an associative entity & $\geq$ 1 & 4 & \textcolor{relc}{\textbf{Met}} & Tables 3, 4, 5, 6 \\ \hline
 \end{longtable}
 
 \textbf{Requirement 1.} The design has 6 non-associative entities (Table 1). The 4
 associative entities are listed separately (Table 3) and are not counted.
 
-\textbf{Requirement 2.} The design has 40 attributes excluding primary and foreign keys:
-28 on the entities and 12 on the associative entities. Primary keys (Tables 1 and 3) and the
+\textbf{Requirement 2.} The design has 38 attributes excluding primary and foreign keys:
+27 on the entities and 11 on the associative entities. Primary keys (Tables 1 and 3) and the
 14 foreign key columns (Table 6) are not counted. Played At is counted as part of Play's primary key
 and is therefore excluded as well, although it is not a foreign key.
 
@@ -577,7 +573,7 @@ and fall inside the example station's ambiguity range.
 {\setlength{\tabcolsep}{4pt}\small
 \begin{longtable}{|L{0.28in}|L{1.00in}|L{1.30in}|T{1.35in}|L{1.15in}|L{1.20in}|}
 \hline
-\rowcolor{hdrgray}\multicolumn{6}{|l|}{\cellcolor{hdrgray}\textbf{Table 8 --- Attribute inventory (40)}\label{tab:attr}} \\ \hline
+\rowcolor{hdrgray}\multicolumn{6}{|l|}{\cellcolor{hdrgray}\textbf{Table 8 --- Attribute inventory (38)}\label{tab:attr}} \\ \hline
 \rowcolor{hdrgray}\textbf{\#} & \textbf{Owner} & \textbf{Attribute} & \textbf{Data Type} & \textbf{Range} & \textbf{Example} \\ \hline
 \endfirsthead
 \hline
@@ -591,49 +587,55 @@ and fall inside the example station's ambiguity range.
 6 & \ent{Track} & Title & VARCHAR(128) & up to 128 characters & Low Tide Signal \\ \hline
 7 & \ent{Track} & Duration & SMALLINT UNSIGNED & 0 to 65,535 s & 214 \\ \hline
 8 & \ent{Track} & Release Date & DATE & calendar date & 2026-04-02 \\ \hline
-9 & \ent{Track} & Audio URI & VARCHAR(128) & up to 128 characters & audio/2026/04/\allowbreak 4817.flac \\ \hline
-10 & \ent{Track} & Audio Checksum & BINARY(32) & 32-byte SHA-256 digest & 0x9F3A\ldots C21E \\ \hline
-11 & \ent{Track} & Ingest Status & ENUM(\q{awaiting scoring}, \q{scored}, \q{rejected}) & one of 3 values & \q{scored} \\ \hline
-12 & \ent{Genre} & Name & VARCHAR(20) & up to 20 characters & jazz \\ \hline
-13 & \ent{Genre} & Description & VARCHAR(255) & up to 255 characters & Swing, improvisation and extended harmony \\ \hline
-14 & \ent{Listener} & Email & VARCHAR(254) & up to 254 characters & j.rivera@\allowbreak example.com \\ \hline
-15 & \ent{Listener} & Display Name & VARCHAR(32) & up to 32 characters & jrivera \\ \hline
-16 & \ent{Listener} & Plan Tier & ENUM(\q{free}, \q{standard}, \q{premium}) & one of 3 values & \q{standard} \\ \hline
-17 & \ent{Listener} & Signup Date & DATE & calendar date & 2026-05-09 \\ \hline
-18 & \ent{Scoring Model} & Version Label & VARCHAR(32) & up to 32 characters & beardown\_3sec \\ \hline
-19 & \ent{Scoring Model} & Fusion Type & ENUM(\q{concat}, \q{gated}) & one of 2 values & \q{concat} \\ \hline
-20 & \ent{Scoring Model} & Embedding Dimension & SMALLINT UNSIGNED & 0 to 65,535 & 384 \\ \hline
-21 & \ent{Scoring Model} & Segment Length & TINYINT UNSIGNED & 0 to 255 s & 3 \\ \hline
-22 & \ent{Scoring Model} & Training Corpus & VARCHAR(64) & up to 64 characters & GTZAN \\ \hline
-23 & \ent{Scoring Model} & Holdout Accuracy & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.7887 \\ \hline
-24 & \ent{Scoring Model} & Deployed On & DATE & calendar date & 2026-06-23 \\ \hline
-25 & \ent{Station} & Name & VARCHAR(64) & up to 64 characters & Late Jazz Hop \\ \hline
-26 & \ent{Station} & Minimum Ambiguity & DECIMAL(3,2) & 0.00 to 1.00 & 0.35 \\ \hline
-27 & \ent{Station} & Maximum Ambiguity & DECIMAL(3,2) & 0.00 to 1.00 & 0.80 \\ \hline
-28 & \ent{Station} & Created On & DATE & calendar date & 2026-08-01 \\ \hline
-29 & \asc{Track Score} & Top Probability & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.5800 \\ \hline
-30 & \asc{Track Score} & Posterior Entropy & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.4619 \\ \hline
-31 & \asc{Track Score} & Model Divergence & DECIMAL(5,4) & 0.0000 to 1.0000, or empty & 0.0198 \\ \hline
-32 & \asc{Track Score} & Segment Variance & DECIMAL(4,4) & 0.0000 to 0.2500 & 0.0051 \\ \hline
-33 & \asc{Track Score} & Embedding Reference & VARCHAR(64) & up to 64 characters & beardown\_3sec/\allowbreak 4817 \\ \hline
-34 & \asc{Track Score} & Scored On & DATETIME & date and time & 2026-07-01 09:14:52 \\ \hline
-35 & \asc{Play} & Seconds Played & SMALLINT UNSIGNED & 0 to 65,535 s & 214 \\ \hline
-36 & \asc{Play} & Completed & BIT(1) & 0 or 1 & 1 \\ \hline
-37 & \asc{Play} & Reaction & ENUM(\q{saved}, \q{skipped}) & one of 2 values & \q{saved} \\ \hline
-38 & \asc{Play} & Royalty Amount & DECIMAL(5,5) & 0.00000 to 0.99999 USD & 0.00400 \\ \hline
-39 & \asc{Station Blend} & Weight & DECIMAL(3,2) & 0.01 to 1.00 & 0.60 \\ \hline
-40 & \asc{Genre Probability} & Probability & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.5800 \\ \hline
+9 & \ent{Track} & Audio Checksum & BINARY(32) & 32-byte SHA-256 digest & 0x9F3A\ldots C21E \\ \hline
+10 & \ent{Track} & Ingest Status & ENUM(\q{awaiting scoring}, \q{scored}, \q{rejected}) & one of 3 values & \q{scored} \\ \hline
+11 & \ent{Genre} & Name & VARCHAR(9) & one of 10 names, longest \q{classical} (9) & jazz \\ \hline
+12 & \ent{Genre} & Description & VARCHAR(80) & up to 80 characters & Swing, improvisation and extended harmony \\ \hline
+13 & \ent{Listener} & Email & VARCHAR(254) & up to 254 characters & j.rivera@\allowbreak example.com \\ \hline
+14 & \ent{Listener} & Display Name & VARCHAR(32) & up to 32 characters & jrivera \\ \hline
+15 & \ent{Listener} & Plan Tier & ENUM(\q{free}, \q{standard}, \q{premium}) & one of 3 values & \q{standard} \\ \hline
+16 & \ent{Listener} & Signup Date & DATE & calendar date & 2026-05-09 \\ \hline
+17 & \ent{Scoring Model} & Version Label & VARCHAR(32) & up to 32 characters & beardown\_3sec \\ \hline
+18 & \ent{Scoring Model} & Fusion Type & ENUM(\q{concat}, \q{gated}) & one of 2 values & \q{concat} \\ \hline
+19 & \ent{Scoring Model} & Embedding Dimension & SMALLINT UNSIGNED & 0 to 65,535 & 384 \\ \hline
+20 & \ent{Scoring Model} & Segment Length & TINYINT UNSIGNED & 0 to 255 s & 3 \\ \hline
+21 & \ent{Scoring Model} & Training Corpus & VARCHAR(16) & up to 16 characters & GTZAN \\ \hline
+22 & \ent{Scoring Model} & Holdout Accuracy & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.7887 \\ \hline
+23 & \ent{Scoring Model} & Deployed On & DATE & calendar date & 2026-06-23 \\ \hline
+24 & \ent{Station} & Name & VARCHAR(64) & up to 64 characters & Late Jazz Hop \\ \hline
+25 & \ent{Station} & Minimum Ambiguity & DECIMAL(3,2) & 0.00 to 1.00 & 0.35 \\ \hline
+26 & \ent{Station} & Maximum Ambiguity & DECIMAL(3,2) & 0.00 to 1.00 & 0.80 \\ \hline
+27 & \ent{Station} & Created On & DATE & calendar date & 2026-08-01 \\ \hline
+28 & \asc{Track Score} & Top Probability & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.5800 \\ \hline
+29 & \asc{Track Score} & Posterior Entropy & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.4619 \\ \hline
+30 & \asc{Track Score} & Model Divergence & DECIMAL(5,4) & 0.0000 to 1.0000, or empty & 0.0198 \\ \hline
+31 & \asc{Track Score} & Segment Variance & DECIMAL(4,4) & 0.0000 to 0.2500 & 0.0051 \\ \hline
+32 & \asc{Track Score} & Scored On & DATETIME & date and time & 2026-07-01 09:14:52 \\ \hline
+33 & \asc{Play} & Seconds Played & SMALLINT UNSIGNED & 0 to 65,535 s & 214 \\ \hline
+34 & \asc{Play} & Completed & BIT(1) & 0 or 1 & 1 \\ \hline
+35 & \asc{Play} & Reaction & ENUM(\q{saved}, \q{skipped}) & one of 2 values & \q{saved} \\ \hline
+36 & \asc{Play} & Royalty Amount & DECIMAL(5,5) & 0.00000 to 0.99999 USD & 0.00400 \\ \hline
+37 & \asc{Station Blend} & Weight & DECIMAL(3,2) & 0.01 to 1.00 & 0.60 \\ \hline
+38 & \asc{Genre Probability} & Probability & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.5800 \\ \hline
 \end{longtable}}
 
 \Needspace{34\baselineskip}
 Every data type in this document is taken from the MySQL type set presented in the Unit 4
 slides, and each column is given the smallest type whose range covers every value the
 attribute can legitimately hold. Integer keys are declared unsigned because no identifier
-is negative. Ranges that a type cannot enforce on its own, such as a probability lying
+is negative. Strings follow four rules. A value whose length never varies is CHAR (Country) or
+BINARY (Audio Checksum), which saves VARCHAR's length byte. A value drawn from a closed
+set gets a VARCHAR sized to its longest member: Genre Name is one of ten fixed names, the
+longest nine. A value that can be computed from other columns is not stored at all: the
+object-store key of a recording's audio and the vector-store key of a model's representation
+are both computed from the primary key, so neither has a column. Free text entered by people (names, titles, email) gets a ceiling set by policy or
+standard, since VARCHAR stores only the characters used plus a length byte. Ranges that a type cannot enforce on its own, such as a probability lying
 between zero and one, are stated in the attribute description and are enforced in the
 physical model with CHECK constraints. Two types from the slides are deliberately not used:
 TIMESTAMP, whose range ends in January 2038, well within the life of a royalty ledger, so
-DATETIME is used for moments in time; and FLOAT and DOUBLE, because every fractional value
+DATETIME is used for moments in time. That is the one place parsimony is knowingly traded:
+the slides give DATETIME 8 bytes against TIMESTAMP's 4 (MySQL 5.6.4 and later stores DATETIME
+in 5), and Played At is part of Play's key, but a play recorded after 2038 must still be payable. FLOAT and DOUBLE are not used either, because every fractional value
 here has a known precision and DECIMAL stores it exactly.
 
 \begin{longtable}{|L{1.10in}|T{2.50in}|L{0.70in}|L{1.98in}|}
@@ -642,7 +644,7 @@ here has a known precision and DECIMAL stores it exactly.
 \rowcolor{hdrgray}\textbf{Family} & \textbf{Types used} & \textbf{Columns} & \textbf{Slide source} \\ \hline
 Integer & INT UNSIGNED, MEDIUMINT UNSIGNED, SMALLINT UNSIGNED, TINYINT UNSIGNED & 24 & Unit 4, Numeric Data Types \\ \hline
 Fixed-point & DECIMAL(3,2), DECIMAL(4,4), DECIMAL(5,4), DECIMAL(5,5) & 11 & Unit 4, Numeric Data Types \\ \hline
-String & CHAR(2), VARCHAR(20), VARCHAR(32), VARCHAR(64), VARCHAR(128), VARCHAR(254), VARCHAR(255) & 12 & Unit 4, String Data Types \\ \hline
+String & CHAR(2), VARCHAR(9), VARCHAR(16), VARCHAR(32), VARCHAR(64), VARCHAR(80), VARCHAR(128), VARCHAR(254) & 10 & Unit 4, String Data Types \\ \hline
 Binary & BINARY(32) & 1 & Unit 4, Binary Data Types \\ \hline
 Date and time & DATE, DATETIME & 7 & Unit 4, Date and Time Types \\ \hline
 Enumeration & ENUM (4 definitions) & 4 & Unit 4, Other Data Types \\ \hline

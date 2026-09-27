@@ -188,7 +188,7 @@ for tid, *_ , mids in TRACKS:
         TRACK_SCORE.append(dict(
             track=tid, model=m, genre=u.index(max(u)), top=max(u) / U,
             entropy=round(ent(u), 4), div=div, segvar=seg_var,
-            emb=f"{M[m][1]}/{tid}", on=scored_on(tid, m)))
+            on=scored_on(tid, m)))
 TS = {(r["track"], r["model"]): r for r in TRACK_SCORE}
 GENRE_PROB = [(tid, m, g, u[g] / U) for (tid, m), u in DIST.items() for g in range(NG)]
 GENRE_PROB.sort()
@@ -257,7 +257,6 @@ uniq(STATION_BLEND, lambda r: r[:2], "Station Blend")
 uniq(PLAY, lambda r: (r["listener"], r["track"], r["at"]), "Play")
 for col, rows, i in [("Stage Name", ARTISTS, 1), ("Email", LISTENERS, 1), ("Version Label", MODELS, 1)]:
     check(len({r[i] for r in rows}) == len(rows), f"UNIQUE {col}")
-check(len({r["emb"] for r in TRACK_SCORE}) == len(TRACK_SCORE), "UNIQUE Embedding Reference")
 check(all(t[1] in A for t in TRACKS), "FK Track.Artist")
 check(all(s[1] in L and s[2] in M for s in STATIONS), "FK Station")
 check(all(r["track"] in T and r["model"] in M and 0 <= r["genre"] < NG for r in TRACK_SCORE), "FK Track Score")
@@ -323,13 +322,12 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 DATE, DT = "yyyy-mm-dd", "yyyy-mm-dd hh:mm:ss"
 def sha(tid): return "0x" + hashlib.sha256(f"crossfade-audio-{tid}".encode()).hexdigest().upper()
-def uri(t):   return f"audio/{t[4].year}/{t[4].month:02d}/{t[0]}.flac"
 
 BLOCKS = [
  ("Artist", ["Artist ID", "Stage Name", "Country", "Joined Date", "Payout Rate", "Verified"],
   [(a[0], a[1], a[2], a[3], a[4], a[5]) for a in ARTISTS], {3: DATE, 4: "0.00000"}),
- ("Track", ["Track ID", "Artist ID", "Title", "Duration", "Release Date", "Audio URI", "Audio Checksum", "Ingest Status"],
-  [(t[0], t[1], t[2], t[3], t[4], uri(t), sha(t[0]), t[5]) for t in TRACKS], {4: DATE}),
+ ("Track", ["Track ID", "Artist ID", "Title", "Duration", "Release Date", "Audio Checksum", "Ingest Status"],
+  [(t[0], t[1], t[2], t[3], t[4], sha(t[0]), t[5]) for t in TRACKS], {4: DATE}),
  ("Genre", ["Genre ID", "Name", "Description"], GENRES, {}),
  ("Listener", ["Listener ID", "Email", "Display Name", "Plan Tier", "Signup Date"], LISTENERS, {4: DATE}),
  ("Scoring Model", ["Model ID", "Version Label", "Fusion Type", "Embedding Dimension", "Segment Length",
@@ -337,9 +335,9 @@ BLOCKS = [
  ("Station", ["Station ID", "Listener ID", "Model ID", "Name", "Minimum Ambiguity", "Maximum Ambiguity", "Created On"],
   [s[:7] for s in STATIONS], {4: "0.00", 5: "0.00", 6: DATE}),
  ("Track Score", ["Track ID", "Model ID", "Genre ID", "Top Probability", "Posterior Entropy", "Model Divergence",
-                  "Segment Variance", "Embedding Reference", "Scored On"],
-  [(r["track"], r["model"], r["genre"], r["top"], r["entropy"], r["div"], r["segvar"], r["emb"], r["on"]) for r in TRACK_SCORE],
-  {3: "0.0000", 4: "0.0000", 5: "0.0000", 6: "0.0000", 8: DT}),
+                  "Segment Variance", "Scored On"],
+  [(r["track"], r["model"], r["genre"], r["top"], r["entropy"], r["div"], r["segvar"], r["on"]) for r in TRACK_SCORE],
+  {3: "0.0000", 4: "0.0000", 5: "0.0000", 6: "0.0000", 7: DT}),
  ("Genre Probability", ["Track ID", "Model ID", "Genre ID", "Probability"], GENRE_PROB, {3: "0.0000"}),
  ("Station Blend", ["Station ID", "Genre ID", "Weight"], STATION_BLEND, {2: "0.00"}),
  ("Play", ["Listener ID", "Track ID", "Played At", "Station ID", "Seconds Played", "Completed", "Reaction", "Royalty Amount"],
