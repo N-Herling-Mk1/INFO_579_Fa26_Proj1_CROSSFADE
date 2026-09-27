@@ -344,6 +344,17 @@ BLOCKS = [
   [(p["listener"], p["track"], p["at"], p["station"], p["secs"], p["done"], p["react"], p["royalty"]) for p in PLAY],
   {2: DT, 7: "0.00000"}),
 ]
+# Columns whose values are computed from other data. Each gets an italic header and
+# an Excel note saying how it is derived; column names stay exactly as in the RA.
+DERIVED = {
+    ("Track Score", "Genre ID"): "Derived: the genre with the highest Probability among this score's ten Genre Probability rows.",
+    ("Track Score", "Top Probability"): "Derived: the largest of this score's ten Genre Probability values.",
+    ("Track Score", "Posterior Entropy"): "Derived: Shannon entropy of this score's ten probabilities divided by log(10), so 0 to 1.",
+    ("Track Score", "Model Divergence"): "Derived: mean Jensen-Shannon divergence (base 2) from the other models' distributions for the same track. Empty while only one model has scored it.",
+    ("Play", "Completed"): "Derived: 1 exactly when Seconds Played equals the track's Duration.",
+    ("Play", "Royalty Amount"): "Snapshot: the artist's Payout Rate at play time when Seconds Played is at least 30, otherwise 0. Copied, not looked up, so a later rate change never rewrites the ledger.",
+}
+from openpyxl.comments import Comment
 wb = Workbook(); ws = wb.active; ws.title = "table records"
 BOLD, NORM = Font(name="Calibri", size=11, bold=True), Font(name="Calibri", size=11)
 widths = {}
@@ -356,7 +367,11 @@ for name, header, rows, fmt in BLOCKS:
         cell.font = BOLD; cell.alignment = Alignment(horizontal="centerContinuous")
     row += 1
     for c, h in enumerate(header, 1):
-        ws.cell(row, c, h).font = BOLD
+        cell = ws.cell(row, c, h); cell.font = BOLD
+        if (name, h) in DERIVED:
+            cell.font = Font(name="Calibri", size=11, bold=True, italic=True)
+            note = Comment(DERIVED[(name, h)], "CROSSFADE"); note.width, note.height = 320, 90
+            cell.comment = note
         widths[c] = max(widths.get(c, 0), len(h))
     row += 1
     for rec in rows:
@@ -375,3 +390,4 @@ import os
 OUT_XLSX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "deliverables", "data.xlsx")
 wb.save(OUT_XLSX)
 print(f"      wrote {os.path.normpath(OUT_XLSX)}: {len(BLOCKS)} blocks, {row - 2} rows used, merged ranges: {len(ws.merged_cells.ranges)}")
+print(f"      derived columns noted in their headers: {len(DERIVED)}")

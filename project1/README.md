@@ -40,7 +40,7 @@ From the repository root:
 pdflatex requirements_analysis.tex          # in source/requirements_analysis/, run twice
 python source/conceptual_model/build_cdm.py  # draft conceptual model only; the deliverable is hand-drawn (needs graphviz)
 python source/data/gen_data.py               # data.xlsx, with integrity self-checks
-python scripts/build_type_glossary.py        # regenerate the type tables in docs/DATA_DICTIONARY.md
+python scripts/build_dictionary.py           # regenerate docs/DATA_DICTIONARY.md (prose in scripts/dictionary_text.py)
 python scripts/build_site.py                 # refresh the site after any of the above
 ```
 
