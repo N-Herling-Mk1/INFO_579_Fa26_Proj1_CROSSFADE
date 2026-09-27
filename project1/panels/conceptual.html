@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conceptual model</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/icon-192.png">
+<link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.png">
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<div class="panel wide">
+  <h1>Conceptual model</h1>
+  <p class="lede">Crow's foot notation. Entity names and relationships only: attributes and keys belong to the physical model, as the course's Unit 2 table specifies.</p>
+  <div class="toolbar" role="group" aria-label="Zoom">
+    <button class="btn" id="fit" aria-pressed="true">Fit to width</button>
+    <button class="btn" id="full" aria-pressed="false">Actual size</button>
+    <a class="btn" href="../deliverables/conceptual_data_model.png" download>Download PNG</a>
+  </div>
+  <div class="figure fit" id="fig"><img src="../deliverables/conceptual_data_model.png" alt="Crow's foot conceptual data model of CROSSFADE (official version, drawn by Nidhi Nilesh Pabari): six entities (Artist, Track, Genre, Listener, Scoring Model, Station) and four associative entities (Track Score, Genre Probability, Station Blend, Play) with their relationships."></div>
+  <div class="prose">
+    <h2>Reading it</h2>
+    <p>White boxes are entities; pink boxes are associative entities. Each relationship is labelled with a verb read from the parent (the "exactly one" end) to the child. The symbol at each end says how many rows on that side relate to one row on the other: a double bar is exactly one, a bar with a crow's foot is one or many, and a circle makes that side optional (zero).</p>
+    <p>Two of the associative entities sit on three relationships, which the professor called ternary structures. Track Score joins Track and Scoring Model and names a top Genre. Play joins Listener and Track and may name the Station that surfaced it.</p>
+    <h2>Checked against the draft</h2>
+    <p>This is the official diagram, drawn by Pabari, Nidhi Nilesh. Before it replaced the generated draft it was checked line by line: the same ten entities (six plain, four associative), the same thirteen relationships with the same verbs, and the same cardinality at every one of the 26 line ends. The draft is kept at <code>source/conceptual_model/conceptual_data_model_draft.png</code>.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var fig = document.getElementById("fig"), fit = document.getElementById("fit"), full = document.getElementById("full");
+  function set(isFit) {
+    fig.classList.toggle("fit", isFit);
+    fit.setAttribute("aria-pressed", isFit); full.setAttribute("aria-pressed", !isFit);
+  }
+  fit.onclick = function () { set(true); }; full.onclick = function () { set(false); };
+})();
+</script>
+</body>
+</html>

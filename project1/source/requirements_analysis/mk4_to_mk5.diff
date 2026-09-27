@@ -1,0 +1,29 @@
+--- requirements_analysis_mk4.tex
++++ requirements_analysis_mk5.tex
+@@ -305,7 +305,7 @@
+ \attr{Posterior Entropy}{DECIMAL(5,4)}{No}{No}{No}%
+      {How spread out the model's probability distribution is across all genres, expressed as the Shannon entropy divided by its maximum possible value so that it lies between zero and one; a high value means the recording sits between categories rather than inside one. Derived from the distribution in Genre Probability.}
+ \attr{Model Divergence}{DECIMAL(5,4)}{Yes}{No}{No}%
+-     {How far this model's distribution sits from those produced by the other deployed versions for the same recording, measured as the Jensen--Shannon divergence in base two so that it lies between zero and one, which is the cross model disagreement signal stations filter on. Derived from the distributions in Genre Probability; because it depends on the other models' results for the same recording, it is recomputed for every result of that recording whenever any model scores it.}
++     {How far this model's distribution sits from those produced by the other model versions that have scored the same recording. It is the mean, over every other result for that recording, of the Jensen--Shannon divergence in base two between the two distributions; each divergence lies between zero and one, so the mean does too. It is empty while only one model has scored the recording, because there is nothing to compare against, and zero would wrongly claim perfect agreement. This is the cross model disagreement signal referred to in the Scoring Model definition. Derived from the distributions in Genre Probability; because it depends on the other models' results for the same recording, it is recomputed for every result of that recording whenever any model scores it.}
+ \attr{Segment Variance}{DECIMAL(4,4)}{Yes}{No}{No}%
+      {How much the placement moves between one audio window and the next within the same recording, measured as the variance of the top genre probability across windows and therefore never above one quarter, which identifies tracks that change character partway through.}
+ \attr{Embedding Reference}{VARCHAR(64)}{No}{Yes}{No}%
+@@ -395,7 +395,7 @@
+ \endhead
+ I1 & A station has at least one blend row, and its weights sum to exactly 1.00. & The procedure that saves a blend replaces all of the station's rows at once and rolls back unless there is at least one row and SUM(Weight) = 1.00. A station and its first blend are created in the same call. Weights are held in hundredths, so a three-genre blend is stored as 0.34, 0.33 and 0.33, never as three equal thirds. \\ \hline
+ I2 & A scoring result has exactly one probability for each of the ten genres, and they sum to one. & The scoring procedure takes the ten probabilities as its input and rolls back unless there are exactly as many rows as there are Genre records, one per genre, summing to one within 0.0010, the rounding allowance for ten values held to four decimal places. \\ \hline
+-I3 & Genre ID, Top Probability, Posterior Entropy and Model Divergence on Track Score agree with the probabilities in Genre Probability. & The scoring procedure computes all four from the probability rows it has just written rather than accepting them as input: the most likely genre, its probability, the normalised Shannon entropy, and the Jensen--Shannon divergence against every other result for the same recording. Because divergence depends on those other results, the procedure recomputes it for all of the recording's results. A rescore replaces the result and its distribution together. \\ \hline
++I3 & Genre ID, Top Probability, Posterior Entropy and Model Divergence on Track Score agree with the probabilities in Genre Probability. & The scoring procedure computes all four from the probability rows it has just written rather than accepting them as input: the most likely genre, its probability, the normalised Shannon entropy, and the mean base-two Jensen--Shannon divergence against every other result for the same recording, left empty when there is no other result. Because divergence depends on those other results, the procedure recomputes it for all of the recording's results. A rescore replaces the result and its distribution together. \\ \hline
+ I4 & Minimum Ambiguity does not exceed Maximum Ambiguity. & A single-row CHECK constraint on Station. \\ \hline
+ I5 & A recording's Ingest Status is scored only if it has at least one Track Score. & Set in the scoring transaction that inserts the first result. \\ \hline
+ I6 & A play's Station ID may refer to a station created by another listener. & Deliberately not constrained by the database: stations can be shared, so the station's Listener ID need not match the play's. Whether a listener may use a given station is a sharing permission checked by the application. \\ \hline
+@@ -609,7 +609,7 @@
+ 28 & \ent{Station} & Created On & DATE & calendar date & 2026-08-01 \\ \hline
+ 29 & \asc{Track Score} & Top Probability & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.5800 \\ \hline
+ 30 & \asc{Track Score} & Posterior Entropy & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.4619 \\ \hline
+-31 & \asc{Track Score} & Model Divergence & DECIMAL(5,4) & 0.0000 to 1.0000 & 0.0198 \\ \hline
++31 & \asc{Track Score} & Model Divergence & DECIMAL(5,4) & 0.0000 to 1.0000, or empty & 0.0198 \\ \hline
+ 32 & \asc{Track Score} & Segment Variance & DECIMAL(4,4) & 0.0000 to 0.2500 & 0.0051 \\ \hline
+ 33 & \asc{Track Score} & Embedding Reference & VARCHAR(64) & up to 64 characters & beardown\_3sec/\allowbreak 4817 \\ \hline
+ 34 & \asc{Track Score} & Scored On & DATETIME & date and time & 2026-07-01 09:14:52 \\ \hline

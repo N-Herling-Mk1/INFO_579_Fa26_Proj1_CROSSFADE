@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physical model</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/icon-192.png">
+<link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.png">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../data/site_data.js"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Physical model</h1>
+  <div id="body"></div>
+</div>
+<script>
+(function () {
+  var done = window.SITE.status["physical_data_model.png"];
+  var b = document.getElementById("body");
+  if (done) {
+    b.innerHTML = '<p class="lede">Tables, columns, SQL types, keys and constraints.</p>' +
+      '<div class="toolbar"><a class="btn" href="../deliverables/physical_data_model.png" download>Download PNG</a></div>' +
+      '<div class="figure fit"><img src="../deliverables/physical_data_model.png" alt="Physical data model of CROSSFADE"></div>';
+    return;
+  }
+  b.innerHTML =
+    '<div class="callout pending"><p><strong>Not built yet.</strong> This is the next deliverable. It builds on the schema the other three already agree on.</p></div>' +
+    '<div class="prose"><h2>What it will show</h2><ul>' +
+    '<li>Every table with its columns and SQL data types, as listed in the requirements analysis.</li>' +
+    '<li>Every composite primary key, including Play\u2019s Listener ID + Track ID + Played At.</li>' +
+    '<li>The composite foreign key from Genre Probability to Track Score.</li>' +
+    '<li>Play.station_id drawn as nullable.</li>' +
+    '<li>The CHECK constraints, such as Minimum Ambiguity \u2264 Maximum Ambiguity.</li>' +
+    '<li>Identifying relationships as solid lines and non-identifying ones as dashed.</li>' +
+    '</ul><p>Until then, the <a href="../index.html#dictionary" target="_top">data dictionary</a> explains every column and the <a href="../index.html#data" target="_top">sample data</a> shows the schema holding real rows.</p></div>';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top-level design | CROSSFADE</title>
+<meta name="description" content="CROSSFADE top-level design shared by INFO 579 Projects 1 to 3.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CROSSFADE">
+<meta property="og:title" content="CROSSFADE | Top-level design">
+<meta property="og:description" content="CROSSFADE top-level design shared by INFO 579 Projects 1 to 3.">
+<meta property="og:url" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/design/">
+<meta property="og:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="INFO 579 logo beside the CROSSFADE wordmark">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_card.png">
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="masthead">
+  <a class="wordmark" href="../">CROSSFADE</a>
+  <span class="course">Top-level design</span>
+  <span class="spacer"></span>
+  <a class="home-link" href="../">All projects</a>
+  <a class="repo" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE/tree/main/design">GitHub folder</a>
+</header>
+<div class="panel">
+  <h1>Top-level design</h1>
+  <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
+  <p class="lede">What stays the same across all three projects: the business and the data it has to manage.</p>
+  <h2>The business</h2>
+  <div class="prose">
+    <p>CROSSFADE is a streaming service for independent artists. Artists upload recordings directly under their own licence, so the catalogue is almost entirely new material. Every track is scored at upload by several versions of the <a href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">BEARDOWN</a> genre classifier, each returning a probability for all ten genres. Listeners don't browse genre names. They build stations from a target blend (say 60% jazz, 40% hip hop) and an allowed range of ambiguity, so a track uploaded an hour ago is as findable as one with a million plays.</p>
+    <p>The database holds the artist roster and catalogue, the model versions and every result they produced, listener accounts and their stations, and every play, which is both the taste signal and the billable event for royalties.</p>
+  </div>
+  <h2>The data</h2>
+  <div class="prose">
+    <p>Ten entities, fixed in Project 1 and reused by the later projects.</p>
+    <table>
+      <tr><th>Kind</th><th>Entities</th></tr>
+      <tr><td>Entity (6)</td><td>Artist, Track, Genre, Listener, Scoring Model, Station</td></tr>
+      <tr><td>Associative entity (4)</td><td>Track Score, Genre Probability, Station Blend, Play</td></tr>
+    </table>
+    <p>The <a href="../project1/#conceptual">conceptual model</a> shows how they relate, and the <a href="../project1/#dictionary">data dictionary</a> says what every attribute is for.</p>
+  </div>
+  <h2>One design, three databases</h2>
+  <div class="prose">
+    <table>
+      <tr><th>Project</th><th>What it does with the design</th><th>Due</th></tr>
+      <tr><td><a href="../project1/">1. Database Design</a></td><td>Defines it: requirements analysis, conceptual model, sample data, physical model.</td><td>Sep 27, 2026</td></tr>
+      <tr><td><a href="../project2/">2. SQL Database</a></td><td>Builds it as a relational database.</td><td>Nov 8, 2026</td></tr>
+      <tr><td><a href="../project3/">3. NoSQL Database</a></td><td>Models the same business in a NoSQL database.</td><td>Dec 13, 2026</td></tr>
+    </table>
+  </div>
+  <h2>Repository layout</h2>
+  <div class="prose">
+<pre><code>index.html     project picker (this site's front page)
+assets/        shared styles, logo, icons, social card
+design/        this page: the top-level design
+project1/      Database Design: deliverables, sources, docs site
+project2/      SQL Database
+project3/      NoSQL Database</code></pre>
+  </div>
+</div>
+</body>
+</html>
