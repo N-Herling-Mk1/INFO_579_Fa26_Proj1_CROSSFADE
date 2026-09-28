@@ -17,7 +17,8 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 
 ```
 index.html       project picker (site front page)
-assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png)
+assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png), CROSSFADE artwork
+tools/           build_banner.py: writes the shared top banner into every top-level page
 design/          top-level design: the business and its ten entities
 project1/        Database Design: deliverables, sources, docs, its own site
 project2/        SQL Database
@@ -32,6 +33,10 @@ Each project's graded submission is built from that project's `deliverables/` fo
 ```
 .\boot_site.ps1
 ```
+
+## Banner
+
+Every top-level page shares one banner: the CROSSFADE wave and wordmark, a context line, and Home / Project 1 / Project 2 / Project 3 buttons with a hover effect. After changing it, run `python tools/build_banner.py` from the repository root; it rewrites the block between the `BANNER` markers in each page.
 
 ## Social preview
 

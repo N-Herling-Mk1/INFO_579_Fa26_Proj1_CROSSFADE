@@ -1,4 +1,4 @@
-# CROSSFADE — INFO 579 Project 1 — mk13
+# CROSSFADE — INFO 579 Project 1 — mk14
 
 ## Package status
 
@@ -209,4 +209,11 @@ Prompted by Unit 4 assignment feedback (a fixed-length phone number should be CH
 - **Every entity description box** ends with a link to that entity's section of the online dictionary.
 - **New `scripts/check_consistency.py`:** 11 checks across the RA entity tables, Tables 1, 2, 3, 6, 8 and 9, `data.xlsx` (columns, order, value fit, nulls, key uniqueness, foreign keys) and the dictionary. All pass. It was confirmed to catch planted errors in a scratch copy.
 - RA is now 23 pages.
+
+## mk14 — site banner and CROSSFADE artwork
+
+- **One banner on every top-level page** (front page, design, Projects 1 to 3): the wave and wordmark from `assets/images/CrossFade_mk1.png`, a context line, Home / Project 1 / Project 2 / Project 3 buttons and a GitHub link. The current page's button is outlined in the artwork's purple-to-gold gradient. On hover or keyboard focus a button lifts, glows and draws a gradient underline. Button subtitles hide below 1100 px wide; below 820 px the buttons move to their own row; below 420 px they form a four-column grid. Tested with no sideways scrolling from 320 to 1400 px.
+- Written into each page by `tools/build_banner.py`, so it stays identical everywhere.
+- **Front page hero:** the CROSSFADE artwork replaces the course logo, which moves beside the course name. The favicons and the social card are unchanged.
+- Web copies cut from the 1.3 MB original: `crossfade_wave.jpg` (17 KB), `crossfade_wordmark.png` (25 KB, transparent), `crossfade_hero.jpg` (55 KB).
 
