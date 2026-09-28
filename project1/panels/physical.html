@@ -8,34 +8,56 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="../../assets/site.css?v=ad177911">
-<script src="../data/site_data.js"></script>
+<link rel="stylesheet" href="../../assets/site.css?v=6e18ac10">
 </head>
 <body>
-<div class="panel">
+<div class="panel wide">
   <h1>Physical model</h1>
-  <div id="body"></div>
+  <p class="lede">MySQL Workbench EER diagram of the CROSSFADE schema: ten tables, their columns and SQL types, primary and foreign keys, unique indexes, and every relationship's cardinality and participation in crow's foot notation.</p>
+  <div class="toolbar" role="group" aria-label="Zoom">
+    <button class="btn" id="fit" aria-pressed="true">Fit to width</button>
+    <button class="btn" id="full" aria-pressed="false">Actual size</button>
+    <a class="btn" href="../deliverables/physical_data_model.png" download>Download PNG</a>
+    <a class="btn" href="../source/physical_model/crossfade_schema.sql" download>Download SQL</a>
+  </div>
+  <div class="figure fit" id="fig"><img src="../deliverables/physical_data_model.png" alt="Physical data model of CROSSFADE in MySQL Workbench: ten tables with columns, types, keys and indexes, joined by solid identifying and dashed non-identifying relationships."></div>
+  <div class="prose">
+    <h2>Reading it</h2>
+    <ul>
+      <li><strong>Column icons.</strong> A yellow key is a primary key column; a red key is a primary key column that is also a foreign key; a red diamond is a foreign key outside the key; a filled blue diamond is NOT NULL; a hollow diamond may be empty.</li>
+      <li><strong>Lines.</strong> Solid lines are identifying relationships: the parent's key is part of the child's primary key, as in all four associative tables. Dashed lines are non-identifying: the foreign key is an ordinary column.</li>
+      <li><strong>Line ends.</strong> The symbol next to a table says how many rows of that table relate to one row at the other end. Parents show <code>||</code>, exactly one. Children show <code>o&lt;</code>, zero or many, because a parent can exist before it has children. Station Blend and Genre Probability show <code>|&lt;</code>, because every station has at least one genre weight and every score has its ten probabilities. The station end of Play's dashed line shows <code>o|</code>, because a play need not come from a station.</li>
+      <li><strong>Indexes.</strong> Each table lists its indexes: PRIMARY, one <code>uq_</code> index per UNIQUE column, and one <code>fk_</code> index per foreign key that does not already begin the primary key. A foreign key that leads the primary key, such as Track Score's <code>track_id</code>, uses the primary key's index, so it has no index of its own.</li>
+    </ul>
+    <h2>How it was built</h2>
+    <p>The diagram is drawn from the requirements analysis, not by hand, so its tables and types cannot drift from the document.</p>
+    <ol>
+      <li><code>scripts/build_ddl.py</code> reads every table and column from the requirements analysis and writes the MySQL schema: <a href="../source/physical_model/crossfade_schema.sql">crossfade_schema.sql</a> (with the 16 CHECK constraints), <a href="../source/physical_model/crossfade_workbench.sql">crossfade_workbench.sql</a> (the same without CHECKs, for Workbench), and <a href="../source/physical_model/crossfade_data.sql">crossfade_data.sql</a> (all 401 rows of <code>data.xlsx</code>).</li>
+      <li>The schema and data were loaded into a MySQL-compatible server (MariaDB 10.11): every row loads, and eight deliberately bad inserts, such as a duplicate play or a probability of 1.2, are rejected.</li>
+      <li>In MySQL Workbench, File &rarr; Import &rarr; Reverse Engineer MySQL Create Script draws the tables and relationships.</li>
+      <li><a href="../source/physical_model/workbench_fixups.py">workbench_fixups.py</a>, run from Scripting &rarr; Run Workbench Script File, sets what a CREATE script cannot carry: each relationship's participation, box widths so no type is cut off, expanded index lists, and a layout with no line running behind a table.</li>
+    </ol>
+    <h2>Derived columns</h2>
+    <p>Five columns hold values computed from other data and one holds a snapshot. The diagram cannot mark them, so they are documented in the <a href="../index.html#dictionary" target="_top">data dictionary</a>, in the column comments of the SQL, and in italic headers with notes in <code>data.xlsx</code>.</p>
+    <table>
+      <tr><th>Column</th><th>Kind</th><th>Computed from</th></tr>
+      <tr><td>track_score.genre_id</td><td>derived</td><td>the genre with the highest probability in the score's ten Genre Probability rows</td></tr>
+      <tr><td>track_score.top_probability</td><td>derived</td><td>the largest of those ten probabilities</td></tr>
+      <tr><td>track_score.posterior_entropy</td><td>derived</td><td>their Shannon entropy divided by log(10)</td></tr>
+      <tr><td>track_score.model_divergence</td><td>derived</td><td>mean Jensen-Shannon divergence from the other models' distributions for the same track</td></tr>
+      <tr><td>play.completed</td><td>derived</td><td>1 exactly when seconds_played equals the track's duration</td></tr>
+      <tr><td>play.royalty_amount</td><td>snapshot</td><td>the artist's payout_rate at play time for a qualifying play (30 seconds or more), otherwise 0; copied so a later rate change never rewrites the ledger</td></tr>
+    </table>
+  </div>
 </div>
 <script>
 (function () {
-  var done = window.SITE.status["physical_data_model.png"];
-  var b = document.getElementById("body");
-  if (done) {
-    b.innerHTML = '<p class="lede">Tables, columns, SQL types, keys and constraints.</p>' +
-      '<div class="toolbar"><a class="btn" href="../deliverables/physical_data_model.png" download>Download PNG</a></div>' +
-      '<div class="figure fit"><img src="../deliverables/physical_data_model.png" alt="Physical data model of CROSSFADE"></div>';
-    return;
+  var fig = document.getElementById("fig"), fit = document.getElementById("fit"), full = document.getElementById("full");
+  function set(isFit) {
+    fig.classList.toggle("fit", isFit);
+    fit.setAttribute("aria-pressed", isFit); full.setAttribute("aria-pressed", !isFit);
   }
-  b.innerHTML =
-    '<div class="callout pending"><p><strong>Not built yet.</strong> This is the next deliverable. It builds on the schema the other three already agree on.</p></div>' +
-    '<div class="prose"><h2>What it will show</h2><ul>' +
-    '<li>Every table with its columns and SQL data types, as listed in the requirements analysis.</li>' +
-    '<li>Every composite primary key, including Play\u2019s Listener ID + Track ID + Played At.</li>' +
-    '<li>The composite foreign key from Genre Probability to Track Score.</li>' +
-    '<li>Play.station_id drawn as nullable.</li>' +
-    '<li>The CHECK constraints, such as Minimum Ambiguity \u2264 Maximum Ambiguity.</li>' +
-    '<li>Identifying relationships as solid lines and non-identifying ones as dashed.</li>' +
-    '</ul><p>Until then, the <a href="../index.html#dictionary" target="_top">data dictionary</a> explains every column and the <a href="../index.html#data" target="_top">sample data</a> shows the schema holding real rows.</p></div>';
+  fit.onclick = function () { set(true); }; full.onclick = function () { set(false); };
 })();
 </script>
 </body>

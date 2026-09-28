@@ -15,9 +15,18 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 | `deliverables/requirements_analysis.pdf` | Done |
 | `deliverables/conceptual_data_model.png` | Done |
 | `deliverables/data.xlsx` | Done |
-| `deliverables/physical_data_model.png` | Next |
+| `deliverables/physical_data_model.png` | Done |
 
-The graded submission is `project01_<groupcode>.zip`, built from `deliverables/` only.
+The graded submission is `submission/project01_info579_group_1.zip`, built from `deliverables/` only by `scripts/build_submission.py` (or the button on the site's Home panel).
+
+## Physical model
+
+`physical_data_model.png` is a MySQL Workbench diagram of the schema in `source/physical_model/`:
+
+1. `python scripts/build_ddl.py` writes `crossfade_schema.sql` (with CHECK constraints), `crossfade_workbench.sql` (for Workbench), `crossfade_data.sql` (the sample data) and `workbench_fixups.py`.
+2. In Workbench: File > New Model, then File > Import > Reverse Engineer MySQL Create Script with `crossfade_workbench.sql` (tick *Place imported objects on a diagram*).
+3. Scripting > Run Workbench Script File > `workbench_fixups.py`: participation on every relationship, full-width tables, expanded indexes, and the submitted layout.
+4. File > Export > Export as PNG.
 
 ## Layout
 
@@ -41,7 +50,9 @@ pdflatex requirements_analysis.tex          # in source/requirements_analysis/, 
 python source/conceptual_model/build_cdm.py  # draft conceptual model only; the deliverable is hand-drawn (needs graphviz)
 python source/data/gen_data.py               # data.xlsx, with integrity self-checks
 python scripts/build_dictionary.py           # regenerate docs/DATA_DICTIONARY.md (prose in scripts/dictionary_text.py)
+python scripts/build_ddl.py                  # MySQL schema, sample-data INSERTs, Workbench formatting script
 python scripts/check_consistency.py         # cross-check every column: RA vs data.xlsx vs dictionary
+python scripts/build_submission.py          # submission/project01_info579_group_1.zip, checked against the brief
 python scripts/build_site.py                 # refresh the site after any of the above
 ```
 

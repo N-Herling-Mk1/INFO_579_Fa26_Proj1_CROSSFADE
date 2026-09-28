@@ -9,7 +9,7 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 | Folder | Project | Due | Status |
 |---|---|---|---|
 | [`design/`](design/) | Top-level design shared by all three | | |
-| [`project1/`](project1/) | Project 1: Database Design | Sep 27, 2026 | 3 of 4 deliverables |
+| [`project1/`](project1/) | Project 1: Database Design | Sep 27, 2026 | All 4 deliverables; submission zip in `project1/submission/` |
 | [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | Not started |
 | [`project3/`](project3/) | Project 3: NoSQL Database | Dec 13, 2026 | Not started |
 
@@ -20,6 +20,7 @@ index.html       project picker (site front page)
 assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png), CROSSFADE artwork
 tools/           build_banner.py: writes the shared top banner into every top-level page
                  stamp_assets.py: tags every link to site.css / panel.js with a content hash
+assets/vendor/   jszip.min.js (JSZip 3.10.1, MIT): builds the Project 1 submission zip in the browser
 design/          top-level design: the business and its ten entities
 project1/        Database Design: deliverables, sources, docs, its own site
 project2/        SQL Database

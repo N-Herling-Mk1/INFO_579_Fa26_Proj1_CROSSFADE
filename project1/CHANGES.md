@@ -1,13 +1,13 @@
-# CROSSFADE — INFO 579 Project 1 — mk14
+# CROSSFADE — INFO 579 Project 1 — mk15
 
 ## Package status
 
 | Deliverable | Status |
 |---|---|
-| `requirements_analysis.pdf` | Done (mk13, 23 pp) |
+| `requirements_analysis.pdf` | Done (mk15, 23 pp) |
 | `conceptual_data_model.png` | Done (official partner version, mk8) |
 | `data.xlsx` | Done (mk6) |
-| `physical_data_model.png` | **Not started** |
+| `physical_data_model.png` | Done (mk15, MySQL Workbench) |
 
 This repository is also the project's documentation site (GitHub Pages). It is not the submission. The submission zip must be named `project01_<groupcode>.zip`, must contain only the four deliverables, and the PDF must be named exactly `requirements_analysis.pdf`.
 
@@ -218,4 +218,28 @@ Prompted by Unit 4 assignment feedback (a fixed-length phone number should be CH
 - Web copies cut from the 1.3 MB original: `crossfade_wave.jpg` (17 KB), `crossfade_wordmark.png` (25 KB, transparent), `crossfade_hero.jpg` (55 KB).
 - **Banner no longer shifts between pages.** On Windows, pages long enough to scroll (front page, design) lost 15 to 17 px to the scrollbar and the Project pages did not, so the banner re-laid out whenever you moved between them. `html { scrollbar-gutter: stable; }` reserves that space on every page; measured with real scrollbars, the banner and buttons are now in identical positions on all five pages.
 - **Stale-stylesheet fix.** Every link to `site.css` and `panel.js` now carries a content hash (`site.css?v=ad177911`), written by `tools/stamp_assets.py`, so a push is seen immediately instead of after the browser's cached copy expires.
+
+## mk15 — physical model, submission zip, derived columns
+
+- **`deliverables/physical_data_model.png`**: the MySQL Workbench EER diagram. All four deliverables are now done.
+- **Schema from the RA.** `scripts/build_ddl.py` reads every table and column from the requirements analysis and writes `source/physical_model/`:
+  - `crossfade_schema.sql`: with 16 CHECK constraints and comments on the derived columns;
+  - `crossfade_workbench.sql`: for Workbench;
+  - `crossfade_data.sql`: all 401 rows;
+  - `workbench_fixups.py`: the Workbench formatting script.
+- **Tested in MariaDB 10.11.** The schema and all 401 rows load, and eight deliberately bad inserts are rejected.
+- **`workbench_fixups.py`** sets what a CREATE script cannot carry:
+  - participation on all 13 relationships, matching the RA and the conceptual model;
+  - table widths so no name or type is cut off;
+  - expanded index lists;
+  - the submitted layout, in which no line runs behind another table.
+- **Submission zip.** `scripts/build_submission.py` writes `submission/project01_info579_group_1.zip` with exactly the four deliverables at the top level, and checks each file's type and the one-sheet `data.xlsx`. The Home panel has a button that builds the same zip in the browser from the published files, falling back to the prebuilt copy when the site is opened from local files.
+- **Derived columns, fully documented.** The RA now marks Play's Completed as derived and Royalty Amount as a snapshot. It also adds integrity rule I7, which covers both; I3 already covered Track Score's four derived columns. All six are documented in:
+  - the data dictionary;
+  - the physical model page;
+  - the SQL column comments;
+  - `data.xlsx` (italic headers with notes).
+
+  Every sample row satisfies I7, checked in the database.
+- The physical model page shows the diagram, how to read it, how it was built, and the derived-column table. The Project 1 home page explains the formatting script.
 

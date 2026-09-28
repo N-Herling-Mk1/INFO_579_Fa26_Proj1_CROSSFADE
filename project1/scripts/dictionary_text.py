@@ -8,7 +8,7 @@ from the requirements analysis and data.xlsx so they cannot drift. Each column h
 
 INTRO = """Every one of the 59 columns in CROSSFADE's ten tables. Each entity opens with a table of its columns, types and the extreme values found in `data.xlsx`. Each column then leads with its type and values, says why that type is the smallest correct choice, and then what the column holds.
 
-Types come from the requirements analysis and values from `data.xlsx`, both read by `scripts/build_dictionary.py` when it writes this page. Byte counts are the Unit 4 figures; DECIMAL, BIT and ENUM follow the MySQL manual, and string sizes assume one byte per character. Rule numbers (I1 to I6) refer to the Integrity rules table in the requirements analysis. *Derived* marks a column computed from other data; in `data.xlsx` its header is italic and carries a note saying how."""
+Types come from the requirements analysis and values from `data.xlsx`, both read by `scripts/build_dictionary.py` when it writes this page. Byte counts are the Unit 4 figures; DECIMAL, BIT and ENUM follow the MySQL manual, and string sizes assume one byte per character. Rule numbers (I1 to I7) refer to the Integrity rules table in the requirements analysis. *Derived* marks a column computed from other data; in `data.xlsx` its header is italic and carries a note saying how."""
 
 ENTITIES = [
 ("Artist", "entity",
@@ -210,13 +210,13 @@ ENTITIES = [
   "How much was actually heard. It decides whether the play earns royalty (30 seconds or more) and how strong a taste signal it is."),
  ("Completed",
   "A yes/no flag: BIT(1), one byte. Derived from Seconds Played and the track's Duration, and stored because the one byte saves a join to Track every time listening history is filtered to finished plays.",
-  "Whether the listener reached the end, separating a genuine listen from an abandoned one. True exactly when Seconds Played equals the track's Duration."),
+  "Whether the listener reached the end, separating a genuine listen from an abandoned one. True exactly when Seconds Played equals the track's Duration; set only by the procedure that records the play (I7)."),
  ("Reaction",
   "Two explicit signals the service defines: ENUM, one byte, NULL when the listener gave none.",
   "A saved or skipped, a stronger taste signal than duration alone."),
  ("Royalty Amount",
   "Money to five decimals, the same scale as Payout Rate: DECIMAL(5,5), 3 bytes, exact. A snapshot rather than a derived value: it copies the rate in force at play time, so it cannot be recomputed later if the rate changes.",
-  "The money owed to the artist for this play: the artist's Payout Rate for a qualifying play, zero otherwise. A later rate change never rewrites the royalty ledger."),
+  "The money owed to the artist for this play: the artist's Payout Rate for a qualifying play, zero otherwise. A later rate change never rewrites the royalty ledger (I7)."),
 ]),
 ]
 

@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="../../assets/site.css?v=ad177911">
+<link rel="stylesheet" href="../../assets/site.css?v=6e18ac10">
 <script src="../data/site_data.js"></script>
 <script src="../../assets/panel.js?v=24710a1b"></script>
 </head>
@@ -26,6 +26,8 @@
       <tr><td>conceptual_data_model.png</td><td>Drawn by hand (official, mk8). <code>python source/conceptual_model/build_cdm.py</code> rebuilds only the draft.</td></tr>
       <tr><td>data.xlsx</td><td><code>python source/data/gen_data.py</code></td></tr>
       <tr><td>docs/DATA_DICTIONARY.md</td><td><code>python scripts/build_dictionary.py</code> (prose in <code>scripts/dictionary_text.py</code>)</td></tr>
+      <tr><td>physical_data_model.png</td><td><code>python scripts/build_ddl.py</code> writes the SQL and <code>workbench_fixups.py</code>; import <code>crossfade_workbench.sql</code> in MySQL Workbench, run the script, export PNG</td></tr>
+      <tr><td>project01_info579_group_1.zip</td><td><code>python scripts/build_submission.py</code>, or the button on Home</td></tr>
       <tr><td>consistency check (RA, data.xlsx, dictionary)</td><td><code>python scripts/check_consistency.py</code></td></tr>
       <tr><td>this site's data</td><td><code>python scripts/build_site.py</code></td></tr>
     </table>
@@ -36,9 +38,10 @@
   var S = window.SITE, el = CF.el, groups = document.getElementById("groups");
   var DESC = {
     "deliverables": "The four graded files.",
+    "submission": "The graded zip, built from deliverables/ by scripts/build_submission.py.",
     "docs": "Reference documents.",
     "source": "Everything the deliverables are built from.",
-    "scripts": "Site tooling."
+    "scripts": "Build and check tooling: site data, dictionary, schema, submission zip."
   };
   Object.keys(DESC).forEach(function (g) {
     var files = S.files.filter(function (f) { return f.path.indexOf(g + "/") === 0; });

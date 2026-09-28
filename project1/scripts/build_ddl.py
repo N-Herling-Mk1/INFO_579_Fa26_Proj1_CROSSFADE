@@ -1,0 +1,337 @@
+"""Generate the MySQL physical model from the requirements analysis.
+
+Reads every table and column (type, optional, unique, primary key, foreign key) from
+the RA's \\attr blocks, so the schema cannot drift from the document, and writes:
+  source/physical_model/crossfade_schema.sql     full schema, with CHECK constraints
+  source/physical_model/crossfade_workbench.sql  same schema without CHECKs, for
+                                                 MySQL Workbench's reverse engineering
+  source/physical_model/crossfade_data.sql       INSERTs for every row of data.xlsx
+  source/physical_model/workbench_fixups.py      Workbench script: participation, box sizes,
+                                                 layout (things a CREATE script cannot carry)
+Physical names are snake_case (Unit 4, Object Naming). Run from project1/:
+    python scripts/build_ddl.py
+"""
+import os, re, sys
+from collections import OrderedDict
+from datetime import date, datetime
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEX = os.path.join(ROOT, "source", "requirements_analysis", "requirements_analysis.tex")
+XLSX = os.path.join(ROOT, "deliverables", "data.xlsx")
+OUT = os.path.join(ROOT, "source", "physical_model")
+STEPS = 6
+def step(i, msg): print(f"[{i}/{STEPS}] {msg}", flush=True)
+
+def untex(s):
+    s = re.sub(r"\\q\{([^}]*)\}", r"'\1'", s)
+    s = s.replace("\\_", "_")
+    return re.sub(r"\s+", " ", s).strip()
+def snake(name): return re.sub(r"\W+", "_", name.strip().lower())
+
+# ------------------------------------------------------------------ 1 read RA
+step(1, "reading tables and columns from requirements_analysis.tex")
+tex = open(TEX, encoding="utf-8").read()
+body = tex[tex.index("\\begin{document}"):]
+ARG = r"%?\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}"
+RA = OrderedDict(); cur = None
+for m in re.finditer(r"\\entityhead\{([^}]*)\}|\\attr" + ARG * 6, body):
+    if m.group(1): cur = m.group(1); RA[cur] = OrderedDict(); continue
+    desc = untex(m.group(7))
+    fk = re.search(r"[Ff]oreign key referencing ([A-Z][a-z]+(?: [A-Z][a-z]+)?)", desc)
+    RA[cur][m.group(2)] = dict(type=untex(m.group(3)), opt=m.group(4) == "Yes", uniq=m.group(5) == "Yes",
+                               pk=m.group(6) == "Yes", fk=fk.group(1) if fk else None)
+ncols = sum(len(c) for c in RA.values())
+print(f"      {len(RA)} tables, {ncols} columns")
+if (len(RA), ncols) != (10, 59): sys.exit("expected 10 tables and 59 columns")
+
+# CHECK constraints: the ranges the RA states in words (Unit 4: CHECK "verifies the
+# value satisfies one or more conditions"). Keyed by (table, column) or table-level.
+CHECKS = {
+    "Genre":             ["genre_id BETWEEN 0 AND 9"],
+    "Track":             ["duration > 0"],
+    "Scoring Model":     ["holdout_accuracy BETWEEN 0 AND 1", "segment_length > 0", "embedding_dimension > 0"],
+    "Station":           ["minimum_ambiguity BETWEEN 0 AND 1", "maximum_ambiguity BETWEEN 0 AND 1",
+                          "minimum_ambiguity <= maximum_ambiguity"],
+    "Track Score":       ["top_probability BETWEEN 0 AND 1", "posterior_entropy BETWEEN 0 AND 1",
+                          "model_divergence IS NULL OR model_divergence BETWEEN 0 AND 1",
+                          "segment_variance IS NULL OR segment_variance BETWEEN 0 AND 0.25"],
+    "Genre Probability": ["probability BETWEEN 0 AND 1"],
+    "Station Blend":     ["weight > 0 AND weight <= 1"],
+    "Play":              ["royalty_amount >= 0"],
+    "Artist":            ["payout_rate > 0"],
+}
+for t, rules in CHECKS.items():
+    cols = {snake(c) for c in RA[t]}
+    for r in rules:
+        for ident in re.findall(r"[a-z_]+", r):
+            if "_" in ident and ident not in cols: sys.exit(f"CHECK on {t} names unknown column {ident}")
+
+# Derived and snapshot columns carry a COMMENT, so the database and the Workbench model
+# (which keeps column comments) say how each value is produced.
+COMMENTS = {
+    ("Track Score", "Genre ID"): "Derived: genre with the highest probability in this score's Genre Probability rows (I3)",
+    ("Track Score", "Top Probability"): "Derived: largest of this score's ten probabilities (I3)",
+    ("Track Score", "Posterior Entropy"): "Derived: Shannon entropy of the ten probabilities / log(10) (I3)",
+    ("Track Score", "Model Divergence"): "Derived: mean Jensen-Shannon divergence from the other models' distributions for this track (I3)",
+    ("Play", "Completed"): "Derived: 1 exactly when seconds_played = track.duration (I7)",
+    ("Play", "Royalty Amount"): "Snapshot: artist payout_rate at play time if seconds_played >= 30, else 0 (I7)",
+}
+for k in COMMENTS:
+    if k[1] not in RA.get(k[0], {}): sys.exit(f"COMMENT for unknown column {k}")
+
+# ------------------------------------------------------------------ 2 DDL
+step(2, "writing CREATE TABLE statements")
+def ddl(with_checks):
+    out = ["-- CROSSFADE physical data model (MySQL 8).",
+           "-- Generated by project1/scripts/build_ddl.py from the requirements analysis; do not edit by hand.",
+           "" if with_checks else "-- Workbench import copy: identical to crossfade_schema.sql without CHECK constraints.",
+           "", "DROP SCHEMA IF EXISTS crossfade;",
+           "CREATE SCHEMA crossfade DEFAULT CHARACTER SET utf8mb4;", "USE crossfade;", ""]
+    for t, cols in RA.items():
+        tn = snake(t); lines = []
+        for c, d in cols.items():
+            note = COMMENTS.get((t, c))
+            lines.append(f"  {snake(c)} {d['type']}{'' if d['opt'] else ' NOT NULL'}"
+                         + (" COMMENT '" + note.replace("'", "''") + "'" if note else ""))
+        pk = [snake(c) for c, d in cols.items() if d["pk"]]
+        lines.append(f"  PRIMARY KEY ({', '.join(pk)})")
+        for c, d in cols.items():
+            if d["uniq"] and not d["pk"]: lines.append(f"  UNIQUE KEY uq_{tn}_{snake(c)} ({snake(c)})")
+        # foreign keys: a composite key to Track Score is one constraint
+        fks = OrderedDict()
+        for c, d in cols.items():
+            if d["fk"]: fks.setdefault(d["fk"], []).append(c)
+        for ref, fcols in fks.items():
+            ref_pk = [snake(c) for c, d in RA[ref].items() if d["pk"]]
+            src = [snake(c) for c in fcols]
+            if len(src) != len(ref_pk):
+                sys.exit(f"{t} -> {ref}: {len(src)} columns against a {len(ref_pk)}-column key")
+            lines.append(f"  CONSTRAINT fk_{tn}_{snake(ref)} FOREIGN KEY ({', '.join(src)}) "
+                         f"REFERENCES {snake(ref)} ({', '.join(ref_pk)})")
+        if with_checks:
+            for i, r in enumerate(CHECKS.get(t, []), 1):
+                lines.append(f"  CONSTRAINT ck_{tn}_{i} CHECK ({r})")
+        out += [f"CREATE TABLE {tn} (", ",\n".join(lines), ") ENGINE=InnoDB;", ""]
+    return "\n".join(out)
+os.makedirs(OUT, exist_ok=True)
+open(os.path.join(OUT, "crossfade_schema.sql"), "w", encoding="utf-8", newline="\n").write(ddl(True))
+open(os.path.join(OUT, "crossfade_workbench.sql"), "w", encoding="utf-8", newline="\n").write(ddl(False))
+print(f"      {sum(len(v) for v in CHECKS.values())} CHECK constraints in the full schema")
+
+# ------------------------------------------------------------------ 3 data
+step(3, "reading data.xlsx")
+from openpyxl import load_workbook
+ws = load_workbook(XLSX, read_only=True)["table records"]
+X = OrderedDict(); cur = hdr = None
+for row in ws.iter_rows(values_only=True):
+    vals = [v for v in row if v is not None]
+    if not vals: continue
+    if len(vals) == 1 and vals[0] in RA: cur, hdr = vals[0], None; continue
+    if cur and hdr is None: hdr = [h for h in row if h is not None]; X[cur] = []; continue
+    if cur: X[cur].append(list(row[:len(hdr)]) + [None] * (len(hdr) - len(row)))
+
+def lit(v, ty):
+    if v is None or v == "": return "NULL"
+    if ty.startswith("BINARY"): return f"UNHEX('{v[2:] if str(v).startswith('0x') else v}')"
+    if ty == "DATE": return f"'{v:%Y-%m-%d}'"
+    if ty == "DATETIME": return f"'{v:%Y-%m-%d %H:%M:%S}'"
+    if ty.startswith("DECIMAL"):
+        places = int(re.search(r",(\d+)", ty).group(1)); return f"{v:.{places}f}"
+    if isinstance(v, (int, float)) and not isinstance(v, bool): return str(v)
+    return "'" + str(v).replace("'", "''") + "'"
+
+# ------------------------------------------------------------------ 4 inserts (parents before children)
+step(4, "writing INSERT statements")
+order, done = [], set()
+while len(order) < len(RA):
+    for t, cols in RA.items():
+        if t not in done and all(d["fk"] in done or d["fk"] == t for d in cols.values() if d["fk"]):
+            order.append(t); done.add(t)
+out = ["-- CROSSFADE sample data from deliverables/data.xlsx. Generated by build_ddl.py.", "USE crossfade;", ""]
+total = 0
+for t in order:
+    cols = RA[t]; names = ", ".join(snake(c) for c in cols)
+    rows = [f"  ({', '.join(lit(v, d['type']) for v, d in zip(r, cols.values()))})" for r in X[t]]
+    out += [f"INSERT INTO {snake(t)} ({names}) VALUES", ",\n".join(rows) + ";", ""]
+    total += len(rows)
+open(os.path.join(OUT, "crossfade_data.sql"), "w", encoding="utf-8", newline="\n").write("\n".join(out))
+print(f"      {total} rows, insert order: {', '.join(snake(t) for t in order)}")
+
+# ------------------------------------------------------------------ 5 Workbench fix-up script
+step(5, "writing the Workbench fix-up script")
+# Participation, from the RA's relationship descriptions and the conceptual model.
+# Child side: every parent may exist with no children ("zero or more") except these two,
+# where the parent always has at least one child.
+CHILD_REQUIRED = {("Station", "Station Blend"), ("Track Score", "Genre Probability")}
+# Parent side: a child row must have its parent unless the foreign key is optional.
+fk_rows = []
+for t, cols in RA.items():
+    seen = OrderedDict()
+    for c, d in cols.items():
+        if d["fk"]: seen.setdefault(d["fk"], []).append(c)
+    for ref, fcols in seen.items():
+        parent_required = not any(RA[t][c]["opt"] for c in fcols)
+        fk_rows.append((snake(t), snake(ref), int(parent_required), int((ref, t) in CHILD_REQUIRED)))
+# Box sizes: wide enough for the longest "name TYPE" line, tall enough for columns + indexes.
+def shown(ty): return "ENUM(...)" if ty.startswith("ENUM") else ty
+sizes, n_idx = {}, {}
+for t, cols in RA.items():
+    fk_refs = OrderedDict()
+    for c, d in cols.items():
+        if d["fk"]: fk_refs.setdefault(d["fk"], []).append(snake(c))
+    pk = [snake(c) for c, d in cols.items() if d["pk"]]
+    # MySQL indexes: PRIMARY, one per UNIQUE, one per FK not already a prefix of the PK
+    idx = ["PRIMARY"] + [f"uq_{snake(t)}_{snake(c)}" for c, d in cols.items() if d["uniq"] and not d["pk"]]
+    idx += [f"fk_{snake(t)}_{snake(r)}" for r, fc in fk_refs.items() if pk[:len(fc)] != fc]
+    lines = [f"{snake(c)} {shown(d['type'])}" for c, d in cols.items()] + idx + [snake(t)]
+    width = int(max(len(s) for s in lines) * 7.8 + 60)
+    height = 32 + 23 * len(cols) + 26 + 22 * len(idx) + 18
+    sizes[snake(t)] = (width, height)
+# Layout: search a 4-column x 3-row grid for the arrangement with the fewest line
+# crossings, no line cutting through another table, and the shortest lines. Columns are
+# as wide as their widest table and rows as tall as their tallest, with even gutters.
+import itertools, random
+GUTTER_X, GUTTER_Y, MARGIN = 90, 80, 40
+NCOL, NROW = int(os.environ.get("NCOL", 5)), int(os.environ.get("NROW", 4))
+EDGES = [(c, p) for c, p, _, _ in fk_rows]
+MK3 = {"scoring_model": (0, 0), "track_score": (1, 0), "artist": (3, 0),
+       "station": (0, 1), "genre_probability": (1, 1), "genre": (2, 1), "track": (3, 1),
+       "station_blend": (0, 2), "listener": (1, 2), "play": (3, 2)}
+def place(cells):
+    colw = [max([sizes[n][0] for n, (c, r) in cells.items() if c == i] or [0]) for i in range(NCOL)]
+    rowh = [max([sizes[n][1] for n, (c, r) in cells.items() if r == j] or [0]) for j in range(NROW)]
+    xs = [MARGIN + sum(colw[:i]) + GUTTER_X * sum(1 for w in colw[:i] if w) for i in range(NCOL)]
+    ys = [MARGIN + sum(rowh[:j]) + GUTTER_Y * sum(1 for h in rowh[:j] if h) for j in range(NROW)]
+    return {n: (xs[c] + (colw[c] - sizes[n][0]) // 2, ys[r]) for n, (c, r) in cells.items()}
+def rect(p, n): return (p[n][0], p[n][1], p[n][0] + sizes[n][0], p[n][1] + sizes[n][1])
+def centre(p, n): x0, y0, x1, y1 = rect(p, n); return ((x0 + x1) / 2, (y0 + y1) / 2)
+def cross(a, b, c, d):
+    def o(p, q, r): return (q[0]-p[0])*(r[1]-p[1]) - (q[1]-p[1])*(r[0]-p[0])
+    return o(a, b, c) * o(a, b, d) < 0 and o(c, d, a) * o(c, d, b) < 0
+def hits(a, b, r):
+    x0, y0, x1, y1 = r[0]+6, r[1]+6, r[2]-6, r[3]-6
+    corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    inside = lambda q: x0 < q[0] < x1 and y0 < q[1] < y1
+    return inside(a) or inside(b) or any(cross(a, b, corners[i], corners[(i + 1) % 4]) for i in range(4))
+def routes(p, a, b):
+    """Workbench-style orthogonal routes between boxes a and b: one straight segment when
+    the boxes overlap on an axis, otherwise the two one-bend L shapes."""
+    ax0, ay0, ax1, ay1 = rect(p, a); bx0, by0, bx1, by1 = rect(p, b)
+    ox0, ox1 = max(ax0, bx0), min(ax1, bx1); oy0, oy1 = max(ay0, by0), min(ay1, by1)
+    if ox1 - ox0 > 30:                       # stacked: one vertical line
+        x = (ox0 + ox1) / 2; ys = sorted([(ay0 + ay1) / 2, (by0 + by1) / 2])
+        return [[(x, ys[0]), (x, ys[1])]]
+    if oy1 - oy0 > 30:                       # side by side: one horizontal line
+        y = (oy0 + oy1) / 2; xs = sorted([(ax0 + ax1) / 2, (bx0 + bx1) / 2])
+        return [[(xs[0], y), (xs[1], y)]]
+    ca, cb = centre(p, a), centre(p, b)
+    return [[ca, (ca[0], cb[1]), cb], [ca, (cb[0], ca[1]), cb]]
+def seg_hits(path, r):
+    return any(hits(path[i], path[i + 1], r) for i in range(len(path) - 1))
+def paths_cross(P, Q):
+    return any(cross(P[i], P[i + 1], Q[j], Q[j + 1]) for i in range(len(P) - 1) for j in range(len(Q) - 1))
+def cost(cells):
+    p = place(cells); chosen = {}; n_hit = 0
+    for e in EDGES:
+        opts = routes(p, *e)
+        scored = [(sum(1 for n in sizes if n not in e and seg_hits(r, rect(p, n))), i) for i, r in enumerate(opts)]
+        # Workbench picks the bend itself and does not avoid tables, so a line only counts
+        # as clear when EVERY route it could take is clear.
+        worst_hits, i = max(scored)
+        n_hit += worst_hits
+        chosen[e] = opts[i]
+    n_cross = sum(1 for e, f in itertools.combinations(EDGES, 2)
+                  if not set(e) & set(f) and paths_cross(chosen[e], chosen[f]))
+    length = sum(sum(abs(r[i][0]-r[i+1][0]) + abs(r[i][1]-r[i+1][1]) for i in range(len(r)-1)) for r in chosen.values())
+    return n_hit * 5000 + n_cross * 1000 + length, n_cross, n_hit, int(length)
+# The submitted diagram: the 5x3 search result with station_blend moved above station and
+# listener raised to sit level with both station and play (Workbench routed those two
+# lines behind scoring_model and play otherwise). Set FINAL_POS = None to use the search.
+FINAL_POS = {'artist': (40, 715), 'track': (416, 715), 'genre': (427, 40), 'listener': (1629, 520), 'scoring_model': (792, 309), 'station': (1237, 309), 'track_score': (408, 309), 'play': (1230, 715), 'station_blend': (1256, 40), 'genre_probability': (48, 309)}
+rng = random.Random(579)
+all_cells = [(c, r) for r in range(NROW) for c in range(NCOL)]
+best = dict(MK3); best_cost = cost(best)
+print(f"      mk3 arrangement: {best_cost[1]} crossings, {best_cost[2]} lines that could pass behind a table, total length {best_cost[3]}")
+for restart in range(0 if FINAL_POS else 80):
+    cur = dict(MK3) if restart == 0 else dict(zip(sizes, rng.sample(all_cells, len(sizes))))
+    cur_cost = cost(cur)
+    for _ in range(1500):
+        a = rng.choice(list(sizes)); target = rng.choice(all_cells)
+        cand = dict(cur); other = next((n for n, c in cand.items() if c == target), None)
+        if other: cand[other] = cand[a]
+        cand[a] = target
+        cc = cost(cand)
+        if cc[0] < cur_cost[0]: cur, cur_cost = cand, cc
+    if cur_cost[0] < best_cost[0]: best, best_cost = cur, cur_cost
+if not FINAL_POS: print(f"      searched layout: {best_cost[1]} crossings, {best_cost[2]} lines that could pass behind a table, total length {best_cost[3]}")
+pos = place(best)
+if FINAL_POS: print("      using the pinned layout of the submitted diagram (FINAL_POS)")
+if FINAL_POS: pos = FINAL_POS
+grid = [[next((n for n, c in best.items() if c == (i, j)), "") for i in range(NCOL)] for j in range(NROW)]
+if not FINAL_POS:
+    for row in grid: print("        " + " | ".join(f"{n:17}" for n in row))
+missing = set(sizes) - set(pos)
+if missing: sys.exit(f"no layout position for {missing}")
+script = f"""# CROSSFADE: finish the physical model in MySQL Workbench.
+# Generated by project1/scripts/build_ddl.py; do not edit by hand.
+#
+# Run AFTER File > Import > Reverse Engineer MySQL Create Script (crossfade_workbench.sql),
+# with the model open: Scripting > Run Workbench Script File... and pick this file.
+# It sets what a CREATE script cannot carry:
+#   1. participation on every relationship (zero-or-many vs one-or-many; optional parent),
+#   2. box widths wide enough that no type or table name is truncated (only ever widens),
+#   3. an optimized layout: fewest line crossings, no line through a table, even gutters
+#      (set APPLY_LAYOUT = False to keep your own arrangement).
+# Safe to run more than once.
+import grt
+
+APPLY_LAYOUT = True    # False keeps your own arrangement and only fixes widths, indexes and line ends
+
+FKS = {fk_rows!r}          # (child, parent, parent_required, child_required)
+SIZES = {sizes!r}
+POS = {pos!r}
+
+model = grt.root.wb.doc.physicalModels[0]
+schema = [s for s in model.catalog.schemata if s.name == "crossfade"][0]
+tables = dict((t.name, t) for t in schema.tables)
+print("[1/3] participation")
+done = 0
+for child, parent, parent_req, child_req in FKS:
+    fks = [fk for fk in tables[child].foreignKeys if fk.referencedTable.name == parent]
+    if len(fks) != 1:
+        print("   !! %s -> %s: found %d foreign keys" % (child, parent, len(fks))); continue
+    fk = fks[0]
+    # Workbench draws fk.mandatory at the CHILD end and fk.referencedMandatory at the
+    # PARENT end (confirmed on the mk3 diagram, where the first run had them swapped).
+    fk.mandatory = child_req             # child end:  |<  (one or many) vs o< (zero or many)
+    fk.referencedMandatory = parent_req  # parent end: ||  (exactly one) vs o| (zero or one)
+    fk.many = 1
+    done += 1
+    print("   %-18s -> %-14s parent %s, children %s" % (child, parent,
+          "exactly one" if parent_req else "zero or one", "one or many" if child_req else "zero or many"))
+print("   %d of %d relationships set" % (done, len(FKS)))
+
+print("[2/3] box widths" + (" and [3/3] layout" if APPLY_LAYOUT else "; [3/3] layout skipped (APPLY_LAYOUT = False)"))
+diagram = model.diagrams[0]
+placed = 0
+for fig in diagram.figures:
+    tbl = getattr(fig, "table", None)
+    if tbl is None or tbl.name not in SIZES: continue
+    need_w, need_h = SIZES[tbl.name]
+    for flag in ("expanded", "columnsExpanded", "indicesExpanded"):   # show every column and index
+        if hasattr(fig, flag): setattr(fig, flag, 1)
+    fig.manualSizing = 1
+    if APPLY_LAYOUT:          # exact sizes so the computed gutters stay even
+        fig.width, fig.height = need_w, need_h
+        fig.left, fig.top = POS[tbl.name]
+    else:                     # keep the user's arrangement; only ever widen
+        fig.width, fig.height = max(fig.width, need_w), max(fig.height, need_h)
+    placed += 1
+print("   %d of %d tables checked" % (placed, len(SIZES)))
+print("done: check the diagram, then File > Export > Export as PNG")
+"""
+open(os.path.join(OUT, "workbench_fixups.py"), "w", encoding="utf-8", newline="\n").write(script)
+print(f"      {len(fk_rows)} relationships, {len(sizes)} tables sized and placed")
+
+# ------------------------------------------------------------------ 6 done
+step(6, f"wrote {os.path.relpath(OUT, ROOT)}/crossfade_schema.sql, crossfade_workbench.sql, crossfade_data.sql, workbench_fixups.py")

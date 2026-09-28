@@ -349,11 +349,11 @@ key rejects it, which is what keeps a double-counted royalty out of the ledger.
 \attr{Seconds Played}{SMALLINT UNSIGNED}{No}{No}{No}%
      {How much of the recording was actually streamed, which determines both whether the play qualifies for royalty and how strong a taste signal it carries.}
 \attr{Completed}{BIT(1)}{No}{No}{No}%
-     {Whether the listener heard the recording to its end, distinguishing a genuine listen from an abandoned one.}
+     {Whether the listener heard the recording to its end, distinguishing a genuine listen from an abandoned one. Derived: true exactly when Seconds Played equals the Duration of the recording. It is stored so that listening history can be filtered to finished plays without a join to Track, and it is set only by the procedure that records the play (I7).}
 \attr{Reaction}{ENUM(\q{saved}, \q{skipped})}{Yes}{No}{No}%
      {An explicit response from the listener where one was given, either saved or skipped, which is treated as a stronger signal than duration alone.}
 \attr{Royalty Amount}{DECIMAL(5,5)}{No}{No}{No}%
-     {The amount in United States dollars accrued to the artist for this play, fixed at the artist's rate as it stood on the date of the play.}
+     {The amount in United States dollars accrued to the artist for this play. A snapshot rather than a derived value: it is the artist's Payout Rate as it stood at the time of a qualifying play of 30 seconds or more, and zero otherwise, copied so that a later rate change never rewrites the royalty ledger (I7).}
 \end{entitytable}
 
 \begin{entitytable}
@@ -421,6 +421,7 @@ I3 & Genre ID, Top Probability, Posterior Entropy and Model Divergence on Track 
 I4 & Minimum Ambiguity does not exceed Maximum Ambiguity. & A single-row CHECK constraint on Station. \\ \hline
 I5 & A recording's Ingest Status is scored only if it has at least one Track Score. & Set in the scoring transaction that inserts the first result. \\ \hline
 I6 & A play's Station ID may refer to a station created by another listener. & Deliberately not constrained by the database: stations can be shared, so the station's Listener ID need not match the play's. Whether a listener may use a given station is a sharing permission checked by the application. \\ \hline
+I7 & Completed is true exactly when Seconds Played equals the recording's Duration, and Royalty Amount equals the artist's Payout Rate for a play of 30 seconds or more and zero otherwise. & The procedure that records a play computes both from the Track and Artist rows rather than accepting them as input, as I3 does for Track Score. Royalty Amount is computed once, when the play is recorded, and never updated. \\ \hline
 \end{longtable}
 
 \clearpage

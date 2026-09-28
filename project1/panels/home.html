@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="../../assets/site.css?v=ad177911">
+<link rel="stylesheet" href="../../assets/site.css?v=6e18ac10">
 <script src="../data/site_data.js"></script>
 <script src="../../assets/panel.js?v=24710a1b"></script>
 </head>
@@ -35,6 +35,16 @@
 
   <h2>Deliverables</h2>
   <table class="status" id="status"></table>
+  <div class="submit-box">
+    <button class="btn primary" id="make-zip" type="button">Download submission zip</button>
+    <span class="note" id="zip-note"></span>
+  </div>
+  <p class="note">The brief asks for all four deliverables in one zip named <code>project01_groupcode.zip</code>. The button builds it in your browser from the files above, so it always matches what is published. <code>python scripts/build_submission.py</code> builds and checks the same zip in <code>submission/</code>.</p>
+
+  <h2>How the physical model was built</h2>
+  <div class="prose">
+    <p>The <a href="../index.html#physical" target="_top">physical model</a> is drawn from the requirements analysis rather than by hand. <code>scripts/build_ddl.py</code> reads every table and column from the RA and writes the MySQL schema, which was tested against a MySQL-compatible server with all 401 sample rows loaded. MySQL Workbench then reverse-engineers the schema into a diagram, and <a href="../source/physical_model/workbench_fixups.py"><code>workbench_fixups.py</code></a>, the formatting script, finishes it: it sets each relationship's participation, widens every table so no name or type is cut off, expands the index lists, and lays the tables out so no line runs behind another table. The SQL and the script are in <code>source/physical_model/</code>.</p>
+  </div>
 
   <h2>Professor's feedback</h2>
   <div class="callout">
@@ -86,6 +96,56 @@
     ["requirements_analysis.pdf", "requirements"], ["conceptual_data_model.png", "conceptual"],
     ["data.xlsx", "data"], ["physical_data_model.png", "physical"]
   ];
+  // ---- submission zip: the four deliverables, top level, named per the brief
+  var sub = S.submission, btn = document.getElementById("make-zip"), note = document.getElementById("zip-note");
+  var have = sub.files.filter(function (n) { return S.status[n]; });
+  var fallback = "../submission/" + sub.name;
+  if (have.length < sub.files.length) {
+    btn.disabled = true;
+    note.textContent = have.length + " of " + sub.files.length + " deliverables present; missing: " +
+      sub.files.filter(function (n) { return !S.status[n]; }).join(", ");
+  } else {
+    note.textContent = sub.name + " \u00b7 " + sub.files.length + " files";
+  }
+  function saveBlob(blob) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = sub.name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function loadJSZip() {
+    return new Promise(function (ok, fail) {
+      if (window.JSZip) return ok(window.JSZip);
+      var s = document.createElement("script");
+      s.src = "../../assets/vendor/jszip.min.js";   // JSZip 3.10.1 (MIT), bundled with the site
+      s.onload = function () { ok(window.JSZip); };
+      s.onerror = function () { fail(new Error("the zip library did not load")); };
+      document.head.appendChild(s);
+    });
+  }
+  btn.addEventListener("click", function () {
+    btn.disabled = true; note.textContent = "Building " + sub.name + " \u2026";
+    loadJSZip().then(function (JSZip) {
+      var zip = new JSZip(), done = 0;
+      return Promise.all(sub.files.map(function (n) {
+        return fetch("../deliverables/" + n, { cache: "no-store" }).then(function (r) {
+          if (!r.ok) throw new Error(n + ": HTTP " + r.status);
+          return r.blob();
+        }).then(function (b) {
+          zip.file(n, b); done += 1;
+          note.textContent = "Added " + done + " of " + sub.files.length + " \u2026";
+        });
+      })).then(function () { return zip.generateAsync({ type: "blob", compression: "DEFLATE" }); });
+    }).then(function (blob) {
+      saveBlob(blob);
+      note.textContent = "Downloaded " + sub.name + " (" + (blob.size / 1024).toFixed(0) + " KB, " + sub.files.length + " files).";
+      btn.disabled = false;
+    }).catch(function (err) {
+      // file:// pages cannot fetch; fall back to the zip built by scripts/build_submission.py
+      note.innerHTML = "Could not build it here (" + String(err.message || err) + "). " +
+        "<a href=\"" + fallback + "\" download>Download the prebuilt copy</a> instead.";
+      btn.disabled = false;
+    });
+  });
+
   var st = document.getElementById("status");
   rows.forEach(function (r) {
     var done = !!S.status[r[0]];
