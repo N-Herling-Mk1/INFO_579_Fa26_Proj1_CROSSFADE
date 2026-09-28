@@ -220,7 +220,7 @@ CROSSFADE is a music streaming service for independent \rae{artists} in which th
 \attr{Duration}{SMALLINT UNSIGNED}{No}{No}{No}%
      {The playing length of the recording in whole seconds, used to decide whether a play qualifies for royalty and to estimate station running time.}
 \attr{Release Date}{DATE}{No}{No}{No}%
-     {The date the artist set for the recording to become available to listeners, which may be later than the date it was uploaded. It takes effect only once the recording has been scored, so a recording awaiting scoring or rejected keeps the date it was given but is not shown to listeners.}
+     {The date on which the recording became available to listeners, which may be later than the date it was uploaded.}
 \attr{Audio Checksum}{BINARY(32)}{No}{Yes}{No}%
      {The SHA-256 digest of the audio file, used to detect duplicate uploads and to confirm that the stored file has not been altered since it was scored.}
 \attr{Ingest Status}{ENUM(\q{awaiting scoring}, \q{scored}, \q{rejected})}{No}{No}{No}%
@@ -571,7 +571,6 @@ Document inventory & \pageref{sec:inv} \\ \hline
 \rowcolor{hdrgray}\textbf{Requirement} & \textbf{Required} & \textbf{This design} & \textbf{Status} & \textbf{Evidence} \\ \hline
 Non-associative entities & 5 to 7 & 6 & \textcolor{relc}{\textbf{Met}} & Table 1 \\ \hline
 Attributes, excluding primary and foreign keys & $\geq$ 20 & 38 & \textcolor{relc}{\textbf{Met}} & Table 8 \\ \hline
-Records in the non-associative entities, at least 5 in each & $\geq$ 50, $\geq$ 5 each & 54, fewest 5 & \textcolor{relc}{\textbf{Met}} & data.xlsx \\ \hline
 Many-to-many relationships resolved with an associative entity & $\geq$ 1 & 4 & \textcolor{relc}{\textbf{Met}} & Tables 3, 4, 5, 6 \\ \hline
 \end{longtable}
 
@@ -583,15 +582,9 @@ associative entities are listed separately (Table 3) and are not counted.
 14 foreign key columns (Table 6) are not counted. Played At is counted as part of Play's primary key
 and is therefore excluded as well, although it is not a foreign key.
 
-\textbf{Requirement 3.} data.xlsx holds 54 records across the six non-associative entities:
-Artist 8, Track 15, Genre 10, Listener 8, Scoring Model 5 and Station 8, so every entity has at
-least 5. The four associative entities add a further 347 rows (Track Score 27, Genre Probability
-270, Station Blend 19, Play 31), which are not counted.
-
-\textbf{Requirement 4.} Four of the nine relationships are many-to-many (Table 4). Each is
-resolved by an associative entity (Table 3) that turns it into two one-to-many identifying
-relationships (Table 5), with the primary key of the associative entity composed of the primary
-keys of the two entities it connects (Table 6).
+\textbf{Requirement 4.} Four of the nine relationships are many-to-many (Table 4), each resolved by
+an associative entity (Table 3) into two one-to-many identifying relationships (Table 5). Each key is
+formed from the keys of the entities it connects (Table 6); Play's also includes Played At.
 
 Table 8 lists every attribute on its own row with its data type, the range that type
 admits and an example value. Scoring Model values are those of a real deployed version, the
@@ -659,10 +652,8 @@ longest nine. A value that can be computed from other columns is not stored at a
 object-store key of a recording's audio and the vector-store key of a model's representation
 are both computed from the primary key, so neither has a column. Free text entered by people (names, titles, email) gets a ceiling set by policy or
 standard, since VARCHAR stores only the characters used plus a length byte. Ranges that a type cannot enforce on its own, such as a probability lying
-between zero and one, are stated in the attribute description and are declared as 16 CHECK constraints in
-the schema script from which the physical model was generated (crossfade\_schema.sql). The
-physical model diagram shows the NOT NULL, UNIQUE, primary key and foreign key constraints; MySQL
-Workbench does not display CHECK constraints or the UNSIGNED attribute in a diagram. Two types from the slides are deliberately not used:
+between zero and one, are stated in the attribute description and are enforced in the
+physical model with CHECK constraints. Two types from the slides are deliberately not used:
 TIMESTAMP, whose range ends in January 2038, well within the life of a royalty ledger, so
 DATETIME is used for moments in time. That is the one place parsimony is knowingly traded:
 the slides give DATETIME 8 bytes against TIMESTAMP's 4 (MySQL 5.6.4 and later stores DATETIME
