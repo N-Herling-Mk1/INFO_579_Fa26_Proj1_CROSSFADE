@@ -212,7 +212,7 @@ Prompted by Unit 4 assignment feedback (a fixed-length phone number should be CH
 
 ## mk14 — site banner and CROSSFADE artwork
 
-- **One banner on every top-level page** (front page, design, Projects 1 to 3): the wave and wordmark from `assets/images/CrossFade_mk1.png`, a context line, Home / Project 1 / Project 2 / Project 3 buttons and a GitHub link. The current page's button is outlined in the artwork's purple-to-gold gradient. On hover or keyboard focus a button lifts, glows and draws a gradient underline. Button subtitles hide below 1100 px wide; below 820 px the buttons move to their own row; below 420 px they form a four-column grid. Tested with no sideways scrolling from 320 to 1400 px.
+- **One banner on every top-level page** (front page, design, Projects 1 to 3): the wave and wordmark from `assets/images/CrossFade_mk1.png`, a context line, Home / Project 1 / Project 2 / Project 3 buttons and a GitHub link. The current page's button is outlined in the artwork's purple-to-gold gradient. The current page's button has the gradient border, a gradient underline and a soft glow; hovering or focusing any other button lights its border only. Button subtitles hide below 1100 px wide; below 820 px the buttons move to their own row; below 420 px they form a four-column grid. Tested with no sideways scrolling from 320 to 1400 px.
 - Written into each page by `tools/build_banner.py`, so it stays identical everywhere.
 - **Front page hero:** the CROSSFADE artwork replaces the course logo, which moves beside the course name. The favicons and the social card are unchanged.
 - Web copies cut from the 1.3 MB original: `crossfade_wave.jpg` (17 KB), `crossfade_wordmark.png` (25 KB, transparent), `crossfade_hero.jpg` (55 KB).
