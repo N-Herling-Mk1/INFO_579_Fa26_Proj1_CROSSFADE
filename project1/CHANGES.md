@@ -1,10 +1,10 @@
-# CROSSFADE — INFO 579 Project 1 — mk15
+# CROSSFADE — INFO 579 Project 1 — mk16
 
 ## Package status
 
 | Deliverable | Status |
 |---|---|
-| `requirements_analysis.pdf` | Done (mk15, 23 pp) |
+| `requirements_analysis.pdf` | Done (mk16, 23 pp) |
 | `conceptual_data_model.png` | Done (official partner version, mk8) |
 | `data.xlsx` | Done (mk6) |
 | `physical_data_model.png` | Done (mk15, MySQL Workbench) |
@@ -243,3 +243,9 @@ Prompted by Unit 4 assignment feedback (a fixed-length phone number should be CH
   Every sample row satisfies I7, checked in the database.
 - The physical model page shows the diagram, how to read it, how it was built, and the derived-column table. The Project 1 home page explains the formatting script.
 
+## mk16 — final audit fixes
+
+- Table 7 now shows Requirement 3 (54 records, fewest 5 in Scoring Model), and a Requirement 3 paragraph was added. Before this, the list went from Requirement 2 straight to Requirement 4.
+- Release Date is now described as the date the artist set, which takes effect only once the track is scored. Tracks 4830 (awaiting scoring) and 4831 (rejected) already have past dates, and the old wording contradicted them. The data dictionary text was changed to match.
+- Page 23: the CHECK sentence now names the 16 CHECK constraints in `crossfade_schema.sql` and says the Workbench diagram does not display CHECK or UNSIGNED.
+- Physical model page: the mk1 hand-drawn draft (`source/physical_model/physical_data_model_mk1.png`) can be switched on as an alternative view. The Workbench model is still the default and is the one in the zip.

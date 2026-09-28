@@ -103,7 +103,7 @@ One uploaded recording. The table holds facts about the audio, never the audio i
 
 - **Values:** `2026-02-25` to `2026-09-22` in the sample; the type allows 1000-01-01 to 9999-12-31; typical `2026-05-06`.
 - **Why this type:** A calendar day: DATE, 3 bytes.
-- **What it holds:** When listeners can first see the track. It cannot precede the artist's Joined Date or the track's first score, since a track is only streamable once scored.
+- **What it holds:** The date the artist set for listeners to first see the track. It cannot precede the artist's Joined Date, and it takes effect only once the track is scored, so a track awaiting scoring or rejected keeps its date but is not shown.
 
 ### Audio Checksum · `BINARY(32)` · UNIQUE
 

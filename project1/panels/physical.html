@@ -14,13 +14,18 @@
 <div class="panel wide">
   <h1>Physical model</h1>
   <p class="lede">MySQL Workbench EER diagram of the CROSSFADE schema: ten tables, their columns and SQL types, primary and foreign keys, unique indexes, and every relationship's cardinality and participation in crow's foot notation.</p>
+  <div class="toolbar" role="group" aria-label="Model version">
+    <button class="btn" id="v-final" aria-pressed="true">Final (submitted)</button>
+    <button class="btn" id="v-mk1" aria-pressed="false">mk1 draft</button>
+    <span class="note" id="v-note">MySQL Workbench EER diagram, as submitted in project01_info579_group_1.zip.</span>
+  </div>
   <div class="toolbar" role="group" aria-label="Zoom">
     <button class="btn" id="fit" aria-pressed="true">Fit to width</button>
     <button class="btn" id="full" aria-pressed="false">Actual size</button>
-    <a class="btn" href="../deliverables/physical_data_model.png" download>Download PNG</a>
+    <a class="btn" id="dl" href="../deliverables/physical_data_model.png" download>Download PNG</a>
     <a class="btn" href="../source/physical_model/crossfade_schema.sql" download>Download SQL</a>
   </div>
-  <div class="figure fit" id="fig"><img src="../deliverables/physical_data_model.png" alt="Physical data model of CROSSFADE in MySQL Workbench: ten tables with columns, types, keys and indexes, joined by solid identifying and dashed non-identifying relationships."></div>
+  <div class="figure fit" id="fig"><img id="pdm" src="../deliverables/physical_data_model.png" alt="Physical data model of CROSSFADE in MySQL Workbench: ten tables with columns, types, keys and indexes, joined by solid identifying and dashed non-identifying relationships."></div>
   <div class="prose">
     <h2>Reading it</h2>
     <ul>
@@ -58,6 +63,21 @@
     fit.setAttribute("aria-pressed", isFit); full.setAttribute("aria-pressed", !isFit);
   }
   fit.onclick = function () { set(true); }; full.onclick = function () { set(false); };
+  var V = {
+    final: { src: "../deliverables/physical_data_model.png",
+             alt: "Physical data model of CROSSFADE in MySQL Workbench: ten tables with columns, types, keys and indexes, joined by solid identifying and dashed non-identifying relationships.",
+             note: "MySQL Workbench EER diagram, as submitted in project01_info579_group_1.zip." },
+    mk1:   { src: "../source/physical_model/physical_data_model_mk1.png",
+             alt: "First draft (mk1) of the CROSSFADE physical data model: ten tables with PK, FK and UQ markers, SQL types with NULL or NOT NULL, and crow's foot relationships; associative tables shaded.",
+             note: "mk1 draft, hand-drawn before the Workbench build. Kept for reference; it is not the submitted model." }
+  };
+  var img = document.getElementById("pdm"), dl = document.getElementById("dl"), note = document.getElementById("v-note"),
+      bF = document.getElementById("v-final"), bM = document.getElementById("v-mk1");
+  function show(k) {
+    var v = V[k]; img.src = v.src; img.alt = v.alt; dl.href = v.src; note.textContent = v.note;
+    bF.setAttribute("aria-pressed", k === "final"); bM.setAttribute("aria-pressed", k === "mk1");
+  }
+  bF.onclick = function () { show("final"); }; bM.onclick = function () { show("mk1"); };
 })();
 </script>
 </body>

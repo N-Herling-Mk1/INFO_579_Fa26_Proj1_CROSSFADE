@@ -48,7 +48,7 @@ ENTITIES = [
   "Length in whole seconds. A play is complete when Seconds Played equals it, and it caps Seconds Played. It also lets a station estimate running time."),
  ("Release Date",
   "A calendar day: DATE, 3 bytes.",
-  "When listeners can first see the track. It cannot precede the artist's Joined Date or the track's first score, since a track is only streamable once scored."),
+  "The date the artist set for listeners to first see the track. It cannot precede the artist's Joined Date, and it takes effect only once the track is scored, so a track awaiting scoring or rejected keeps its date but is not shown."),
  ("Audio Checksum",
   "A SHA-256 digest is always exactly 32 bytes, so BINARY(32). Stored as text it would take 64 hex characters, twice the space.",
   "The digest of the audio file. Duplicate detection: identical files give identical hashes, and because the column is UNIQUE the database rejects a second upload of the same file by itself, which also blocks re-uploading someone else's track to collect its royalties. Integrity: if the stored file is later replaced or corrupted, re-hashing no longer matches, so its scores and royalties are shown to point at different audio. Limit: it catches only byte-identical copies; a re-encoded copy needs audio fingerprinting, which is out of scope. It is kept, unlike the removed location key, because it cannot be computed without reading the file."),
