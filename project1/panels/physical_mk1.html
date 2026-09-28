@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physical model mk1</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/icon-192.png">
+<link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.png">
+<link rel="stylesheet" href="../../assets/site.css?v=6e18ac10">
+</head>
+<body>
+<div class="panel wide">
+  <h1>Physical model mk1 (draft)</h1>
+  <p class="lede">The first physical data model, drawn by hand before the Workbench build. It is kept here for reference. The submitted model is the <a href="../index.html#physical" target="_top">final version</a>.</p>
+  <div class="toolbar" role="group" aria-label="Model version">
+    <a class="btn" href="../index.html#physical" target="_top">&larr; Final (submitted)</a>
+    <span class="btn" aria-pressed="true">mk1 draft</span>
+  </div>
+  <div class="toolbar" role="group" aria-label="Zoom">
+    <button class="btn" id="fit" aria-pressed="true">Fit to width</button>
+    <button class="btn" id="full" aria-pressed="false">Actual size</button>
+    <a class="btn" href="../source/physical_model/physical_data_model_mk1.png" download>Download PNG</a>
+  </div>
+  <div class="figure fit" id="fig"><img src="../source/physical_model/physical_data_model_mk1.png" alt="First draft (mk1) of the CROSSFADE physical data model: ten tables with PK, FK and UQ markers, SQL types with NULL or NOT NULL, and crow's foot relationships; associative tables shaded."></div>
+  <div class="prose">
+    <h2>What mk1 got right</h2>
+    <p>mk1 already has all ten tables, every column and type from the requirements analysis, the composite primary keys on the four associative tables, the five UNIQUE columns, and the right cardinality on 12 of its 13 relationship lines.</p>
+    <h2>What it missed, and how the final version fixes it</h2>
+    <table>
+      <tr><th>Gap in mk1</th><th>Final version</th></tr>
+      <tr><td><strong>Drawn by hand.</strong> Nothing tied it to the requirements analysis, so a type or name could drift from the document without anyone noticing.</td><td>Generated: <code>build_ddl.py</code> writes the schema from the requirements analysis, and Workbench reverse-engineers the diagram from that schema.</td></tr>
+      <tr><td><strong>Not the course notation.</strong> The PK/FK/UQ text column and the NULL/NOT NULL suffixes are not the MySQL Workbench icons used in Unit 4.</td><td>Workbench EER diagram: key icons, filled and hollow diamonds for NOT NULL and nullable, red icons for foreign keys.</td></tr>
+      <tr><td><strong>No index lists.</strong> Unit 4 shows the index that every PRIMARY KEY, FOREIGN KEY and UNIQUE constraint creates.</td><td>Every table lists PRIMARY, its <code>uq_</code> indexes and its <code>fk_</code> indexes.</td></tr>
+      <tr><td><strong>Every line solid.</strong> Identifying and non-identifying relationships look the same.</td><td>Solid lines for identifying relationships (all four associative tables), dashed for non-identifying ones.</td></tr>
+      <tr><td><strong>One wrong line end.</strong> Genre to Genre Probability shows one-or-many at the Genre Probability end. That says every genre must already have a probability row, which the conceptual model does not say and a junction table cannot enforce (Unit 4).</td><td>Zero-or-many, matching the conceptual model.</td></tr>
+      <tr><td><strong>Typos.</strong> <code>injest_status</code> for <code>ingest_status</code>; <code>NOTNULL</code> on <code>track.artist_id</code> and <code>track.release_date</code>; <code>join_date</code> where the requirements analysis says Joined Date.</td><td><code>ingest_status</code>, <code>NOT NULL</code> and <code>joined_date</code>, all taken directly from the document.</td></tr>
+      <tr><td><strong>One unmarked column.</strong> <code>artist.country</code> has neither NULL nor NOT NULL, while every other column has one.</td><td>Hollow diamond: nullable, as the requirements analysis says.</td></tr>
+      <tr><td><strong>CHECK rules nowhere.</strong> The probability, ambiguity and weight ranges exist only in the prose.</td><td>16 CHECK constraints in <a href="../source/physical_model/crossfade_schema.sql">crossfade_schema.sql</a>, tested against eight deliberately bad inserts. Workbench cannot draw them.</td></tr>
+    </table>
+  </div>
+</div>
+<script>
+(function () {
+  var fig = document.getElementById("fig"), fit = document.getElementById("fit"), full = document.getElementById("full");
+  function set(isFit) {
+    fig.classList.toggle("fit", isFit);
+    fit.setAttribute("aria-pressed", isFit); full.setAttribute("aria-pressed", !isFit);
+  }
+  fit.onclick = function () { set(true); }; full.onclick = function () { set(false); };
+})();
+</script>
+</body>
+</html>
