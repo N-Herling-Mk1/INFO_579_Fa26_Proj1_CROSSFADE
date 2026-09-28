@@ -216,4 +216,6 @@ Prompted by Unit 4 assignment feedback (a fixed-length phone number should be CH
 - Written into each page by `tools/build_banner.py`, so it stays identical everywhere.
 - **Front page hero:** the CROSSFADE artwork replaces the course logo, which moves beside the course name. The favicons and the social card are unchanged.
 - Web copies cut from the 1.3 MB original: `crossfade_wave.jpg` (17 KB), `crossfade_wordmark.png` (25 KB, transparent), `crossfade_hero.jpg` (55 KB).
+- **Banner no longer shifts between pages.** On Windows, pages long enough to scroll (front page, design) lost 15 to 17 px to the scrollbar and the Project pages did not, so the banner re-laid out whenever you moved between them. `html { scrollbar-gutter: stable; }` reserves that space on every page; measured with real scrollbars, the banner and buttons are now in identical positions on all five pages.
+- **Stale-stylesheet fix.** Every link to `site.css` and `panel.js` now carries a content hash (`site.css?v=ad177911`), written by `tools/stamp_assets.py`, so a push is seen immediately instead of after the browser's cached copy expires.
 
