@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do list</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=109b4685">
+<script src="../data/plan.js"></script>
+<script src="../../assets/panel.js?v=24710a1b"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>To-do list</h1>
+  <p class="group-line">info579_group_1 &middot; updated <span id="updated"></span></p>
+  <p class="lede">Each item lists the requirement(s) from the brief that it meets. Click a requirement to see its full wording and every item that serves it.</p>
+  <div class="toolbar">
+    <label class="note" for="req">Requirement</label>
+    <select class="filter" id="req"><option value="">All</option></select>
+    <span class="note" style="margin-left:12px">Status</span>
+    <button class="btn" type="button" data-status="" aria-pressed="true">All</button>
+    <button class="btn" type="button" data-status="open" aria-pressed="false">Open</button>
+    <button class="btn" type="button" data-status="partial" aria-pressed="false">In progress</button>
+    <button class="btn" type="button" data-status="done" aria-pressed="false">Done</button>
+    <span class="note" id="count"></span>
+  </div>
+  <div id="list"></div>
+</div>
+<script>
+(function () {
+  var P = window.PLAN, el = CF.el;
+  var LABEL = { open: "open", partial: "in progress", done: "done" };
+  document.getElementById("updated").textContent = P.updated;
+  var reqText = {}; P.requirements.forEach(function (r) { reqText[r.id] = r.text; });
+
+  var sel = document.getElementById("req");
+  P.requirements.forEach(function (r) {
+    sel.appendChild(el("option", { value: r.id, text: r.id + "  " + (r.text.length > 60 ? r.text.slice(0, 58) + "…" : r.text) }));
+  });
+
+  var list = document.getElementById("list"), items = [];
+  P.tasks.forEach(function (t) {
+    var todos = P.todos.filter(function (x) { return x.task === t.id; });
+    var head = el("div", { "class": "task-head" }, [
+      el("h2", { text: t.id + " · " + t.title }),
+      t.file ? el("span", { "class": "note", html: "<code>" + t.file + "</code> · " + t.weight + "% of the grade" }) : null
+    ]);
+    var ul = el("ul", { "class": "todos" });
+    todos.forEach(function (x) {
+      var chips = el("div", { "class": "c" }, x.reqs.map(function (r) {
+        return el("a", { "class": "chip" + (r[0] === "G" ? " g" : ""), href: "../index.html#requirements/" + r,
+          target: "_top", title: reqText[r], text: r });
+      }));
+      var li = el("li", { "class": "todo-item", id: x.id }, [
+        el("span", {}, [el("span", { "class": "mark " + x.status, text: LABEL[x.status] })]),
+        el("span", { "class": "t", text: x.title }),
+        el("span", { "class": "d", text: x.detail }),
+        chips
+      ]);
+      li._todo = x; li._group = head; ul.appendChild(li); items.push(li);
+    });
+    head._ul = ul;
+    list.appendChild(head); list.appendChild(ul);
+  });
+
+  var want = { req: "", status: "" };
+  function apply() {
+    var shown = 0, groups = {};
+    items.forEach(function (li) {
+      var x = li._todo;
+      var ok = (!want.req || x.reqs.indexOf(want.req) >= 0) && (!want.status || x.status === want.status);
+      li.classList.toggle("hidden", !ok);
+      if (ok) { shown++; groups[x.task] = true; }
+    });
+    Array.prototype.forEach.call(list.querySelectorAll(".task-head"), function (h, i) {
+      h.style.display = groups[P.tasks[i].id] ? "" : "none";
+    });
+    document.getElementById("count").textContent = shown + " of " + items.length + " items";
+  }
+  sel.addEventListener("change", function () { want.req = sel.value; apply(); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-status]"), function (b, _, all) {
+    b.addEventListener("click", function () {
+      want.status = b.dataset.status;
+      Array.prototype.forEach.call(document.querySelectorAll("[data-status]"), function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      apply();
+    });
+  });
+  // #R2.a in the URL filters to that requirement; #t2-artist scrolls to that item
+  var h = decodeURIComponent(location.hash.slice(1));
+  if (reqText[h]) { sel.value = h; want.req = h; }
+  apply();
+  if (h && document.getElementById(h)) document.getElementById(h).scrollIntoView();
+})();
+</script>
+</body>
+</html>

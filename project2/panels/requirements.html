@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requirements</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=109b4685">
+<script src="../data/plan.js"></script>
+<script src="../../assets/panel.js?v=24710a1b"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Requirements</h1>
+  <p class="group-line">From the assignment brief, numbered for cross-reference</p>
+  <p class="lede">Every requirement in the brief, with the to-do items that meet it. A requirement is met when all of its items are done.</p>
+  <table class="reqtable" id="reqs">
+    <thead><tr><th>ID</th><th>Requirement</th><th>To-do items</th><th>Status</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="note">The wording follows the brief (<a href="../index.html#brief" target="_top">Assignment brief</a>). IDs R1&ndash;R4 match the brief's four tasks; G covers the rules that apply to every deliverable.</p>
+</div>
+<script>
+(function () {
+  var P = window.PLAN, el = CF.el;
+  var body = document.querySelector("#reqs tbody");
+  P.tasks.forEach(function (t) {
+    body.appendChild(el("tr", { "class": "group" }, [el("td", { colspan: "4",
+      text: t.id + " · " + t.title + (t.file ? "  (" + t.file + ", " + t.weight + "%)" : "") })]));
+    P.requirements.filter(function (r) { return r.task === t.id; }).forEach(function (r) {
+      var todos = P.todos.filter(function (x) { return x.reqs.indexOf(r.id) >= 0; });
+      var done = todos.filter(function (x) { return x.status === "done"; }).length;
+      var any = todos.some(function (x) { return x.status !== "open"; });
+      var state = done === todos.length ? "done" : any ? "partial" : "open";
+      body.appendChild(el("tr", { id: r.id }, [
+        el("td", {}, [el("a", { "class": "chip" + (r.id[0] === "G" ? " g" : ""), href: "../index.html#todo/" + r.id, target: "_top", title: "Show only these to-dos", text: r.id })]),
+        el("td", { text: r.text }),
+        el("td", {}, todos.map(function (x) {
+          return el("div", {}, [el("a", { href: "../index.html#todo/" + x.id, target: "_top", text: x.title })]);
+        })),
+        el("td", {}, [el("span", { "class": "mark " + state, text: state === "done" ? "met" : state === "partial" ? done + "/" + todos.length + " done" : "open" })])
+      ]));
+    });
+  });
+  var h = decodeURIComponent(location.hash.slice(1));
+  if (h && document.getElementById(h)) document.getElementById(h).scrollIntoView();
+})();
+</script>
+</body>
+</html>

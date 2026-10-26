@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Project 2: SQL Database | CROSSFADE</title>
-<meta name="description" content="CROSSFADE, INFO 579 Project 2: SQL Database.">
+<meta name="description" content="CROSSFADE, INFO 579 Project 2: SQL Database. Requirements, to-do list and deliverables.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CROSSFADE">
 <meta property="og:title" content="CROSSFADE | Project 2: SQL Database">
-<meta property="og:description" content="CROSSFADE, INFO 579 Project 2: SQL Database.">
+<meta property="og:description" content="CROSSFADE, INFO 579 Project 2: SQL Database. Requirements, to-do list and deliverables.">
 <meta property="og:url" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/project2/">
 <meta property="og:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_card.png">
 <meta property="og:image:width" content="1280">
@@ -20,9 +20,11 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/site.css?v=6e18ac10">
+<script src="data/plan.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=109b4685">
 </head>
 <body>
+<div class="shell">
 <!-- BANNER:BEGIN -->
 <header class="banner">
   <a class="brand" href="../" aria-label="CROSSFADE home">
@@ -43,12 +45,63 @@
   </a>
 </header>
 <!-- BANNER:END -->
-<div class="panel">
-  <h1>Project 2: SQL Database</h1>
-  <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
-  <p class="lede">Due Nov 8, 2026 11:59 PM. This project will hold the Project 1 design built and queried as a relational database.</p>
-  <div class="callout pending"><p><strong>Not started.</strong> The assignment brief has not been posted yet. Work and deliverables will go in this folder, <code>project2/</code>, alongside a site like <a href="../project1/">Project 1's</a>.</p></div>
-  <p>The shared business and entity model are on the <a href="../design/">top-level design</a> page.</p>
+  <div class="frame">
+    <nav class="rail" aria-label="Project sections">
+      <h2>Overview</h2>
+      <button class="navbtn" data-panel="home">Home</button>
+      <h2>Plan</h2>
+      <button class="navbtn" data-panel="todo">To-do list<span class="state" id="st-todo"></span></button>
+      <button class="navbtn" data-panel="requirements">Requirements<span class="state" id="st-req"></span></button>
+      <h2>Deliverables</h2>
+      <button class="navbtn" data-panel="deliverables">Deliverables<span class="state" id="st-del"></span></button>
+      <h2>Reference</h2>
+      <button class="navbtn" data-panel="brief">Assignment brief</button>
+    </nav>
+    <main class="viewport">
+      <iframe id="view" title="Project panel" src="panels/home.html"></iframe>
+    </main>
+  </div>
 </div>
+<script>
+(function () {
+  var buttons = Array.prototype.slice.call(document.querySelectorAll(".navbtn"));
+  var view = document.getElementById("view");
+  var ids = buttons.map(function (b) { return b.dataset.panel; });
+  var P = window.PLAN;
+  if (P) {
+    var done = P.todos.filter(function (t) { return t.status === "done"; }).length;
+    var met = P.requirements.filter(function (r) {
+      var ts = P.todos.filter(function (t) { return t.reqs.indexOf(r.id) >= 0; });
+      return ts.length && ts.every(function (t) { return t.status === "done"; });
+    }).length;
+    var have = P.deliverables.filter(function (d) { return d.present; }).length;
+    [["st-todo", done, P.todos.length], ["st-req", met, P.requirements.length], ["st-del", have, P.deliverables.length]]
+      .forEach(function (x) {
+        var s = document.getElementById(x[0]);
+        s.textContent = x[1] + "/" + x[2];
+        s.className = "state " + (x[1] === x[2] ? "done" : "todo");
+      });
+  }
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () { location.hash = b.dataset.panel; });
+  });
+  function show() {
+    var id = location.hash.replace("#", "") || "home";
+    var anchor = "";
+    if (id.indexOf("/") > 0) { anchor = "#" + id.split("/")[1]; id = id.split("/")[0]; }
+    if (ids.indexOf(id) < 0) id = "home";
+    var src = "panels/" + id + ".html" + anchor;
+    if (view.getAttribute("src") !== src) view.setAttribute("src", src);
+    buttons.forEach(function (b) {
+      if (b.dataset.panel === id) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+    var label = buttons[ids.indexOf(id)].childNodes[0].textContent.trim();
+    document.title = label + " | Project 2 | CROSSFADE";
+  }
+  window.addEventListener("hashchange", show);
+  show();
+})();
+</script>
 </body>
 </html>

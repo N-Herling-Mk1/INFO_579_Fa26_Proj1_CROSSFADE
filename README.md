@@ -10,7 +10,7 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 |---|---|---|---|
 | [`design/`](design/) | Top-level design shared by all three | | |
 | [`project1/`](project1/) | Project 1: Database Design | Sep 27, 2026 | All 4 deliverables; submission zip in `project1/submission/` |
-| [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | Not started |
+| [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | Planning: to-do list, requirements and deliverables in [`project2/README.md`](project2/README.md) |
 | [`project3/`](project3/) | Project 3: NoSQL Database | Dec 13, 2026 | Not started |
 
 ## Layout

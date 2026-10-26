@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deliverables</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=109b4685">
+<script src="../data/plan.js"></script>
+<script src="../../assets/panel.js?v=24710a1b"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Deliverables</h1>
+  <p class="group-line">Due <span id="due"></span></p>
+  <p class="lede">Four SQL scripts, each worth 25%, submitted together as one zip. A file shows as present once it is in <code>project2/deliverables/</code> (the zip in <code>project2/submission/</code>) and the plan has been rebuilt.</p>
+  <table class="deltable" id="del">
+    <thead><tr><th>File</th><th>Task</th><th>Requirements</th><th>To-dos</th><th>Status</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="callout pending">
+    <p><strong>Upload.</strong> The brief says to upload to &ldquo;the assignment of project 1 Dropbox&rdquo;, which is probably a copy-paste error. Check D2L for a Project 2 Dropbox before submitting (to-do <a href="../index.html#todo/g-upload" target="_top">g-upload</a>).</p>
+  </div>
+</div>
+<script>
+(function () {
+  var P = window.PLAN, el = CF.el;
+  document.getElementById("due").textContent = P.due_text;
+  var tasks = {}; P.tasks.forEach(function (t) { tasks[t.id] = t; });
+  var body = document.querySelector("#del tbody");
+  P.deliverables.forEach(function (d) {
+    var t = tasks[d.task];
+    var todos = P.todos.filter(function (x) { return x.task === d.task || d.reqs.some(function (r) { return x.reqs.indexOf(r) >= 0; }); });
+    var done = todos.filter(function (x) { return x.status === "done"; }).length;
+    var name = d.present ? el("a", { href: "../" + d.path, download: "", text: d.file }) : el("span", { text: d.file });
+    body.appendChild(el("tr", {}, [
+      el("td", {}, [name, el("span", { "class": "sub", text: d.what })]),
+      el("td", { text: t.id + " · " + t.title + (t.weight ? " (" + t.weight + "%)" : "") }),
+      el("td", {}, d.reqs.map(function (r) {
+        return el("a", { "class": "chip" + (r[0] === "G" ? " g" : ""), href: "../index.html#requirements/" + r, target: "_top", text: r });
+      })),
+      el("td", {}, [el("a", { href: "../index.html#todo", target: "_top", text: done + " of " + todos.length + " done" })]),
+      el("td", {}, [el("span", { "class": "mark " + (d.present ? "done" : "open"), text: d.present ? "present" : "not yet" })])
+    ]));
+  });
+})();
+</script>
+</body>
+</html>
