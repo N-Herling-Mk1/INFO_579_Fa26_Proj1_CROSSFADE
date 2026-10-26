@@ -175,7 +175,9 @@ window.PLAN = {
     "R1.3"
    ],
    "title": "Merge the Project 1 schema and data into database_implementation.sql",
-   "detail": "Sources already exist: project1/source/physical_model/crossfade_schema.sql (10 tables with PK, FK, UNIQUE and CHECK) and crossfade_data.sql (401 rows). Both load cleanly on MySQL 8.0.46 (tested Oct 26). Generate the merged script from build_ddl.py, not by hand, and use the version with CHECK constraints, not the Workbench copy."
+   "detail": "Sources already exist: project1/source/physical_model/crossfade_schema.sql (10 tables with PK, FK, UNIQUE and CHECK) and crossfade_data.sql (401 rows). Both load cleanly on MySQL 8.0.46 (tested Oct 26). Generate the merged script from build_ddl.py, not by hand, and use the version with CHECK constraints, not the Workbench copy.",
+   "phase": 1,
+   "blocked_by": []
   },
   {
    "id": "t1-comments",
@@ -186,7 +188,24 @@ window.PLAN = {
     "G2"
    ],
    "title": "Purpose comment before every CREATE TABLE and INSERT",
-   "detail": "Take the text from the requirements analysis entity descriptions so each table is justified by the business plan."
+   "detail": "Take the text from the requirements analysis entity descriptions so each table is justified by the business plan.",
+   "phase": 1,
+   "blocked_by": []
+  },
+  {
+   "id": "t1-env",
+   "task": "T1",
+   "status": "open",
+   "reqs": [
+    "R1.1",
+    "R1.2"
+   ],
+   "title": "Load it on a MySQL 8 that both of us use",
+   "detail": "Local server or Workbench, same version for both of us, so every later script is tested against the same database. Everything in Tasks 2 to 4 waits on this.",
+   "phase": 1,
+   "blocked_by": [
+    "t1-merge"
+   ]
   },
   {
    "id": "t2-artist",
@@ -197,7 +216,11 @@ window.PLAN = {
     "R2.a"
    ],
    "title": "artist: roster profile with tenure and payout",
-   "detail": "Single-row functions: DATEDIFF for days since joining, CONCAT/UPPER for the display line, ROUND(payout_rate * 1000, 2) for payout per 1,000 qualifying plays."
+   "detail": "Single-row functions: DATEDIFF for days since joining, CONCAT/UPPER for the display line, ROUND(payout_rate * 1000, 2) for payout per 1,000 qualifying plays.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-track",
@@ -209,7 +232,11 @@ window.PLAN = {
     "R2.d"
    ],
    "title": "track: newest releases in the catalogue",
-   "detail": "ORDER BY release_date DESC with LIMIT N, duration shown as mm:ss. This is the 'new uploads' shelf the business plan says is as findable as a hit."
+   "detail": "ORDER BY release_date DESC with LIMIT N, duration shown as mm:ss. This is the 'new uploads' shelf the business plan says is as findable as a hit.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-genre",
@@ -220,7 +247,11 @@ window.PLAN = {
     "R2.e"
    ],
    "title": "genre: reference list with a description fallback",
-   "detail": "IFNULL on the optional description. A 10-row lookup table risks looking trivial (G3), so give it a business reason, e.g. the label set every probability distribution is spread over."
+   "detail": "IFNULL on the optional description. A 10-row lookup table risks looking trivial (G3), so give it a business reason, e.g. the label set every probability distribution is spread over.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-listener",
@@ -231,7 +262,11 @@ window.PLAN = {
     "R2.b"
    ],
    "title": "listener: accounts by plan tier",
-   "detail": "COUNT, MIN(signup_date) and average tenure, GROUP BY plan_tier. This is the subscriber mix behind revenue."
+   "detail": "COUNT, MIN(signup_date) and average tenure, GROUP BY plan_tier. This is the subscriber mix behind revenue.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-model",
@@ -242,7 +277,11 @@ window.PLAN = {
     "R2.c"
    ],
    "title": "scoring_model: deployed model leaderboard",
-   "detail": "Rank model versions by holdout_accuracy and compare concat vs gated fusion. This shows which model a new station should default to."
+   "detail": "Rank model versions by holdout_accuracy and compare concat vs gated fusion. This shows which model a new station should default to.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-station",
@@ -253,7 +292,11 @@ window.PLAN = {
     "R2.e"
    ],
    "title": "station: classify each ambiguity window",
-   "detail": "CASE on (maximum_ambiguity - minimum_ambiguity) gives narrow, mid or wide. This is how adventurous each listener's station is."
+   "detail": "CASE on (maximum_ambiguity - minimum_ambiguity) gives narrow, mid or wide. This is how adventurous each listener's station is.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-score",
@@ -264,7 +307,11 @@ window.PLAN = {
     "R2.b"
    ],
    "title": "track_score: ambiguity summary per scoring model",
-   "detail": "AVG(posterior_entropy), MAX(model_divergence) and COUNT per model_id. Included so every table other than the two pure link tables gets its own query."
+   "detail": "AVG(posterior_entropy), MAX(model_divergence) and COUNT per model_id. Included so every table other than the two pure link tables gets its own query.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-play",
@@ -276,7 +323,11 @@ window.PLAN = {
     "R2.e"
    ],
    "title": "play: royalty and completion ledger",
-   "detail": "SUM(royalty_amount), completion rate, and saved vs skipped counts via IF/CASE, per track or month. Included so every table other than the two pure link tables gets its own query."
+   "detail": "SUM(royalty_amount), completion rate, and saved vs skipped counts via IF/CASE, per track or month. Included so every table other than the two pure link tables gets its own query.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t2-file",
@@ -287,7 +338,18 @@ window.PLAN = {
     "R2.0"
    ],
    "title": "Assemble single_table.sql and check coverage",
-   "detail": "One query per non-associative table, 8 in all: artist, track, genre, listener, scoring_model, station, track_score, play. Requirements (a) to (e) must each appear at least once."
+   "detail": "One query per non-associative table, 8 in all: artist, track, genre, listener, scoring_model, station, track_score, play. Requirements (a) to (e) must each appear at least once.",
+   "phase": 2,
+   "blocked_by": [
+    "t2-artist",
+    "t2-track",
+    "t2-genre",
+    "t2-listener",
+    "t2-model",
+    "t2-station",
+    "t2-score",
+    "t2-play"
+   ]
   },
   {
    "id": "t3-inner",
@@ -297,7 +359,11 @@ window.PLAN = {
     "R3.1"
    ],
    "title": "INNER JOIN: each station's genre recipe",
-   "detail": "station INNER JOIN station_blend INNER JOIN genre, ordered by weight. Station Blend is a pure link table: two foreign keys and a weight. Alternative: track_score + genre_probability + genre."
+   "detail": "station INNER JOIN station_blend INNER JOIN genre, ordered by weight. Station Blend is a pure link table: two foreign keys and a weight. Alternative: track_score + genre_probability + genre.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t3-left",
@@ -307,7 +373,11 @@ window.PLAN = {
     "R3.2"
    ],
    "title": "LEFT OUTER JOIN: catalogue with no plays yet",
-   "detail": "track LEFT JOIN play (with artist). Finds tracks never streamed, which is the artist-exposure gap. The sample has 4. Alternatives: scoring_model LEFT JOIN track_score (1 unused model), listener LEFT JOIN station (1 listener with no station)."
+   "detail": "track LEFT JOIN play (with artist). Finds tracks never streamed, which is the artist-exposure gap. The sample has 4. Alternatives: scoring_model LEFT JOIN track_score (1 unused model), listener LEFT JOIN station (1 listener with no station).",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t3-set",
@@ -317,7 +387,12 @@ window.PLAN = {
     "R3.3"
    ],
    "title": "Set operation: tracks saved but never skipped",
-   "detail": "Saved EXCEPT skipped. EXCEPT needs MySQL 8.0.31 or later. If the grader's version is unknown, use a UNION form instead (e.g. tracks surfaced by a station UNION tracks played without one)."
+   "detail": "Saved EXCEPT skipped. EXCEPT needs MySQL 8.0.31 or later, so this waits on g-version. If the grader's version is older or unknown, use a UNION form instead (e.g. tracks surfaced by a station UNION tracks played without one).",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env",
+    "g-version"
+   ]
   },
   {
    "id": "t3-sub",
@@ -327,7 +402,11 @@ window.PLAN = {
     "R3.4"
    ],
    "title": "Subquery with a multi-row operator",
-   "detail": "IN, ANY, ALL or EXISTS over a multi-row subquery. Example: tracks whose posterior entropy is above ALL scores in another genre, or listeners who played any track IN a given station's blend."
+   "detail": "IN, ANY, ALL or EXISTS over a multi-row subquery. Example: tracks whose posterior entropy is above ALL scores in another genre, or listeners who played any track IN a given station's blend.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t3-with",
@@ -337,7 +416,11 @@ window.PLAN = {
     "R3.5"
    ],
    "title": "WITH: artist royalty totals against the platform mean",
-   "detail": "A CTE sums royalty_amount per artist; the outer query compares each artist with the average and ranks them."
+   "detail": "A CTE sums royalty_amount per artist; the outer query compares each artist with the average and ranks them.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t3-file",
@@ -347,7 +430,15 @@ window.PLAN = {
     "R3.6"
    ],
    "title": "Assemble multiple_table.sql",
-   "detail": "The five queries in order, each with its purpose comment."
+   "detail": "The five queries in order, each with its purpose comment.",
+   "phase": 2,
+   "blocked_by": [
+    "t3-inner",
+    "t3-left",
+    "t3-set",
+    "t3-sub",
+    "t3-with"
+   ]
   },
   {
    "id": "t4-royalty",
@@ -357,7 +448,11 @@ window.PLAN = {
     "R4.1"
    ],
    "title": "Function fn_royalty(track_id, seconds_played)",
-   "detail": "Returns the artist's payout_rate if 30 or more seconds were played, otherwise 0. This is integrity rule I7 from the requirements analysis."
+   "detail": "Returns the artist's payout_rate if 30 or more seconds were played, otherwise 0. This is integrity rule I7 from the requirements analysis.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t4-record",
@@ -367,7 +462,11 @@ window.PLAN = {
     "R4.1"
    ],
    "title": "Procedure sp_record_play(...)",
-   "detail": "Inserts one play, derives completed (seconds_played = duration) and royalty_amount through fn_royalty, so the stored values cannot drift."
+   "detail": "Inserts one play, derives completed (seconds_played = duration) and royalty_amount through fn_royalty, so the stored values cannot drift.",
+   "phase": 2,
+   "blocked_by": [
+    "t4-royalty"
+   ]
   },
   {
    "id": "t4-queue",
@@ -377,7 +476,11 @@ window.PLAN = {
     "R4.1"
    ],
    "title": "Procedure sp_station_queue(station_id, n)",
-   "detail": "Returns the top N tracks matching the station's genre blend and ambiguity window, scored by the station's model. This is the core product feature. Alternative: sp_artist_statement(artist_id, from, to)."
+   "detail": "Returns the top N tracks matching the station's genre blend and ambiguity window, scored by the station's model. This is the core product feature. Alternative: sp_artist_statement(artist_id, from, to).",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "t4-file",
@@ -387,7 +490,13 @@ window.PLAN = {
     "R4.2"
    ],
    "title": "Assemble routines.sql",
-   "detail": "DELIMITER blocks, DETERMINISTIC or READS SQL DATA declared on functions, and a short demo CALL or SELECT for each routine."
+   "detail": "DELIMITER blocks, DETERMINISTIC or READS SQL DATA declared on functions, and a short demo CALL or SELECT for each routine.",
+   "phase": 2,
+   "blocked_by": [
+    "t4-royalty",
+    "t4-record",
+    "t4-queue"
+   ]
   },
   {
    "id": "g-comments",
@@ -398,7 +507,11 @@ window.PLAN = {
     "G2"
    ],
    "title": "Purpose comment on every statement, query and routine",
-   "detail": "Each comment says which business question it answers, not just what the SQL does."
+   "detail": "Each comment says which business question it answers, not just what the SQL does.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-comments"
+   ]
   },
   {
    "id": "g-review",
@@ -408,7 +521,14 @@ window.PLAN = {
     "G3"
    ],
    "title": "Review pass for trivial or generic queries",
-   "detail": "No bare SELECT * and no query that would fit any database. Each one uses something specific to CROSSFADE."
+   "detail": "No bare SELECT * and no query that would fit any database. Each one uses something specific to CROSSFADE.",
+   "phase": 3,
+   "blocked_by": [
+    "t2-file",
+    "t3-file",
+    "t4-file",
+    "g-comments"
+   ]
   },
   {
    "id": "g-harness",
@@ -421,7 +541,11 @@ window.PLAN = {
     "R4.2"
    ],
    "title": "Test harness: run all four scripts on a fresh MySQL 8",
-   "detail": "Runs implementation, single-table, multiple-table, then routines. Fails on any error or empty result set. Prints progress per script."
+   "detail": "Runs implementation, single-table, multiple-table, then routines. Fails on any error or empty result set. Prints progress per script.",
+   "phase": 2,
+   "blocked_by": [
+    "t1-env"
+   ]
   },
   {
    "id": "g-zip",
@@ -431,7 +555,12 @@ window.PLAN = {
     "G4"
    ],
    "title": "Build project02_info579_group_1.zip",
-   "detail": "Built from project2/deliverables/ only, with the four .sql files at the top level, as in Project 1's build_submission.py."
+   "detail": "Built from project2/deliverables/ only, with the four .sql files at the top level, as in Project 1's build_submission.py.",
+   "phase": 3,
+   "blocked_by": [
+    "g-review",
+    "g-harness"
+   ]
   },
   {
    "id": "g-upload",
@@ -441,7 +570,23 @@ window.PLAN = {
     "G5"
    ],
    "title": "Confirm the Dropbox and upload",
-   "detail": "The brief says to upload to 'the assignment of project 1 Dropbox', which is probably a copy-paste error. Check D2L for a Project 2 Dropbox before submitting."
+   "detail": "The brief says to upload to 'the assignment of project 1 Dropbox', which is probably a copy-paste error. Check D2L for a Project 2 Dropbox before submitting.",
+   "phase": 3,
+   "blocked_by": [
+    "g-zip"
+   ]
+  },
+  {
+   "id": "g-version",
+   "task": "G",
+   "status": "open",
+   "reqs": [
+    "R3.3"
+   ],
+   "title": "Find out the grader's MySQL version",
+   "detail": "Decides whether the set-operation query can use EXCEPT, which needs MySQL 8.0.31 or later, or has to use UNION.",
+   "phase": 1,
+   "blocked_by": []
   },
   {
    "id": "g-split",
@@ -451,7 +596,9 @@ window.PLAN = {
     "G6"
    ],
    "title": "Split the work with Nidhi and set internal dates",
-   "detail": "Leave at least two days before Nov 8 for the harness run and the review pass."
+   "detail": "Task 1 needs no split. Once it loads, Tasks 2, 3 and 4 can run in parallel, one person per script. Leave at least two days before Nov 8 for the harness run and the review pass.",
+   "phase": 1,
+   "blocked_by": []
   }
  ],
  "deliverables": [
@@ -522,5 +669,98 @@ window.PLAN = {
    "path": "submission/project02_info579_group_1.zip"
   }
  ],
- "feedback": "The only deduction in Project 1 was the conceptual model (9/10: many-to-many relationships not drawn). Project 2 has no conceptual-model deliverable, so nothing carries over. The schema and sample data are used as graded."
+ "feedback": "The only deduction in Project 1 was the conceptual model (9/10: many-to-many relationships not drawn). Project 2 has no conceptual-model deliverable, so nothing carries over. The schema and sample data are used as graded.",
+ "phases": [
+  {
+   "id": 1,
+   "title": "Start here",
+   "text": "Everything in Tasks 2 to 4 runs against the loaded database, so nothing can be written or tested until database_implementation.sql loads on a MySQL 8 both of us use. The split and the grader's MySQL version are settled now because they shape the later scripts."
+  },
+  {
+   "id": 2,
+   "title": "In parallel",
+   "text": "Once Task 1 loads, the work fans out: one person per script for Tasks 2, 3 and 4. The test harness starts here too, because it is what tells us each script still runs from a fresh database."
+  },
+  {
+   "id": 3,
+   "title": "Close-out",
+   "text": "Review every query for a business reason and for anything trivial, build the zip from the deliverables folder, and upload. Leave at least two days before Nov 8."
+  }
+ ],
+ "qa": [
+  {
+   "date": "2026-10-26",
+   "q": [
+    "What has to be done first, before the project can move forward?",
+    "Is this project almost entirely built upon writing .sql scripts? Is there any additional front-end work to do?"
+   ],
+   "a": [
+    {
+     "p": "**What has to happen first:** `database_implementation.sql`. The other three scripts all run against the loaded database, so nothing can be written or tested until it exists. It's close: the schema and the 401 inserts already exist and load cleanly. What's left:"
+    },
+    {
+     "ol": [
+      "Generate the merged script from `build_ddl.py`, with a purpose comment before each CREATE TABLE and INSERT.",
+      "Get it loading on a MySQL 8 you and Nidhi both use (local server or Workbench), so you're testing on the same thing.",
+      {
+       "text": "Settle two small things now, because they shape the later scripts:",
+       "ul": [
+        "**Who writes what.** Task 1 needs no split. Once it loads, Tasks 2, 3 and 4 can run in parallel, one person per script.",
+        "**The grader's MySQL version.** It decides whether the set-operation query can use EXCEPT, which needs 8.0.31 or later."
+       ]
+      }
+     ]
+    },
+    {
+     "p": "After that the work fans out. The test harness belongs early too: it's what tells you each script still runs from a fresh database."
+    },
+    {
+     "p": "**Is it all SQL?** Yes. The graded deliverables are four `.sql` files in a zip, and the brief asks for no front end. The grade rests on two things:"
+    },
+    {
+     "ul": [
+      "whether each query meets its requirement;",
+      "whether it's justified by the business plan and is non-trivial."
+     ]
+    },
+    {
+     "p": "The second is where points are actually at risk, so that's where the time should go."
+    },
+    {
+     "p": "**Front-end work:** none is required. The only optional work is showing the finished scripts on the Project 2 site, the way Project 1 showed its deliverables: each query with its purpose comment and the result it returns on the sample data. It earns no points, so it's only worth doing after the scripts are done, and it's cheap at that point because the harness already produces the results."
+    }
+   ]
+  }
+ ],
+ "order": [
+  "t1-merge",
+  "t1-comments",
+  "t1-env",
+  "g-version",
+  "g-split",
+  "t2-artist",
+  "t2-track",
+  "t2-genre",
+  "t2-listener",
+  "t2-model",
+  "t2-station",
+  "t2-score",
+  "t2-play",
+  "t2-file",
+  "t3-inner",
+  "t3-left",
+  "t3-set",
+  "t3-sub",
+  "t3-with",
+  "t3-file",
+  "t4-royalty",
+  "t4-record",
+  "t4-queue",
+  "t4-file",
+  "g-comments",
+  "g-harness",
+  "g-review",
+  "g-zip",
+  "g-upload"
+ ]
 };

@@ -345,6 +345,7 @@ a.chip:hover { border-color: var(--cyan); }
 .mark { display: inline-block; min-width: 96px; white-space: nowrap; font: 12px/1.6 var(--mono); text-align: center; border-radius: 3px; padding: 0 6px; border: 1px solid; }
 .mark.done { color: #2e8b57; border-color: #9fd3b5; background: #eef8f2; }
 .mark.partial { color: #a46a0c; border-color: #efd7a8; background: var(--amber-wash); }
+.mark.ready { color: var(--cyan); border-color: #b9dcec; background: var(--cyan-wash); }
 .mark.open { color: var(--ink-2); border-color: var(--rule); background: #f6f8fa; }
 .progress { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 4px 0 20px; font: 14px var(--mono); color: var(--ink-2); }
 .progress b { font: 600 22px/1 var(--display); color: var(--ink); margin-right: 6px; }
@@ -358,6 +359,9 @@ a.chip:hover { border-color: var(--cyan); }
 .todo-item .d { grid-column: 2; color: var(--ink-2); font-size: 15px; max-width: 78ch; }
 .todo-item .c { grid-column: 2; margin-top: 2px; }
 .todo-item.hidden { display: none; }
+.qa { border: 1px solid var(--rule); border-left: 3px solid var(--cyan); padding: 4px 20px 8px; margin: 12px 0 24px; max-width: 78ch; }
+.qa-q { border-bottom: 1px solid var(--grid); margin: 0 0 8px; padding: 10px 0 6px; }
+.qa-q p { font-weight: 600; margin: 4px 0; }
 .todo-item .d, .todo-item .t { overflow-wrap: anywhere; }
 .deltable td:nth-child(4) { white-space: nowrap; }
 .reqtable, .deltable { border-collapse: collapse; width: 100%; font-size: 15px; }

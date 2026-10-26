@@ -6,7 +6,7 @@
 <title>To-do list</title>
 <link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
-<link rel="stylesheet" href="../../assets/site.css?v=109b4685">
+<link rel="stylesheet" href="../../assets/site.css?v=d0a396a4">
 <script src="../data/plan.js"></script>
 <script src="../../assets/panel.js?v=24710a1b"></script>
 </head>
@@ -56,6 +56,10 @@
         el("span", {}, [el("span", { "class": "mark " + x.status, text: LABEL[x.status] })]),
         el("span", { "class": "t", text: x.title }),
         el("span", { "class": "d", text: x.detail }),
+        el("div", { "class": "c note" }, ["phase " + x.phase + (x.blocked_by.length ? " \u00b7 waits on " : " \u00b7 waits on nothing")]
+          .concat(x.blocked_by.map(function (b, n) {
+            return el("span", {}, [n ? ", " : "", el("a", { href: "#" + b, text: b })]);
+          }))),
         chips
       ]);
       li._todo = x; li._group = head; ul.appendChild(li); items.push(li);

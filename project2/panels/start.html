@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start here</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=d0a396a4">
+<script src="../data/plan.js"></script>
+<script src="../../assets/panel.js?v=24710a1b"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Start here</h1>
+  <p class="group-line">What has to be done first, and what waits on what</p>
+  <p class="lede">Phase 1 unblocks everything else. Within a phase, items are listed in an order that works; <em>waits on</em> names the to-dos that must be finished first.</p>
+  <div id="phases"></div>
+
+  <h2 id="qa-head">Q&amp;A</h2>
+  <div id="qa"></div>
+</div>
+<script>
+(function () {
+  var P = window.PLAN, el = CF.el;
+  var LABEL = { open: "open", partial: "in progress", done: "done" };
+  var todo = {}; P.todos.forEach(function (t) { todo[t.id] = t; });
+  function link(id, text) { return el("a", { href: "../index.html#todo/" + id, target: "_top", text: text || id }); }
+
+  var box = document.getElementById("phases");
+  P.phases.forEach(function (ph) {
+    var ids = P.order.filter(function (i) { return todo[i].phase === ph.id; });
+    var done = ids.filter(function (i) { return todo[i].status === "done"; }).length;
+    var ready = function (t) { return t.blocked_by.every(function (b) { return todo[b].status === "done"; }); };
+    box.appendChild(el("div", { "class": "task-head" }, [
+      el("h2", { text: "Phase " + ph.id + " · " + ph.title }),
+      el("span", { "class": "note", text: done + " of " + ids.length + " done" })
+    ]));
+    box.appendChild(el("p", { "class": "prose", text: ph.text }));
+    var ul = el("ul", { "class": "todos" });
+    ids.forEach(function (i) {
+      var t = todo[i];
+      var waits = t.blocked_by.length
+        ? el("div", { "class": "c note" }, ["waits on "].concat(t.blocked_by.map(function (b, n) {
+            var a = link(b, todo[b].title); if (todo[b].status === "done") a.style.textDecoration = "line-through";
+            return n ? el("span", {}, [" · ", a]) : a;
+          })))
+        : el("div", { "class": "c note", text: "waits on nothing: can start now" });
+      var state = t.status !== "open" ? t.status : (ready(t) ? "ready" : "open");
+      ul.appendChild(el("li", { "class": "todo-item" }, [
+        el("span", {}, [el("span", { "class": "mark " + state, text: state === "ready" ? "ready" : LABEL[t.status] })]),
+        el("span", { "class": "t" }, [link(i, t.title)]),
+        waits
+      ]));
+    });
+    box.appendChild(ul);
+  });
+
+  // Q&A: blocks of {p}, {ol}, {ul}; inline `code` and **bold**
+  function inline(s) {
+    var esc = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return esc.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  }
+  function list(kind, items) {
+    return el(kind, {}, items.map(function (it) {
+      if (typeof it === "string") return el("li", { html: inline(it) });
+      return el("li", {}, [el("span", { html: inline(it.text) }), it.ul ? list("ul", it.ul) : null]);
+    }));
+  }
+  var qa = document.getElementById("qa");
+  (P.qa || []).forEach(function (x) {
+    var card = el("div", { "class": "qa prose" });
+    card.appendChild(el("div", { "class": "qa-q" }, [el("span", { "class": "note", text: x.date })]
+      .concat(x.q.map(function (q) { return el("p", { text: q }); }))));
+    x.a.forEach(function (b) {
+      if (b.p) card.appendChild(el("p", { html: inline(b.p) }));
+      if (b.ol) card.appendChild(list("ol", b.ol));
+      if (b.ul) card.appendChild(list("ul", b.ul));
+    });
+    qa.appendChild(card);
+  });
+  if (!(P.qa || []).length) document.getElementById("qa-head").style.display = "none";
+})();
+</script>
+</body>
+</html>

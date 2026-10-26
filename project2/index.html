@@ -21,7 +21,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
 <script src="data/plan.js"></script>
-<link rel="stylesheet" href="../assets/site.css?v=109b4685">
+<link rel="stylesheet" href="../assets/site.css?v=d0a396a4">
 </head>
 <body>
 <div class="shell">
@@ -50,6 +50,7 @@
       <h2>Overview</h2>
       <button class="navbtn" data-panel="home">Home</button>
       <h2>Plan</h2>
+      <button class="navbtn" data-panel="start">Start here<span class="state" id="st-start"></span></button>
       <button class="navbtn" data-panel="todo">To-do list<span class="state" id="st-todo"></span></button>
       <button class="navbtn" data-panel="requirements">Requirements<span class="state" id="st-req"></span></button>
       <h2>Deliverables</h2>
@@ -75,7 +76,9 @@
       return ts.length && ts.every(function (t) { return t.status === "done"; });
     }).length;
     var have = P.deliverables.filter(function (d) { return d.present; }).length;
-    [["st-todo", done, P.todos.length], ["st-req", met, P.requirements.length], ["st-del", have, P.deliverables.length]]
+    var p1 = P.todos.filter(function (t) { return t.phase === 1; });
+    var p1done = p1.filter(function (t) { return t.status === "done"; }).length;
+    [["st-start", p1done, p1.length], ["st-todo", done, P.todos.length], ["st-req", met, P.requirements.length], ["st-del", have, P.deliverables.length]]
       .forEach(function (x) {
         var s = document.getElementById(x[0]);
         s.textContent = x[1] + "/" + x[2];
