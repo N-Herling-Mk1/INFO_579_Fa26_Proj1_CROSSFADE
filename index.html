@@ -20,7 +20,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/site.css?v=d0a396a4">
+<link rel="stylesheet" href="assets/site.css?v=5f5f8128">
 <script src="project1/data/site_data.js"></script>
 </head>
 <body>
@@ -44,56 +44,274 @@
   </a>
 </header>
 <!-- BANNER:END -->
-<main class="splash">
-  <section class="splash-hero">
+<main class="home">
+  <div class="home-art">
     <img class="hero-art" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="CROSSFADE artwork: a scattered violet and blue signal converging into a single gold waveform above the word crossfade">
-    <div>
-      <h1>CROSSFADE</h1>
-      <p>A streaming service for independent artists, indexed by where a track sits between genres. One business, carried through the course's three projects: designed, then built as an SQL database, then as a NoSQL database.</p>
-      <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
-      <span class="course-badge"><img src="assets/images/INFO_579_logo.png" width="424" height="480" alt="INFO 579 course logo"><span class="group-line" style="margin:0">INFO 579: SQL/NoSQL Databases</span></span>
-    </div>
+  </div>
+
+  <section class="home-head">
+    <h1>CROSSFADE</h1>
+    <p>A streaming service for independent artists, indexed by where a track sits between genres. One business, carried through the course's three projects: designed, then built as an SQL database, then as a NoSQL database.</p>
+    <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
+    <span class="course-badge"><img src="assets/images/INFO_579_logo.png" width="424" height="480" alt="INFO 579 course logo"><span class="group-line">INFO 579: SQL/NoSQL Databases</span></span>
   </section>
 
-  <h2>Projects</h2>
-  <div class="cards">
-    <a class="card" href="project1/">
-      <span class="num">PROJECT 1</span>
-      <span class="title">Database Design</span>
-      <span class="desc">Requirements analysis, conceptual model, sample data and physical model.</span>
-      <span class="meta"><span>Due Sep 27, 2026</span><span id="p1-status">&nbsp;</span></span>
+  <nav class="home-rail" aria-label="Quick access">
+    <a class="tile" href="#p1" data-view="p1">
+      <span class="tile-num">01</span>
+      <span class="tile-label">Project 1</span>
+      <span class="tile-sub">Instructions and the completed submission</span>
     </a>
-    <a class="card" href="project2/" style="--accent: var(--g4)">
-      <span class="num">PROJECT 2</span>
-      <span class="title">SQL Database</span>
-      <span class="desc">The Project 1 design built and queried as a relational database.</span>
-      <span class="meta"><span>Due Nov 8, 2026</span><span class="todo">Planning</span></span>
+    <a class="tile" href="#data" data-view="data">
+      <span class="tile-num">02</span>
+      <span class="tile-label">Project 1 data</span>
+      <span class="tile-sub">Sample data download: data.xlsx + one CSV per table</span>
     </a>
-    <a class="card" href="project3/" style="--accent: var(--g8)">
-      <span class="num">PROJECT 3</span>
-      <span class="title">NoSQL Database</span>
-      <span class="desc">The same business modelled in a NoSQL database.</span>
-      <span class="meta"><span>Due Dec 13, 2026</span><span class="todo">Not started</span></span>
+    <a class="tile" href="#brief" data-view="brief">
+      <span class="tile-num">03</span>
+      <span class="tile-label">Project 2 brief</span>
+      <span class="tile-sub">Assignment instructions (PDF)</span>
     </a>
-  </div>
+  </nav>
 
-  <h2>Shared</h2>
-  <div class="cards">
-    <a class="card" href="design/" style="--accent: var(--ink-2)">
-      <span class="num">DESIGN</span>
-      <span class="title">Top-level design</span>
-      <span class="desc">The business, its ten entities, and how each project builds on the last.</span>
-      <span class="meta"><span>All projects</span><span></span></span>
-    </a>
-  </div>
+  <section class="home-view">
+
+    <!-- ===================================================== default: projects -->
+    <div class="view" id="view-projects">
+      <h2>Projects</h2>
+      <div class="cards">
+        <a class="card" href="project1/">
+          <span class="num">PROJECT 1</span>
+          <span class="title">Database Design</span>
+          <span class="desc">Requirements analysis, conceptual model, sample data and physical model.</span>
+          <span class="meta"><span>Due Sep 27, 2026</span><span id="p1-status">&nbsp;</span></span>
+        </a>
+        <a class="card" href="project2/" style="--accent: var(--g4)">
+          <span class="num">PROJECT 2</span>
+          <span class="title">SQL Database</span>
+          <span class="desc">The Project 1 design built and queried as a relational database.</span>
+          <span class="meta"><span>Due Nov 8, 2026</span><span id="p2-status" class="todo">0/4 files</span></span>
+        </a>
+        <a class="card" href="project3/" style="--accent: var(--g8)">
+          <span class="num">PROJECT 3</span>
+          <span class="title">NoSQL Database</span>
+          <span class="desc">The same business modelled in a NoSQL database.</span>
+          <span class="meta"><span>Due Dec 13, 2026</span><span class="todo">Not started</span></span>
+        </a>
+      </div>
+
+      <h2>Shared</h2>
+      <div class="cards">
+        <a class="card" href="design/" style="--accent: var(--ink-2)">
+          <span class="num">DESIGN</span>
+          <span class="title">Top-level design</span>
+          <span class="desc">The business, its ten entities, and how each project builds on the last.</span>
+          <span class="meta"><span>All projects</span><span></span></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ===================================================== 01: project 1 -->
+    <div class="view" id="view-p1" hidden>
+      <a class="back" href="#">&larr; Projects</a>
+      <h2>Project 1 &middot; Database Design</h2>
+      <p class="note">Graded submission, due Sep 27, 2026. Every file below is the version handed in.</p>
+
+      <h3>Instructions</h3>
+      <table class="files">
+        <tbody>
+          <tr id="p1-brief-row">
+            <td><code>info579_project01.pdf</code><span class="sub">Project 1 assignment brief</span></td>
+            <td class="size">&nbsp;</td>
+            <td class="acts"><span class="mark open" id="p1-brief-state">not in repo yet</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Completed submission</h3>
+      <table class="files">
+        <tbody>
+          <tr>
+            <td><code>requirements_analysis.pdf</code><span class="sub">Requirements analysis: business plan, entities, attributes, relationships</span></td>
+            <td class="size">735 KB</td>
+            <td class="acts"><a class="btn" href="project1/#requirements">View</a><a class="btn" href="project1/deliverables/requirements_analysis.pdf" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>conceptual_data_model.png</code><span class="sub">Conceptual data model</span></td>
+            <td class="size">139 KB</td>
+            <td class="acts"><a class="btn" href="project1/#conceptual">View</a><a class="btn" href="project1/deliverables/conceptual_data_model.png" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>data.xlsx</code><span class="sub">Sample data, 10 tables, 401 rows</span></td>
+            <td class="size">20 KB</td>
+            <td class="acts"><a class="btn" href="project1/#data">View</a><a class="btn" href="project1/deliverables/data.xlsx" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>physical_data_model.png</code><span class="sub">Physical data model</span></td>
+            <td class="size">122 KB</td>
+            <td class="acts"><a class="btn" href="project1/#physical">View</a><a class="btn" href="project1/deliverables/physical_data_model.png" download>Download</a></td>
+          </tr>
+          <tr class="total">
+            <td><code>project01_info579_group_1.zip</code><span class="sub">The four files above, as uploaded to D2L</span></td>
+            <td class="size">970 KB</td>
+            <td class="acts"><a class="btn primary" href="project1/submission/project01_info579_group_1.zip" download>Download zip</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Supporting documents</h3>
+      <table class="files">
+        <tbody>
+          <tr>
+            <td><code>DATA_DICTIONARY.md</code><span class="sub">Every column: type, length, nullability and reason</span></td>
+            <td class="size">37 KB</td>
+            <td class="acts"><a class="btn" href="project1/#dictionary">View</a><a class="btn" href="project1/docs/DATA_DICTIONARY.md" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>CHANGES.md</code><span class="sub">Change log for the requirements analysis and models</span></td>
+            <td class="size">23 KB</td>
+            <td class="acts"><a class="btn" href="project1/#changes">View</a><a class="btn" href="project1/CHANGES.md" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>requirements_analysis.tex</code><span class="sub">LaTeX source of the requirements analysis</span></td>
+            <td class="size">55 KB</td>
+            <td class="acts"><a class="btn" href="project1/source/requirements_analysis/requirements_analysis.tex" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>crossfade_schema.sql</code><span class="sub">DDL behind the physical model: 10 tables with PK, FK, UNIQUE and CHECK</span></td>
+            <td class="size">6.2 KB</td>
+            <td class="acts"><a class="btn" href="project1/source/physical_model/crossfade_schema.sql" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>physical_data_model_mk1.png</code><span class="sub">First physical model draft, kept with what it missed</span></td>
+            <td class="size">657 KB</td>
+            <td class="acts"><a class="btn" href="project1/#physical_mk1">View</a><a class="btn" href="project1/source/physical_model/physical_data_model_mk1.png" download>Download</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <p><a href="project1/">Open the full Project 1 site &rarr;</a></p>
+    </div>
+
+    <!-- ===================================================== 02: project 1 data -->
+    <div class="view" id="view-data" hidden>
+      <a class="back" href="#">&larr; Projects</a>
+      <h2>Project 1 sample data</h2>
+      <p class="note">The data handed in with Project 1, which Project 2 loads. The CSVs are a direct export of the graded <code>data.xlsx</code>; every cell was checked against the workbook.</p>
+
+      <div class="submit-box">
+        <a class="btn primary" href="project1/data_export/crossfade_project1_data.zip" download>Download crossfade_project1_data.zip</a>
+        <span class="note">25 KB &middot; data.xlsx + 10 CSVs + README</span>
+      </div>
+      <div class="toolbar">
+        <a class="btn" href="project1/deliverables/data.xlsx" download>data.xlsx only</a>
+        <a class="btn" href="project1/#data">Browse the tables</a>
+      </div>
+
+      <h3>Tables</h3>
+      <table class="files">
+        <thead><tr><th>CSV</th><th class="num">Rows</th><th class="num">Columns</th><th></th></tr></thead>
+        <tbody id="csv-rows"></tbody>
+        <tfoot><tr><td>10 tables</td><td class="num">401</td><td></td><td></td></tr></tfoot>
+      </table>
+
+      <h3>CSV conventions</h3>
+      <ul class="prose">
+        <li>Header row: the column names used in <code>data.xlsx</code>.</li>
+        <li>Empty field: <code>NULL</code>.</li>
+        <li>Dates <code>yyyy-mm-dd</code>; timestamps <code>yyyy-mm-dd hh:mm:ss</code> (Play &rarr; Played At, Track Score &rarr; Scored On).</li>
+        <li>Decimals: the exact stored value, no rounding.</li>
+      </ul>
+    </div>
+
+    <!-- ===================================================== 03: project 2 brief -->
+    <div class="view" id="view-brief" hidden>
+      <a class="back" href="#">&larr; Projects</a>
+      <h2>Project 2 brief</h2>
+      <p class="note">Database Implementation and Querying &middot; due Nov 8, 2026 11:59 PM</p>
+      <div class="toolbar">
+        <a class="btn" href="project2/brief/info579_project02.pdf" target="_blank" rel="noopener">Open in a new tab</a>
+        <a class="btn" href="project2/brief/info579_project02.pdf" download>Download PDF</a>
+        <a class="btn" href="project2/">Project 2 deliverables &rarr;</a>
+      </div>
+      <iframe class="pdf" data-src="project2/brief/info579_project02.pdf" title="Project 2 brief PDF"></iframe>
+    </div>
+
+  </section>
 </main>
+<script src="project2/data/deliverables.js"></script>
 <script>
 (function () {
+  /* Project 1 card: deliverables present, from site_data.js */
   var s = (window.SITE && window.SITE.status) || {}, keys = Object.keys(s);
-  var done = keys.filter(function (k) { return s[k]; }).length, el = document.getElementById("p1-status");
-  if (!keys.length) return;
-  el.textContent = done + "/" + keys.length + " deliverables";
-  el.className = done === keys.length ? "done" : "todo";
+  var el = document.getElementById("p1-status");
+  if (keys.length) {
+    var done = keys.filter(function (k) { return s[k]; }).length;
+    el.textContent = done + "/" + keys.length + " deliverables";
+    el.className = done === keys.length ? "done" : "todo";
+  }
+
+  /* Project 2 card: how many of the four .sql files exist */
+  if (window.P2) {
+    var have = 0, seen = 0, p2 = document.getElementById("p2-status");
+    window.P2.present("project2/", function (f, ok) {
+      seen++; if (ok) have++;
+      if (seen === window.P2.files.length) {
+        p2.textContent = have + "/" + seen + " files";
+        p2.className = have === seen ? "done" : "todo";
+      }
+    });
+  }
+
+  /* Project 1 brief: shown once project1/brief/info579_project01.pdf is in the repo */
+  var P1_BRIEF = "project1/brief/info579_project01.pdf";
+  fetch(P1_BRIEF, { method: "HEAD", cache: "no-store" }).then(function (r) {
+    if (!r.ok) return;
+    var row = document.getElementById("p1-brief-row");
+    var n = +r.headers.get("content-length");
+    if (n) row.querySelector(".size").textContent = Math.round(n / 1024) + " KB";
+    row.querySelector(".acts").innerHTML =
+      '<a class="btn" href="' + P1_BRIEF + '" target="_blank" rel="noopener">View</a>' +
+      '<a class="btn" href="' + P1_BRIEF + '" download>Download</a>';
+  }).catch(function () {});
+
+  /* Project 1 data: one row per CSV */
+  var CSV = [["artist", 8, 6], ["track", 15, 7], ["genre", 10, 3], ["listener", 8, 5],
+             ["scoring_model", 5, 8], ["station", 8, 7], ["track_score", 27, 8],
+             ["genre_probability", 270, 4], ["station_blend", 19, 3], ["play", 31, 8]];
+  document.getElementById("csv-rows").innerHTML = CSV.map(function (c) {
+    var href = "project1/data_export/csv/" + c[0] + ".csv";
+    return "<tr><td><code>" + c[0] + ".csv</code></td><td class=\"num\">" + c[1] +
+      "</td><td class=\"num\">" + c[2] + "</td><td class=\"acts\"><a class=\"btn\" href=\"" + href +
+      "\" download>Download</a></td></tr>";
+  }).join("");
+
+  /* views: #p1, #data, #brief; anything else shows the project cards */
+  var VIEWS = ["p1", "data", "brief"];
+  var tiles = Array.prototype.slice.call(document.querySelectorAll(".tile"));
+  tiles.forEach(function (t) {
+    t.addEventListener("click", function (e) {          // clicking the open tile closes it
+      if (location.hash === "#" + t.dataset.view) { e.preventDefault(); location.hash = ""; }
+    });
+  });
+  function show() {
+    var id = location.hash.replace("#", "");
+    if (VIEWS.indexOf(id) < 0) id = "projects";
+    Array.prototype.forEach.call(document.querySelectorAll(".view"), function (v) {
+      v.hidden = v.id !== "view-" + id;
+    });
+    tiles.forEach(function (t) {
+      if (t.dataset.view === id) t.setAttribute("aria-current", "true");
+      else t.removeAttribute("aria-current");
+    });
+    if (id === "brief") {                                 // load the PDF only when asked for
+      var f = document.querySelector("#view-brief iframe");
+      if (!f.getAttribute("src")) f.setAttribute("src", f.dataset.src);
+    }
+    document.title = (id === "projects" ? "" : tiles[VIEWS.indexOf(id)].querySelector(".tile-label").textContent + " | ") +
+      "CROSSFADE | INFO 579 Group 1";
+  }
+  window.addEventListener("hashchange", show);
+  show();
 })();
 </script>
 </body>

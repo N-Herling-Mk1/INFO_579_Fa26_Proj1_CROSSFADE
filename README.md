@@ -10,25 +10,51 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 |---|---|---|---|
 | [`design/`](design/) | Top-level design shared by all three | | |
 | [`project1/`](project1/) | Project 1: Database Design | Sep 27, 2026 | All 4 deliverables; submission zip in `project1/submission/` |
-| [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | Planning: to-do list, requirements and deliverables in [`project2/README.md`](project2/README.md) |
+| [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | Restarted Nov 6: four `.sql` deliverables, see [`project2/README.md`](project2/README.md) |
 | [`project3/`](project3/) | Project 3: NoSQL Database | Dec 13, 2026 | Not started |
 
 ## Layout
 
 ```
-index.html       project picker (site front page)
+index.html       front page: art | title on top, quick-access rail | view below.
+                 Rail: 01 Project 1 (brief + completed submission + supporting docs),
+                 02 Project 1 data (download), 03 Project 2 brief. Views open at #p1, #data, #brief.
 assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png), CROSSFADE artwork
 tools/           build_banner.py: writes the shared top banner into every top-level page
                  stamp_assets.py: tags every link to site.css / panel.js with a content hash
+                 export_p1_data.py: data.xlsx -> project1/data_export/ (one CSV per table + zip)
 assets/vendor/   jszip.min.js (JSZip 3.10.1, MIT): builds the Project 1 submission zip in the browser
 design/          top-level design: the business and its ten entities
 project1/        Database Design: deliverables, sources, docs, its own site
+  data_export/   the graded data.xlsx as one CSV per table, plus crossfade_project1_data.zip
+  brief/         (to add) info579_project01.pdf; the front page shows it once it exists
 project2/        SQL Database
 project3/        NoSQL Database
+course_materials/  course zips kept for transport only; not linked from the site (see below)
 boot_site.ps1    local preview server for the whole repo
 ```
 
 Each project's graded submission is built from that project's `deliverables/` folder only (for Project 1, `project01_<groupcode>.zip`).
+
+## Project 1 data export
+
+```
+python tools/export_p1_data.py
+```
+
+Reads `project1/deliverables/data.xlsx` (the file handed in), writes `project1/data_export/csv/<table>.csv` for all 10 tables (401 rows), checks every CSV cell against the workbook, then builds `crossfade_project1_data.zip` (data.xlsx + CSVs + README.txt). Empty field = NULL; dates `yyyy-mm-dd`; timestamps `yyyy-mm-dd hh:mm:ss`; decimals exact.
+
+## Course materials (transport only)
+
+`course_materials/` holds the course zips as uploaded, so they travel with the repo. Nothing on the site links to them.
+
+| File | Contents |
+|---|---|
+| `lectures.zip` | Lecture slides, units 1 to 10 plus the unit 8 exercises (PDF) |
+| `0_unit_4.zip` | Homework units 4 to 10: submitted `.sql`/`.png`, instructor feedback screenshots, the assignment attachments |
+| `project01_info579_group_1.zip` | The Project 1 submission as uploaded; same four files as `project1/submission/project01_info579_group_1.zip` |
+
+The repository is public, so these files can be downloaded by anyone who browses it, whether or not the site links to them.
 
 ## Local preview
 

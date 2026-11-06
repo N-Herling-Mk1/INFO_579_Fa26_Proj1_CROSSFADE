@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deliverable</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=5f5f8128">
+<script src="../data/deliverables.js"></script>
+</head>
+<body>
+<div class="panel">
+  <p class="group-line" id="kicker"></p>
+  <h1 id="name"></h1>
+  <p class="lede" id="title"></p>
+
+  <h2>Requirements</h2>
+  <ul class="prose" id="reqs"></ul>
+
+  <h2>Script</h2>
+  <div id="script">
+    <div class="callout pending">
+      <p><b>Not started.</b> Nothing in <code id="path"></code> yet.</p>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var P = window.P2;
+  var id = new URLSearchParams(location.search).get("f");
+  var f = P.files.filter(function (x) { return x.id === id; })[0] || P.files[0];
+  document.title = f.file;
+  document.getElementById("kicker").textContent = f.task + " · " + f.weight + "% · due " + P.due;
+  document.getElementById("name").textContent = f.file;
+  document.getElementById("title").textContent = f.title;
+  document.getElementById("path").textContent = "project2/deliverables/" + f.file;
+  document.getElementById("reqs").innerHTML = f.reqs.map(function (r) { return "<li>" + r + "</li>"; }).join("");
+  var url = "../deliverables/" + f.file;
+  fetch(url, { cache: "no-store" }).then(function (r) {
+    if (!r.ok) return;
+    return r.text().then(function (sql) {
+      var box = document.getElementById("script");
+      box.innerHTML = '<div class="toolbar"><a class="btn" download></a><span class="note"></span></div><div class="prose"><pre><code></code></pre></div>';
+      var a = box.querySelector("a"); a.href = url; a.textContent = "Download " + f.file;
+      box.querySelector(".note").textContent = sql.split("\n").length + " lines";
+      box.querySelector("code").textContent = sql;
+    });
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>

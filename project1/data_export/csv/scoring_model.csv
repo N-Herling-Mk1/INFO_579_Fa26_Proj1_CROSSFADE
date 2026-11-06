@@ -1,0 +1,6 @@
+Model ID,Version Label,Fusion Type,Embedding Dimension,Segment Length,Training Corpus,Holdout Accuracy,Deployed On
+1,beardown,gated,512,30,GTZAN,0.7,2026-01-12
+2,beardown_rrm_cfg12,concat,384,30,GTZAN,0.68,2026-02-16
+3,beardown_rrm_cfg17,concat,768,30,GTZAN,0.76,2026-03-09
+4,beardown_rrm,concat,768,30,GTZAN,0.76,2026-03-23
+5,beardown_3sec,concat,384,3,GTZAN,0.7887,2026-06-23

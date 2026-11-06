@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deliverables</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=5f5f8128">
+<script src="../data/deliverables.js"></script>
+</head>
+<body>
+<div class="panel">
+  <h1>Deliverables</h1>
+  <p class="group-line">INFO 579 &middot; Project 2 &middot; SQL Database &middot; due <span id="due"></span></p>
+  <p class="lede">Four SQL scripts, each worth 25%, zipped together as <code id="zip"></code>.</p>
+
+  <table class="deltable">
+    <thead><tr><th>File</th><th>Task</th><th>Weight</th><th>Status</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <h2>Every file</h2>
+  <ul class="prose" id="general"></ul>
+  <p class="note">From the <a href="../index.html#brief" target="_top">assignment brief</a>.</p>
+</div>
+<script>
+(function () {
+  var P = window.P2;
+  document.getElementById("due").textContent = P.due;
+  document.getElementById("zip").textContent = P.zip;
+  document.getElementById("rows").innerHTML = P.files.map(function (f) {
+    return '<tr><td><a href="../index.html#' + f.id + '" target="_top"><code>' + f.file + '</code></a>' +
+      '<span class="sub">' + f.title + '</span></td><td>' + f.task + '</td><td>' + f.weight + '%</td>' +
+      '<td><span class="mark open" id="m-' + f.id + '">not started</span></td></tr>';
+  }).join("") +
+    '<tr><td><code>' + P.zip + '</code><span class="sub">All four files, uploaded to D2L</span></td><td>Submit</td><td></td>' +
+    '<td><span class="mark open">not built</span></td></tr>';
+  document.getElementById("general").innerHTML = P.general.map(function (g) { return "<li>" + g + "</li>"; }).join("");
+  P.present("../", function (f, ok) {
+    if (!ok) return;
+    var m = document.getElementById("m-" + f.id);
+    m.textContent = "draft"; m.className = "mark ready";
+  });
+})();
+</script>
+</body>
+</html>
