@@ -71,11 +71,11 @@ def s2(t):
 
 # ----------------------------------------------------------------------------- S3 genre: composer legend
 def s3(t):
-    cols = ["model_class_index", "label", "legend_text", "composer_status"]
+    cols = ["model_class_index", "label", "legend_line", "composer_status"]
     out = []
     for g in sorted(t["genre"]["rows"], key=lambda g: int(g["genre_id"])):
         desc = g["description"]
-        out.append((D(g["genre_id"]), g["name"].upper(), desc if desc is not None else "(no description)",
+        out.append((D(g["genre_id"]), g["name"], g["name"] + ": " + (desc if desc is not None else "(no description)"),
                     "HIDE: no description for the composer" if desc is None else "READY"))
     return cols, out
 
@@ -99,7 +99,7 @@ def s5(t):
     rows = sorted(t["scoring_model"]["rows"],
                   key=lambda m: (-D(m["holdout_accuracy"]), -day(m["deployed_on"]).toordinal()))
     out = []
-    for m in rows[:3]:
+    for m in rows[:1]:                                         # the one default
         out.append((m["version_label"],
                     f"{m['fusion_type']} / {m['embedding_dimension']}d / {m['segment_length']}s / {m['training_corpus']}",
                     rnd(D(m["holdout_accuracy"]) * 100, 2), m["deployed_on"]))
@@ -123,15 +123,18 @@ def s6(t):
 
 # ----------------------------------------------------------------------------- S7 track: upload pipeline
 def s7(t):
-    cols = ["ingest_status", "recordings", "newest_release", "days_since_newest", "listener_visibility"]
+    cols = ["ingest_status", "recordings", "earliest_release", "days_to_earliest_release", "release_status"]
     groups = {}
     for r in t["track"]["rows"]:
         groups.setdefault(r["ingest_status"], []).append(r["release_date"])
     out = []
     for st in sorted(groups, key=INGEST.index):
-        newest = max(groups[st])
-        out.append((st, D(len(groups[st])), newest, days_to_report(newest),
-                    "streamable" if st == "scored" else "not streamable"))
+        earliest = min(groups[st])
+        status = ("streamable" if st == "scored" else
+                  "never streamable: rejected" if st == "rejected" else
+                  "LATE: release date reached, still unscored" if day(earliest) <= REPORT_DATE else
+                  "on time: release date still ahead")
+        out.append((st, D(len(groups[st])), earliest, -days_to_report(earliest), status))
     return cols, out
 
 

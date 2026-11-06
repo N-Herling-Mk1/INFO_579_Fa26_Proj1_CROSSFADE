@@ -20,10 +20,23 @@ if (-not $py) { Write-Host "      python not found on PATH" -ForegroundColor Red
 
 Write-Host "[2/3] finding a free port" -ForegroundColor Cyan
 function Test-Free([int]$p) {
-  try { $l = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $p); $l.Start(); $l.Stop(); $true } catch { $false }
+  # A trial bind on 127.0.0.1 is not enough on Windows: it can succeed while another server
+  # (e.g. an old python http.server) listens on 0.0.0.0 / :: on the same port. So: is anything
+  # listening on this port on any address, and does anything answer on 127.0.0.1?
+  try {
+    if (Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue) { return $false }
+  } catch {}
+  $c = [System.Net.Sockets.TcpClient]::new()
+  try {
+    if ($c.ConnectAsync("127.0.0.1", $p).Wait(250) -and $c.Connected) { return $false }
+  } catch {} finally { $c.Dispose() }
+  try { $l = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $p); $l.ExclusiveAddressUse = $true; $l.Start(); $l.Stop(); $true } catch { $false }
 }
 if ($Port -eq 0) {
-  foreach ($p in 8000..8020) { if (Test-Free $p) { $Port = $p; break } }
+  foreach ($p in 8000..8020) {
+    if (Test-Free $p) { $Port = $p; break }
+    Write-Host "      port $p busy" -ForegroundColor DarkGray
+  }
   if ($Port -eq 0) { Write-Host "      no free port in 8000-8020" -ForegroundColor Red; exit 1 }
 } elseif (-not (Test-Free $Port)) { Write-Host "      port $Port is in use" -ForegroundColor Red; exit 1 }
 $url = "http://127.0.0.1:$Port/"

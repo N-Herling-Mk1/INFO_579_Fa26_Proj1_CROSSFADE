@@ -137,6 +137,10 @@
     {
      "block": "rule:I5",
      "phrase": "A recording's Ingest Status is scored only if it has at least one Track Score."
+    },
+    {
+     "block": "attr:track.release_date",
+     "phrase": "which may be later than the date it was uploaded"
     }
    ],
    "columns": {
@@ -290,6 +294,10 @@
     {
      "block": "rel:scoring_model-station",
      "phrase": "Each station is evaluated against the output of one nominated model version"
+    },
+    {
+     "block": "attr:station.model_id",
+     "phrase": "The model version whose output the station is evaluated against"
     }
    ],
    "columns": {
@@ -643,7 +651,7 @@
     "constraint": "uq_track_audio_checksum",
     "why": "The database itself must refuse the write: the UNIQUE index on audio_checksum is what detects the duplicate."
    },
-   "rest": "An error case: tested by an expected-error test ([E1] in project2/tests/expected_errors.sql), not by a query in single_table.sql, which must run clean."
+   "rest": "An error case: [E1], the last statement in single_table.sql, marked EXPECTED TO FAIL (MySQL must refuse it with 1062). Planned for routines.sql (Task 4): an upload procedure whose DECLARE ... HANDLER FOR 1062 catches the duplicate and answers the uploader instead of stopping."
   }
  ]
 }

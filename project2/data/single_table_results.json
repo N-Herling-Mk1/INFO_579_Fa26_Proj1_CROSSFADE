@@ -1,7 +1,7 @@
 {
  "file": "single_table.sql",
- "generated": "2026-11-06T03:20:48",
- "passed": 64,
+ "generated": "2026-11-06T13:45:36",
+ "passed": 66,
  "failed": 0,
  "queries": {
   "S1": {
@@ -11,10 +11,18 @@
     "UC-01"
    ],
    "question": "Who can be paid in this royalty run, who is on hold and why, and what does each artist earn per 1,000 qualifying streams?",
+   "need": "CROSSFADE pays independent artists a per-stream royalty, and pays only verified artists through a channel chosen by their country (RA: Overview; Artist: Payout Rate, Country, Verified).",
    "declared": [
     "a",
     "c",
     "e"
+   ],
+   "output": [
+    "artist_id",
+    "payee",
+    "usd_per_1000_streams",
+    "days_under_licence",
+    "payment_status"
    ],
    "sql": "SELECT artist_id,\n       CONCAT(stage_name, ' (', IFNULL(country, '--'), ')') AS payee,\n       ROUND(payout_rate * 1000, 2) AS usd_per_1000_streams,\n       DATEDIFF('2026-09-30', joined_date) AS days_under_licence,\n       CASE\n           WHEN verified = 0 THEN 'HOLD: identity not verified'\n           WHEN country IS NULL THEN 'HOLD: no payment country'\n           ELSE 'PAYABLE'\n       END AS payment_status\nFROM crossfade.artist\nORDER BY CASE WHEN verified = 1 AND country IS NOT NULL THEN 0 ELSE 1 END,\n         payout_rate DESC,\n         artist_id",
    "detected": [
@@ -94,7 +102,74 @@
      "134",
      "HOLD: identity not verified"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "artist_id",
+     "payee",
+     "usd_per_1000_streams",
+     "days_under_licence",
+     "payment_status"
+    ],
+    "rows": [
+     [
+      "1042",
+      "Velvet Static (US)",
+      "4.00",
+      "200",
+      "PAYABLE"
+     ],
+     [
+      "1044",
+      "Low Orbit Choir (CA)",
+      "3.80",
+      "239",
+      "PAYABLE"
+     ],
+     [
+      "1046",
+      "Ochre Parade (MX)",
+      "3.60",
+      "172",
+      "PAYABLE"
+     ],
+     [
+      "1043",
+      "Mara Quell (GB)",
+      "3.50",
+      "253",
+      "PAYABLE"
+     ],
+     [
+      "1047",
+      "Juno Fleet (DE)",
+      "3.00",
+      "151",
+      "PAYABLE"
+     ],
+     [
+      "1049",
+      "Kestrel Ave (JM)",
+      "3.40",
+      "33",
+      "HOLD: identity not verified"
+     ],
+     [
+      "1045",
+      "Tin Harbour (AU)",
+      "3.20",
+      "215",
+      "HOLD: identity not verified"
+     ],
+     [
+      "1048",
+      "Saltmarsh Tapes (--)",
+      "3.00",
+      "134",
+      "HOLD: identity not verified"
+     ]
+    ]
+   }
   },
   "S2": {
    "table": "track",
@@ -102,12 +177,20 @@
     "UC-03"
    ],
    "question": "What are the five newest recordings listeners can stream?",
+   "need": "a recording uploaded an hour ago must be as recommendable as one with a million plays (RA: Overview), and only scored recordings may be streamed (RA: Track).",
    "declared": [
     "a",
     "c",
     "d"
    ],
-   "sql": "SELECT track_id,\n       title,\n       CONCAT(FLOOR(duration / 60), ':', LPAD(MOD(duration, 60), 2, '0')) AS run_time,\n       release_date,\n       DATEDIFF('2026-09-30', release_date) AS days_since_release\nFROM crossfade.track\nWHERE ingest_status = 'scored'\nORDER BY release_date DESC,\n         track_id\nLIMIT 5",
+   "output": [
+    "track_id",
+    "title",
+    "run_time",
+    "release_date",
+    "days_since_release"
+   ],
+   "sql": "SELECT track_id,\n       title,\n       CONCAT(duration DIV 60, ':', LPAD(MOD(duration, 60), 2, '0')) AS run_time,\n       release_date,\n       DATEDIFF('2026-09-30', release_date) AS days_since_release\nFROM crossfade.track\nWHERE ingest_status = 'scored'\nORDER BY release_date DESC,\n         track_id\nLIMIT 5",
    "detected": [
     "a",
     "c",
@@ -163,7 +246,53 @@
      "2026-05-15",
      "138"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "track_id",
+     "title",
+     "run_time",
+     "release_date",
+     "days_since_release"
+    ],
+    "rows": [
+     [
+      "4828",
+      "Afterimage Club",
+      "3:41",
+      "2026-07-10",
+      "82"
+     ],
+     [
+      "4826",
+      "Plaza at Noon",
+      "3:18",
+      "2026-06-30",
+      "92"
+     ],
+     [
+      "4829",
+      "Tapeworm Blues",
+      "3:09",
+      "2026-06-05",
+      "117"
+     ],
+     [
+      "4827",
+      "Stahlwerk",
+      "4:14",
+      "2026-05-25",
+      "128"
+     ],
+     [
+      "4822",
+      "Hymn for a Server Room",
+      "4:28",
+      "2026-05-15",
+      "138"
+     ]
+    ]
+   }
   },
   "S3": {
    "table": "genre",
@@ -171,12 +300,19 @@
     "UC-05"
    ],
    "question": "Is every genre ready to show in the blend composer, listed in the order the scoring models output them?",
+   "need": "listeners compose station blends from the genre legend, which shows them each genre's description (RA: Genre).",
    "declared": [
     "a",
     "c",
     "e"
    ],
-   "sql": "SELECT genre_id AS model_class_index,\n       UPPER(name) AS label,\n       IFNULL(description, '(no description)') AS legend_text,\n       IF(description IS NULL, 'HIDE: no description for the composer', 'READY') AS composer_status\nFROM crossfade.genre\nORDER BY genre_id",
+   "output": [
+    "model_class_index",
+    "label",
+    "legend_line",
+    "composer_status"
+   ],
+   "sql": "SELECT genre_id AS model_class_index,\n       name AS label,\n       CONCAT(name, ': ', IFNULL(description, '(no description)')) AS legend_line,\n       IF(description IS NULL, 'HIDE: no description for the composer', 'READY') AS composer_status\nFROM crossfade.genre\nORDER BY genre_id",
    "detected": [
     "a",
     "c",
@@ -190,71 +326,141 @@
    "columns_out": [
     "model_class_index",
     "label",
-    "legend_text",
+    "legend_line",
     "composer_status"
    ],
    "rows": [
     [
      "0",
-     "BLUES",
-     "Twelve-bar forms, blue notes and call-and-response phrasing",
+     "blues",
+     "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
      "READY"
     ],
     [
      "1",
-     "CLASSICAL",
-     "Orchestral and chamber writing in the Western art-music tradition",
+     "classical",
+     "classical: Orchestral and chamber writing in the Western art-music tradition",
      "READY"
     ],
     [
      "2",
-     "COUNTRY",
-     "Narrative songwriting with steel guitar, fiddle and twang",
+     "country",
+     "country: Narrative songwriting with steel guitar, fiddle and twang",
      "READY"
     ],
     [
      "3",
-     "DISCO",
-     "Four-on-the-floor dance grooves with lush strings and bass",
+     "disco",
+     "disco: Four-on-the-floor dance grooves with lush strings and bass",
      "READY"
     ],
     [
      "4",
-     "HIPHOP",
-     "Rhythmic vocal delivery over sampled or programmed beats",
+     "hiphop",
+     "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
      "READY"
     ],
     [
      "5",
-     "JAZZ",
-     "Swing, improvisation and extended harmony",
+     "jazz",
+     "jazz: Swing, improvisation and extended harmony",
      "READY"
     ],
     [
      "6",
-     "METAL",
-     "Distorted guitars, heavy drums and aggressive dynamics",
+     "metal",
+     "metal: Distorted guitars, heavy drums and aggressive dynamics",
      "READY"
     ],
     [
      "7",
-     "POP",
-     "Hook-driven songs built for broad appeal",
+     "pop",
+     "pop: Hook-driven songs built for broad appeal",
      "READY"
     ],
     [
      "8",
-     "REGGAE",
-     "Offbeat skank rhythm and prominent bass lines",
+     "reggae",
+     "reggae: Offbeat skank rhythm and prominent bass lines",
      "READY"
     ],
     [
      "9",
-     "ROCK",
-     "Guitar-led songs with a driving backbeat",
+     "rock",
+     "rock: Guitar-led songs with a driving backbeat",
      "READY"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "model_class_index",
+     "label",
+     "legend_line",
+     "composer_status"
+    ],
+    "rows": [
+     [
+      "0",
+      "blues",
+      "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
+      "READY"
+     ],
+     [
+      "1",
+      "classical",
+      "classical: Orchestral and chamber writing in the Western art-music tradition",
+      "READY"
+     ],
+     [
+      "2",
+      "country",
+      "country: Narrative songwriting with steel guitar, fiddle and twang",
+      "READY"
+     ],
+     [
+      "3",
+      "disco",
+      "disco: Four-on-the-floor dance grooves with lush strings and bass",
+      "READY"
+     ],
+     [
+      "4",
+      "hiphop",
+      "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
+      "READY"
+     ],
+     [
+      "5",
+      "jazz",
+      "jazz: Swing, improvisation and extended harmony",
+      "READY"
+     ],
+     [
+      "6",
+      "metal",
+      "metal: Distorted guitars, heavy drums and aggressive dynamics",
+      "READY"
+     ],
+     [
+      "7",
+      "pop",
+      "pop: Hook-driven songs built for broad appeal",
+      "READY"
+     ],
+     [
+      "8",
+      "reggae",
+      "reggae: Offbeat skank rhythm and prominent bass lines",
+      "READY"
+     ],
+     [
+      "9",
+      "rock",
+      "rock: Guitar-led songs with a driving backbeat",
+      "READY"
+     ]
+    ]
+   }
   },
   "S4": {
    "table": "listener",
@@ -262,10 +468,18 @@
     "UC-06"
    ],
    "question": "How many subscribers does each plan tier have, when did the first and latest join, and how long has the average subscriber been billing?",
+   "need": "subscribers are billed by plan tier, each from their own signup date (RA: Listener: Plan Tier, Signup Date).",
    "declared": [
     "a",
     "b",
     "c"
+   ],
+   "output": [
+    "plan_tier",
+    "listeners",
+    "first_signup",
+    "latest_signup",
+    "avg_days_subscribed"
    ],
    "sql": "SELECT plan_tier,\n       COUNT(*) AS listeners,\n       MIN(signup_date) AS first_signup,\n       MAX(signup_date) AS latest_signup,\n       ROUND(AVG(DATEDIFF('2026-09-30', signup_date))) AS avg_days_subscribed\nFROM crossfade.listener\nGROUP BY plan_tier\nORDER BY plan_tier DESC",
    "detected": [
@@ -306,20 +520,59 @@
      "2026-08-15",
      "104"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "plan_tier",
+     "listeners",
+     "first_signup",
+     "latest_signup",
+     "avg_days_subscribed"
+    ],
+    "rows": [
+     [
+      "premium",
+      "2",
+      "2026-04-02",
+      "2026-05-27",
+      "154"
+     ],
+     [
+      "standard",
+      "3",
+      "2026-05-09",
+      "2026-07-08",
+      "116"
+     ],
+     [
+      "free",
+      "3",
+      "2026-04-18",
+      "2026-08-15",
+      "104"
+     ]
+    ]
+   }
   },
   "S5": {
    "table": "scoring_model",
    "use_cases": [
     "UC-08"
    ],
-   "question": "Which three model versions should a new station default to?",
+   "question": "Which model version should a new station default to?",
+   "need": "each scoring model version is weighted by its measured holdout accuracy, and versions trained on different corpora are never silently compared (RA: Scoring Model).",
    "declared": [
     "a",
     "c",
     "d"
    ],
-   "sql": "SELECT version_label,\n       CONCAT(fusion_type, ' / ', embedding_dimension, 'd / ', segment_length, 's / ', training_corpus) AS architecture,\n       ROUND(holdout_accuracy * 100, 2) AS accuracy_pct,\n       deployed_on\nFROM crossfade.scoring_model\nORDER BY holdout_accuracy DESC,\n         deployed_on DESC\nLIMIT 3",
+   "output": [
+    "version_label",
+    "architecture",
+    "accuracy_pct",
+    "deployed_on"
+   ],
+   "sql": "SELECT version_label,\n       CONCAT(fusion_type, ' / ', embedding_dimension, 'd / ', segment_length, 's / ', training_corpus) AS architecture,\n       ROUND(holdout_accuracy * 100, 2) AS accuracy_pct,\n       deployed_on\nFROM crossfade.scoring_model\nORDER BY holdout_accuracy DESC,\n         deployed_on DESC\nLIMIT 1",
    "detected": [
     "a",
     "c",
@@ -346,20 +599,24 @@
      "concat / 384d / 3s / GTZAN",
      "78.87",
      "2026-06-23"
-    ],
-    [
-     "beardown_rrm",
-     "concat / 768d / 30s / GTZAN",
-     "76.00",
-     "2026-03-23"
-    ],
-    [
-     "beardown_rrm_cfg17",
-     "concat / 768d / 30s / GTZAN",
-     "76.00",
-     "2026-03-09"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "version_label",
+     "architecture",
+     "accuracy_pct",
+     "deployed_on"
+    ],
+    "rows": [
+     [
+      "beardown_3sec",
+      "concat / 384d / 3s / GTZAN",
+      "78.87",
+      "2026-06-23"
+     ]
+    ]
+   }
   },
   "S6": {
    "table": "station",
@@ -368,11 +625,19 @@
     "UC-08"
    ],
    "question": "How many stations does each model version serve, how wide are their ambiguity windows, and since when has each version been relied on?",
+   "need": "every station is evaluated against one nominated model version inside an ambiguity window (RA: Station; Scoring Model 1:N Station), so retiring or redeploying a version changes the stations that rely on it.",
    "declared": [
     "a",
     "b",
     "c",
     "e"
+   ],
+   "output": [
+    "model_id",
+    "stations",
+    "avg_window",
+    "wide_stations",
+    "oldest_station"
    ],
    "sql": "SELECT model_id,\n       COUNT(*) AS stations,\n       ROUND(AVG(maximum_ambiguity - minimum_ambiguity), 2) AS avg_window,\n       SUM(CASE WHEN maximum_ambiguity - minimum_ambiguity > 0.5 THEN 1 ELSE 0 END) AS wide_stations,\n       MIN(created_on) AS oldest_station\nFROM crossfade.station\nGROUP BY model_id\nORDER BY stations DESC,\n         model_id",
    "detected": [
@@ -423,21 +688,68 @@
      "1",
      "2026-05-20"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "model_id",
+     "stations",
+     "avg_window",
+     "wide_stations",
+     "oldest_station"
+    ],
+    "rows": [
+     [
+      "4",
+      "3",
+      "0.57",
+      "2",
+      "2026-06-10"
+     ],
+     [
+      "2",
+      "2",
+      "0.60",
+      "2",
+      "2026-05-02"
+     ],
+     [
+      "5",
+      "2",
+      "0.50",
+      "1",
+      "2026-07-20"
+     ],
+     [
+      "1",
+      "1",
+      "0.60",
+      "1",
+      "2026-05-20"
+     ]
+    ]
+   }
   },
   "S7": {
    "table": "track",
    "use_cases": [
     "UC-04"
    ],
-   "question": "How many recordings sit at each stage of the upload pipeline, and how long since the newest one reached each stage?",
+   "question": "How many recordings sit at each stage of the upload pipeline, and is scoring keeping up with their release dates?",
+   "need": "every upload is scored before it can be streamed (RA: Track: Ingest Status), so a backlog in the upload pipeline must be visible.",
    "declared": [
     "a",
     "b",
     "c",
     "e"
    ],
-   "sql": "SELECT ingest_status,\n       COUNT(*) AS recordings,\n       MAX(release_date) AS newest_release,\n       DATEDIFF('2026-09-30', MAX(release_date)) AS days_since_newest,\n       IF(ingest_status = 'scored', 'streamable', 'not streamable') AS listener_visibility\nFROM crossfade.track\nGROUP BY ingest_status\nORDER BY ingest_status",
+   "output": [
+    "ingest_status",
+    "recordings",
+    "earliest_release",
+    "days_to_earliest_release",
+    "release_status"
+   ],
+   "sql": "SELECT ingest_status,\n       COUNT(*) AS recordings,\n       MIN(release_date) AS earliest_release,\n       DATEDIFF(MIN(release_date), '2026-09-30') AS days_to_earliest_release,\n       CASE\n           WHEN ingest_status = 'scored' THEN 'streamable'\n           WHEN ingest_status = 'rejected' THEN 'never streamable: rejected'\n           WHEN MIN(release_date) <= '2026-09-30' THEN 'LATE: release date reached, still unscored'\n           ELSE 'on time: release date still ahead'\n       END AS release_status\nFROM crossfade.track\nGROUP BY ingest_status\nORDER BY ingest_status",
    "detected": [
     "a",
     "b",
@@ -451,33 +763,65 @@
    "columns_out": [
     "ingest_status",
     "recordings",
-    "newest_release",
-    "days_since_newest",
-    "listener_visibility"
+    "earliest_release",
+    "days_to_earliest_release",
+    "release_status"
    ],
    "rows": [
     [
      "awaiting scoring",
      "1",
      "2026-09-21",
-     "9",
-     "not streamable"
+     "-9",
+     "LATE: release date reached, still unscored"
     ],
     [
      "scored",
      "13",
-     "2026-07-10",
-     "82",
+     "2026-02-25",
+     "-217",
      "streamable"
     ],
     [
      "rejected",
      "1",
      "2026-09-22",
-     "8",
-     "not streamable"
+     "-8",
+     "never streamable: rejected"
     ]
-   ]
+   ],
+   "expected": {
+    "columns": [
+     "ingest_status",
+     "recordings",
+     "earliest_release",
+     "days_to_earliest_release",
+     "release_status"
+    ],
+    "rows": [
+     [
+      "awaiting scoring",
+      "1",
+      "2026-09-21",
+      "-9",
+      "LATE: release date reached, still unscored"
+     ],
+     [
+      "scored",
+      "13",
+      "2026-02-25",
+      "-217",
+      "streamable"
+     ],
+     [
+      "rejected",
+      "1",
+      "2026-09-22",
+      "-8",
+      "never streamable: rejected"
+     ]
+    ]
+   }
   },
   "E1": {
    "table": "track",
@@ -485,6 +829,7 @@
     "UC-15"
    ],
    "question": "What happens when an artist uploads an audio file that is already in the catalogue?",
+   "need": "a re-upload of the same audio file must never become a second catalogue entry earning a second royalty stream; the RA keeps the audio checksum (SHA-256 of the file) to \"detect duplicate uploads\" (RA: Track: Audio Checksum).",
    "sql": "INSERT INTO crossfade.track (track_id, artist_id, title, duration, release_date, audio_checksum, ingest_status)\nSELECT 9999, artist_id, CONCAT(title, ' (re-upload)'), duration, '2026-09-30', audio_checksum, 'awaiting scoring'\nFROM crossfade.track\nWHERE track_id = 4817",
    "kind": "expected_error",
    "expects": "1062 uq_track_audio_checksum",
@@ -744,6 +1089,14 @@
     "outcome": "passed"
    },
    {
+    "test": "test_s7_unscored_recording_before_its_release_is_on_time",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_s7_release_due_on_the_report_date_is_late",
+    "outcome": "passed"
+   },
+   {
     "test": "test_every_non_associative_table_is_queried",
     "outcome": "passed"
    },
@@ -766,5 +1119,1200 @@
     "outcome": "passed"
    }
   ]
- }
+ },
+ "cases": [
+  {
+   "tag": "S1",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "artist",
+     "row": {
+      "artist_id": "9001",
+      "stage_name": "Zero Country",
+      "country": null,
+      "joined_date": "2026-09-01",
+      "payout_rate": "0.0020",
+      "verified": "1"
+     }
+    }
+   ],
+   "columns": [
+    "artist_id",
+    "payee",
+    "usd_per_1000_streams",
+    "days_under_licence",
+    "payment_status"
+   ],
+   "expected": [
+    [
+     "1042",
+     "Velvet Static (US)",
+     "4.00",
+     "200",
+     "PAYABLE"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir (CA)",
+     "3.80",
+     "239",
+     "PAYABLE"
+    ],
+    [
+     "1046",
+     "Ochre Parade (MX)",
+     "3.60",
+     "172",
+     "PAYABLE"
+    ],
+    [
+     "1043",
+     "Mara Quell (GB)",
+     "3.50",
+     "253",
+     "PAYABLE"
+    ],
+    [
+     "1047",
+     "Juno Fleet (DE)",
+     "3.00",
+     "151",
+     "PAYABLE"
+    ],
+    [
+     "1049",
+     "Kestrel Ave (JM)",
+     "3.40",
+     "33",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1045",
+     "Tin Harbour (AU)",
+     "3.20",
+     "215",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes (--)",
+     "3.00",
+     "134",
+     "HOLD: identity not verified"
+    ],
+    [
+     "9001",
+     "Zero Country (--)",
+     "2.00",
+     "29",
+     "HOLD: no payment country"
+    ]
+   ],
+   "got": [
+    [
+     "1042",
+     "Velvet Static (US)",
+     "4.00",
+     "200",
+     "PAYABLE"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir (CA)",
+     "3.80",
+     "239",
+     "PAYABLE"
+    ],
+    [
+     "1046",
+     "Ochre Parade (MX)",
+     "3.60",
+     "172",
+     "PAYABLE"
+    ],
+    [
+     "1043",
+     "Mara Quell (GB)",
+     "3.50",
+     "253",
+     "PAYABLE"
+    ],
+    [
+     "1047",
+     "Juno Fleet (DE)",
+     "3.00",
+     "151",
+     "PAYABLE"
+    ],
+    [
+     "1049",
+     "Kestrel Ave (JM)",
+     "3.40",
+     "33",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1045",
+     "Tin Harbour (AU)",
+     "3.20",
+     "215",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes (--)",
+     "3.00",
+     "134",
+     "HOLD: identity not verified"
+    ],
+    [
+     "9001",
+     "Zero Country (--)",
+     "2.00",
+     "29",
+     "HOLD: no payment country"
+    ]
+   ],
+   "doc": "A verified artist with no payment country is held, not paid.\nWhy: the sample data never reaches this CASE branch (its one artist with no country is also unverified,\nand the first WHEN wins).\nExpect: artist 9001 reads 'HOLD: no payment country', payee 'Zero Country (--)'.",
+   "test": "test_s1_verified_artist_without_country_is_held",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S1",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "artist",
+     "row": {
+      "artist_id": "900",
+      "stage_name": "Aardvark Tie",
+      "country": "US",
+      "joined_date": "2026-01-01",
+      "payout_rate": "0.0040",
+      "verified": "1"
+     }
+    }
+   ],
+   "columns": [
+    "artist_id",
+    "payee",
+    "usd_per_1000_streams",
+    "days_under_licence",
+    "payment_status"
+   ],
+   "expected": [
+    [
+     "900",
+     "Aardvark Tie (US)",
+     "4.00",
+     "272",
+     "PAYABLE"
+    ],
+    [
+     "1042",
+     "Velvet Static (US)",
+     "4.00",
+     "200",
+     "PAYABLE"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir (CA)",
+     "3.80",
+     "239",
+     "PAYABLE"
+    ],
+    [
+     "1046",
+     "Ochre Parade (MX)",
+     "3.60",
+     "172",
+     "PAYABLE"
+    ],
+    [
+     "1043",
+     "Mara Quell (GB)",
+     "3.50",
+     "253",
+     "PAYABLE"
+    ],
+    [
+     "1047",
+     "Juno Fleet (DE)",
+     "3.00",
+     "151",
+     "PAYABLE"
+    ],
+    [
+     "1049",
+     "Kestrel Ave (JM)",
+     "3.40",
+     "33",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1045",
+     "Tin Harbour (AU)",
+     "3.20",
+     "215",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes (--)",
+     "3.00",
+     "134",
+     "HOLD: identity not verified"
+    ]
+   ],
+   "got": [
+    [
+     "900",
+     "Aardvark Tie (US)",
+     "4.00",
+     "272",
+     "PAYABLE"
+    ],
+    [
+     "1042",
+     "Velvet Static (US)",
+     "4.00",
+     "200",
+     "PAYABLE"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir (CA)",
+     "3.80",
+     "239",
+     "PAYABLE"
+    ],
+    [
+     "1046",
+     "Ochre Parade (MX)",
+     "3.60",
+     "172",
+     "PAYABLE"
+    ],
+    [
+     "1043",
+     "Mara Quell (GB)",
+     "3.50",
+     "253",
+     "PAYABLE"
+    ],
+    [
+     "1047",
+     "Juno Fleet (DE)",
+     "3.00",
+     "151",
+     "PAYABLE"
+    ],
+    [
+     "1049",
+     "Kestrel Ave (JM)",
+     "3.40",
+     "33",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1045",
+     "Tin Harbour (AU)",
+     "3.20",
+     "215",
+     "HOLD: identity not verified"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes (--)",
+     "3.00",
+     "134",
+     "HOLD: identity not verified"
+    ]
+   ],
+   "doc": "Two payable artists on the same rate are ordered by artist_id.\nWhy: without a tie-break the order of equal rates is up to MySQL and could change between runs.\nExpect: artist 900 (rate 0.0040, same as 1042) is listed first, 1042 second.",
+   "test": "test_s1_equal_rates_break_ties_on_artist_id",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S2",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9100",
+      "artist_id": "1042",
+      "title": "Fresh But Unscored",
+      "duration": "200",
+      "release_date": "2026-09-29",
+      "audio_checksum": "0x0101010101010101010101010101010101010101010101010101010101010101",
+      "ingest_status": "awaiting scoring"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "run_time",
+    "release_date",
+    "days_since_release"
+   ],
+   "expected": [
+    [
+     "4828",
+     "Afterimage Club",
+     "3:41",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "3:18",
+     "2026-06-30",
+     "92"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "3:09",
+     "2026-06-05",
+     "117"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4:14",
+     "2026-05-25",
+     "128"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4:28",
+     "2026-05-15",
+     "138"
+    ]
+   ],
+   "got": [
+    [
+     "4828",
+     "Afterimage Club",
+     "3:41",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "3:18",
+     "2026-06-30",
+     "92"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "3:09",
+     "2026-06-05",
+     "117"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4:14",
+     "2026-05-25",
+     "128"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4:28",
+     "2026-05-15",
+     "138"
+    ]
+   ],
+   "doc": "The newest upload stays off the shelf until it is scored.\nWhy: only scored recordings can be streamed, so date alone must not put a track on the shelf.\nExpect: track 9100 (released 2026-09-29, awaiting scoring) is not in the result.",
+   "test": "test_s2_unscored_new_release_stays_off_the_shelf",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S2",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "4800",
+      "artist_id": "1043",
+      "title": "Same Day",
+      "duration": "61",
+      "release_date": "2026-07-10",
+      "audio_checksum": "0x0202020202020202020202020202020202020202020202020202020202020202",
+      "ingest_status": "scored"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "run_time",
+    "release_date",
+    "days_since_release"
+   ],
+   "expected": [
+    [
+     "4800",
+     "Same Day",
+     "1:01",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "3:41",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "3:18",
+     "2026-06-30",
+     "92"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "3:09",
+     "2026-06-05",
+     "117"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4:14",
+     "2026-05-25",
+     "128"
+    ]
+   ],
+   "got": [
+    [
+     "4800",
+     "Same Day",
+     "1:01",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "3:41",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "3:18",
+     "2026-06-30",
+     "92"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "3:09",
+     "2026-06-05",
+     "117"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4:14",
+     "2026-05-25",
+     "128"
+    ]
+   ],
+   "doc": "Two releases on the same day are ordered by track_id, and run time is shown as m:ss.\nWhy: same-day releases tie on the date; 61 seconds checks the seconds are zero-padded.\nExpect: 4800 then 4828 at the top; 4800's run_time is '1:01'.",
+   "test": "test_s2_same_day_releases_order_by_track_id",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S2",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9200",
+      "artist_id": "1044",
+      "title": "New 0",
+      "duration": "120",
+      "release_date": "2026-09-20",
+      "audio_checksum": "0x1010101010101010101010101010101010101010101010101010101010101010",
+      "ingest_status": "scored"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9201",
+      "artist_id": "1044",
+      "title": "New 1",
+      "duration": "120",
+      "release_date": "2026-09-21",
+      "audio_checksum": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "ingest_status": "scored"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9202",
+      "artist_id": "1044",
+      "title": "New 2",
+      "duration": "120",
+      "release_date": "2026-09-22",
+      "audio_checksum": "0x1212121212121212121212121212121212121212121212121212121212121212",
+      "ingest_status": "scored"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "run_time",
+    "release_date",
+    "days_since_release"
+   ],
+   "expected": [
+    [
+     "9202",
+     "New 2",
+     "2:00",
+     "2026-09-22",
+     "8"
+    ],
+    [
+     "9201",
+     "New 1",
+     "2:00",
+     "2026-09-21",
+     "9"
+    ],
+    [
+     "9200",
+     "New 0",
+     "2:00",
+     "2026-09-20",
+     "10"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "3:41",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "3:18",
+     "2026-06-30",
+     "92"
+    ]
+   ],
+   "got": [
+    [
+     "9202",
+     "New 2",
+     "2:00",
+     "2026-09-22",
+     "8"
+    ],
+    [
+     "9201",
+     "New 1",
+     "2:00",
+     "2026-09-21",
+     "9"
+    ],
+    [
+     "9200",
+     "New 0",
+     "2:00",
+     "2026-09-20",
+     "10"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "3:41",
+     "2026-07-10",
+     "82"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "3:18",
+     "2026-06-30",
+     "92"
+    ]
+   ],
+   "doc": "The shelf never shows more than five recordings.\nWhy: the sample data has exactly enough scored tracks that LIMIT 5 is never pushed.\nExpect: 5 rows, newest first: track 9202 (released 2026-09-22).",
+   "test": "test_s2_shelf_never_holds_more_than_five",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S3",
+   "inputs": [
+    {
+     "kind": "update",
+     "sql": "UPDATE genre SET description = NULL WHERE genre_id = 9",
+     "rows": 1
+    }
+   ],
+   "columns": [
+    "model_class_index",
+    "label",
+    "legend_line",
+    "composer_status"
+   ],
+   "expected": [
+    [
+     "0",
+     "blues",
+     "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
+     "READY"
+    ],
+    [
+     "1",
+     "classical",
+     "classical: Orchestral and chamber writing in the Western art-music tradition",
+     "READY"
+    ],
+    [
+     "2",
+     "country",
+     "country: Narrative songwriting with steel guitar, fiddle and twang",
+     "READY"
+    ],
+    [
+     "3",
+     "disco",
+     "disco: Four-on-the-floor dance grooves with lush strings and bass",
+     "READY"
+    ],
+    [
+     "4",
+     "hiphop",
+     "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
+     "READY"
+    ],
+    [
+     "5",
+     "jazz",
+     "jazz: Swing, improvisation and extended harmony",
+     "READY"
+    ],
+    [
+     "6",
+     "metal",
+     "metal: Distorted guitars, heavy drums and aggressive dynamics",
+     "READY"
+    ],
+    [
+     "7",
+     "pop",
+     "pop: Hook-driven songs built for broad appeal",
+     "READY"
+    ],
+    [
+     "8",
+     "reggae",
+     "reggae: Offbeat skank rhythm and prominent bass lines",
+     "READY"
+    ],
+    [
+     "9",
+     "rock",
+     "rock: (no description)",
+     "HIDE: no description for the composer"
+    ]
+   ],
+   "got": [
+    [
+     "0",
+     "blues",
+     "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
+     "READY"
+    ],
+    [
+     "1",
+     "classical",
+     "classical: Orchestral and chamber writing in the Western art-music tradition",
+     "READY"
+    ],
+    [
+     "2",
+     "country",
+     "country: Narrative songwriting with steel guitar, fiddle and twang",
+     "READY"
+    ],
+    [
+     "3",
+     "disco",
+     "disco: Four-on-the-floor dance grooves with lush strings and bass",
+     "READY"
+    ],
+    [
+     "4",
+     "hiphop",
+     "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
+     "READY"
+    ],
+    [
+     "5",
+     "jazz",
+     "jazz: Swing, improvisation and extended harmony",
+     "READY"
+    ],
+    [
+     "6",
+     "metal",
+     "metal: Distorted guitars, heavy drums and aggressive dynamics",
+     "READY"
+    ],
+    [
+     "7",
+     "pop",
+     "pop: Hook-driven songs built for broad appeal",
+     "READY"
+    ],
+    [
+     "8",
+     "reggae",
+     "reggae: Offbeat skank rhythm and prominent bass lines",
+     "READY"
+    ],
+    [
+     "9",
+     "rock",
+     "rock: (no description)",
+     "HIDE: no description for the composer"
+    ]
+   ],
+   "doc": "A genre with no description is flagged to be hidden from the blend composer.\nWhy: every genre in the sample data has a description, so the HIDE branch is never reached.\nExpect: genre 9 (rock) shows 'rock: (no description)' and 'HIDE: no description for the composer'.",
+   "test": "test_s3_genre_without_description_is_hidden",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S4",
+   "inputs": [
+    {
+     "kind": "update",
+     "sql": "UPDATE listener SET plan_tier = 'standard' WHERE plan_tier = 'premium'",
+     "rows": 2
+    }
+   ],
+   "columns": [
+    "plan_tier",
+    "listeners",
+    "first_signup",
+    "latest_signup",
+    "avg_days_subscribed"
+   ],
+   "expected": [
+    [
+     "standard",
+     "5",
+     "2026-04-02",
+     "2026-07-08",
+     "131"
+    ],
+    [
+     "free",
+     "3",
+     "2026-04-18",
+     "2026-08-15",
+     "104"
+    ]
+   ],
+   "got": [
+    [
+     "standard",
+     "5",
+     "2026-04-02",
+     "2026-07-08",
+     "131"
+    ],
+    [
+     "free",
+     "3",
+     "2026-04-18",
+     "2026-08-15",
+     "104"
+    ]
+   ],
+   "doc": "A plan tier nobody is on does not appear in the subscriber mix.\nWhy: every tier has listeners in the sample data; GROUP BY must not invent an empty tier.\nExpect: only standard and free, in tier order, standard with 5 listeners.",
+   "test": "test_s4_tier_with_no_listeners_is_absent",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S5",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "scoring_model",
+     "row": {
+      "model_id": "6",
+      "version_label": "tie_newer",
+      "fusion_type": "gated",
+      "embedding_dimension": "256",
+      "segment_length": "10",
+      "training_corpus": "GTZAN",
+      "holdout_accuracy": "0.7887",
+      "deployed_on": "2026-09-01"
+     }
+    }
+   ],
+   "columns": [
+    "version_label",
+    "architecture",
+    "accuracy_pct",
+    "deployed_on"
+   ],
+   "expected": [
+    [
+     "tie_newer",
+     "gated / 256d / 10s / GTZAN",
+     "78.87",
+     "2026-09-01"
+    ]
+   ],
+   "got": [
+    [
+     "tie_newer",
+     "gated / 256d / 10s / GTZAN",
+     "78.87",
+     "2026-09-01"
+    ]
+   ],
+   "doc": "On equal holdout accuracy the more recently deployed version becomes the default.\nWhy: the sample's top version has no tie, so the deployed_on tie-break is never used for the default.\nExpect: tie_newer (accuracy 0.7887 like beardown_3sec, but deployed later, 2026-09-01) is the one default.",
+   "test": "test_s5_accuracy_tie_prefers_the_newer_version",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S6",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "station",
+     "row": {
+      "station_id": "7799",
+      "listener_id": "20938",
+      "model_id": "3",
+      "name": "Edge Window",
+      "minimum_ambiguity": "0.25",
+      "maximum_ambiguity": "0.75",
+      "created_on": "2026-09-01"
+     }
+    }
+   ],
+   "columns": [
+    "model_id",
+    "stations",
+    "avg_window",
+    "wide_stations",
+    "oldest_station"
+   ],
+   "expected": [
+    [
+     "4",
+     "3",
+     "0.57",
+     "2",
+     "2026-06-10"
+    ],
+    [
+     "2",
+     "2",
+     "0.60",
+     "2",
+     "2026-05-02"
+    ],
+    [
+     "5",
+     "2",
+     "0.50",
+     "1",
+     "2026-07-20"
+    ],
+    [
+     "1",
+     "1",
+     "0.60",
+     "1",
+     "2026-05-20"
+    ],
+    [
+     "3",
+     "1",
+     "0.50",
+     "0",
+     "2026-09-01"
+    ]
+   ],
+   "got": [
+    [
+     "4",
+     "3",
+     "0.57",
+     "2",
+     "2026-06-10"
+    ],
+    [
+     "2",
+     "2",
+     "0.60",
+     "2",
+     "2026-05-02"
+    ],
+    [
+     "5",
+     "2",
+     "0.50",
+     "1",
+     "2026-07-20"
+    ],
+    [
+     "1",
+     "1",
+     "0.60",
+     "1",
+     "2026-05-20"
+    ],
+    [
+     "3",
+     "1",
+     "0.50",
+     "0",
+     "2026-09-01"
+    ]
+   ],
+   "doc": "An ambiguity window of exactly 0.50 is not counted as wide.\nWhy: 'wide' means more than half the range; the boundary itself is not in the sample data.\nExpect: model 3 (only station 7799, window 0.25 to 0.75): 1 station, avg_window 0.50, 0 wide.",
+   "test": "test_s6_window_of_exactly_half_is_not_wide",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S7",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9300",
+      "artist_id": "1049",
+      "title": "Clipped Master",
+      "duration": "30",
+      "release_date": "2026-09-28",
+      "audio_checksum": "0x0303030303030303030303030303030303030303030303030303030303030303",
+      "ingest_status": "rejected"
+     }
+    }
+   ],
+   "columns": [
+    "ingest_status",
+    "recordings",
+    "earliest_release",
+    "days_to_earliest_release",
+    "release_status"
+   ],
+   "expected": [
+    [
+     "awaiting scoring",
+     "1",
+     "2026-09-21",
+     "-9",
+     "LATE: release date reached, still unscored"
+    ],
+    [
+     "scored",
+     "13",
+     "2026-02-25",
+     "-217",
+     "streamable"
+    ],
+    [
+     "rejected",
+     "2",
+     "2026-09-22",
+     "-8",
+     "never streamable: rejected"
+    ]
+   ],
+   "got": [
+    [
+     "awaiting scoring",
+     "1",
+     "2026-09-21",
+     "-9",
+     "LATE: release date reached, still unscored"
+    ],
+    [
+     "scored",
+     "13",
+     "2026-02-25",
+     "-217",
+     "streamable"
+    ],
+    [
+     "rejected",
+     "2",
+     "2026-09-22",
+     "-8",
+     "never streamable: rejected"
+    ]
+   ],
+   "doc": "A new rejection is counted, and statuses stay in pipeline order, not alphabetical.\nWhy: ingest_status is an ENUM; ORDER BY must follow awaiting scoring, scored, rejected.\nExpect: rejected shows 2 recordings, earliest release 2026-09-22 (8 days ago), 'never streamable: rejected'.",
+   "test": "test_s7_new_rejection_is_counted_in_pipeline_order",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S7",
+   "inputs": [
+    {
+     "kind": "update",
+     "sql": "UPDATE track SET release_date = '2026-10-15' WHERE ingest_status = 'awaiting scoring'",
+     "rows": 1
+    }
+   ],
+   "columns": [
+    "ingest_status",
+    "recordings",
+    "earliest_release",
+    "days_to_earliest_release",
+    "release_status"
+   ],
+   "expected": [
+    [
+     "awaiting scoring",
+     "1",
+     "2026-10-15",
+     "15",
+     "on time: release date still ahead"
+    ],
+    [
+     "scored",
+     "13",
+     "2026-02-25",
+     "-217",
+     "streamable"
+    ],
+    [
+     "rejected",
+     "1",
+     "2026-09-22",
+     "-8",
+     "never streamable: rejected"
+    ]
+   ],
+   "got": [
+    [
+     "awaiting scoring",
+     "1",
+     "2026-10-15",
+     "15",
+     "on time: release date still ahead"
+    ],
+    [
+     "scored",
+     "13",
+     "2026-02-25",
+     "-217",
+     "streamable"
+    ],
+    [
+     "rejected",
+     "1",
+     "2026-09-22",
+     "-8",
+     "never streamable: rejected"
+    ]
+   ],
+   "doc": "An unscored recording whose release date is still ahead is on time, not late.\nWhy: the sample's one unscored recording is already past its release date (LATE), so the on-time branch is\nnever reached.\nExpect: with its release moved to 2026-10-15, awaiting scoring reads 15 days ahead, 'on time: release date still ahead'.",
+   "test": "test_s7_unscored_recording_before_its_release_is_on_time",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S7",
+   "inputs": [
+    {
+     "kind": "update",
+     "sql": "UPDATE track SET release_date = '2026-09-30' WHERE ingest_status = 'awaiting scoring'",
+     "rows": 1
+    }
+   ],
+   "columns": [
+    "ingest_status",
+    "recordings",
+    "earliest_release",
+    "days_to_earliest_release",
+    "release_status"
+   ],
+   "expected": [
+    [
+     "awaiting scoring",
+     "1",
+     "2026-09-30",
+     "0",
+     "LATE: release date reached, still unscored"
+    ],
+    [
+     "scored",
+     "13",
+     "2026-02-25",
+     "-217",
+     "streamable"
+    ],
+    [
+     "rejected",
+     "1",
+     "2026-09-22",
+     "-8",
+     "never streamable: rejected"
+    ]
+   ],
+   "got": [
+    [
+     "awaiting scoring",
+     "1",
+     "2026-09-30",
+     "0",
+     "LATE: release date reached, still unscored"
+    ],
+    [
+     "scored",
+     "13",
+     "2026-02-25",
+     "-217",
+     "streamable"
+    ],
+    [
+     "rejected",
+     "1",
+     "2026-09-22",
+     "-8",
+     "never streamable: rejected"
+    ]
+   ],
+   "doc": "A release due on the report date itself, still unscored, is already late.\nWhy: the boundary: on its release day the recording must already be streamable, so 'reached' includes the day.\nExpect: with its release moved to 2026-09-30, awaiting scoring reads 0 days, 'LATE: release date reached, still unscored'.",
+   "test": "test_s7_release_due_on_the_report_date_is_late",
+   "outcome": "passed"
+  }
+ ]
 }

@@ -15,7 +15,7 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 
 ## Layout
 
-The site is one page, `index.html`: a slim top bar (sections), a side rail (that section's pages) and one
+The site is one page, `index.html`: a top bar (sections), a side rail (that section's pages) and one
 iframe that every page loads into. Routes are hashes: `#<section>/<page>[/<anchor>]`.
 
 | Route | Loads |
@@ -29,14 +29,18 @@ iframe that every page loads into. Routes are hashes: `#<section>/<page>[/<ancho
 `project1/index.html`, `project2/index.html`, `project3/index.html` and `design/index.html` are now redirect
 stubs (`project2/#usecases` → `#p2/usecases`), so old links and bookmarks still work. Links inside a panel that
 point at those old pages are caught by the shell and turned into routes, so the panels did not need editing.
-The ☰ button hides the rail for a full-width panel; the choice is remembered per browser. To add a page,
+The shell chrome is dark TRON Ares (`assets/shell.css`, modelled on the HELIX view shell): each section has its own
+accent colour, the top-right readout shows the current section and page, and Alt+1 to Alt+5 jump between sections.
+The front panel `home/overview.html` is dark too (`assets/splash.css`); every other panel stays a light reading surface
+(`site.css`). The ☰ button hides the rail for a full-width panel; the choice is remembered per browser. To add a page,
 add one line to `SECTIONS` in the script at the bottom of `index.html`.
 
 ```
 index.html       the site shell (top bar, rail, iframe, router)
 home/            front-page panels: overview, Project 1 package, Project 1 data (bulk / per table), Project 2 brief
-assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png), CROSSFADE artwork
-tools/           stamp_assets.py: tags every link to site.css / panel.js with a content hash
+assets/          site.css (panels), shell.css (index.html chrome), splash.css (home/overview.html), panel.js,
+                 logo, favicons, social card (og_card.png), CROSSFADE artwork
+tools/           stamp_assets.py: tags every link to site.css / shell.css / splash.css / panel.js with a content hash
                  export_p1_data.py: data.xlsx -> project1/data_export/ (data.csv + one CSV per table + zip)
 assets/vendor/   jszip.min.js (JSZip 3.10.1, MIT): builds the Project 1 submission zip in the browser
 design/          top-level design (panel.html)
@@ -77,7 +81,7 @@ The repository is public, so these files can be downloaded by anyone who browses
 .\boot_site.ps1
 ```
 
-## After editing site.css or panel.js
+## After editing site.css, shell.css, splash.css or panel.js
 
 Run `python tools/stamp_assets.py`. It tags each page's links as `site.css?v=<hash>`, so browsers fetch the new file instead of reusing a cached copy (GitHub Pages lets them cache for up to 10 minutes).
 

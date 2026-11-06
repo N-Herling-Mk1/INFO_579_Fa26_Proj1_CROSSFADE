@@ -10,7 +10,7 @@ fetch it fresh. Run from the repository root after editing either file:
 import glob, hashlib, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASSETS = ["site.css", "panel.js"]
+ASSETS = ["site.css", "shell.css", "splash.css", "panel.js"]
 tags = {}
 for name in ASSETS:
     with open(os.path.join(ROOT, "assets", name), "rb") as f:
@@ -20,7 +20,7 @@ print("[1/2] fingerprints: " + ", ".join(f"{n}={t}" for n, t in tags.items()), f
 pages = sorted(set(glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True)))
 changed = 0
 for path in pages:
-    html = open(path, encoding="utf-8").read()
+    html = open(path, encoding="utf-8", newline="").read()   # keep CRLF/LF as checked out
     new = html
     for name, tag in tags.items():
         new = re.sub(r'((?:\.\./)*assets/' + re.escape(name) + r')(\?v=[0-9a-f]+)?"', r'\1?v=' + tag + '"', new)

@@ -9,8 +9,9 @@ Four layers:
                row for row, in order, to the exact decimal; two runs give the same result.
   behaviour    logic the sample data never exercises: a row is added or changed inside a
                transaction, the query is checked, and everything is rolled back.
-  errors       use cases whose right answer is a refusal (expected_errors.sql, tagged [E#]): MySQL must
-               raise exactly the expected error and leave the data unchanged.
+  errors       use cases whose right answer is a refusal: the [E#] statements at the end of
+               single_table.sql, marked EXPECTED TO FAIL. MySQL must raise exactly the expected error and
+               leave the data unchanged.
   coverage     the file as a whole: every non-associative table queried, every requirement (a)-(e)
                met at least twice, every single-table use case answered (by a query or an expected
                error), tags unique and in order.
@@ -33,7 +34,9 @@ NON_ASSOCIATIVE = ["artist", "track", "genre", "listener", "scoring_model", "sta
 SINGLE_ROW = ["CONCAT", "LENGTH", "CHAR_LENGTH", "SUBSTR", "SUBSTRING", "INSTR", "TRIM", "REPLACE", "LPAD", "RPAD",
               "UPPER", "LOWER", "LEFT", "RIGHT", "ABS", "POW", "POWER", "SQRT", "ROUND", "TRUNCATE", "FLOOR", "CEIL",
               "CEILING", "MOD", "DATE", "TIME", "EXTRACT", "DATE_FORMAT", "DATE_ADD", "DATE_SUB", "DATEDIFF", "NOW",
-              "CURDATE", "CURTIME", "YEAR", "MONTH", "DAY", "IFNULL", "COALESCE", "NULLIF"]
+              "CURDATE", "CURTIME", "YEAR", "MONTH", "DAY"]
+# IFNULL, COALESCE and NULLIF are "NULL handling functions" in the Unit 8 slides, a group of their own: they count as
+# neither (a) single-row nor (e) selection control.
 AGGREGATE = ["COUNT", "SUM", "AVG", "STD", "STDDEV", "MAX", "MIN"]
 
 
@@ -73,9 +76,10 @@ def allowed_columns(q, use_cases):
 
 
 # ============================================================================ contract (per query)
-def test_comment_contract(query, use_cases):
-    """Preceded by a purpose comment that carries a tag, the table, use cases, a business question and
-    the requirements it meets; every use case it names exists."""
+def test_comment_contract(query, use_cases, data):
+    """Preceded by a purpose comment that carries a tag, the table, use cases, the business need, a business
+    question, the requirements it meets and its output columns; every use case it names exists, and the output
+    columns are the ones the oracle answers with."""
     assert query.tag, "comment has no [S#] tag"
     assert query.table in NON_ASSOCIATIVE, f"tag must name a non-associative table, got {query.table!r}"
     assert query.use_cases, "comment names no use case (Use cases: UC-xx)"
@@ -83,9 +87,14 @@ def test_comment_contract(query, use_cases):
     assert not unknown, f"use cases not in use_cases.json: {unknown}"
     assert len(query.question) > 20, "comment has no business question"
     assert query.declared, "comment lists no brief requirements (Requirements: (a) ...)"
+    assert len(query.need) > 20, "comment states no business need (Business need: ...)"
+    assert query.output, "comment lists no output columns (Output: col, col, ...)"
+    if query.tag in ORACLES:
+        want = ORACLES[query.tag](data)[0]
+        assert query.output == want, f"Output: lists {query.output}, the oracle answers with {want}"
     from conftest import record
-    record(query.tag, table=query.table, use_cases=query.use_cases, question=query.question,
-           declared=query.declared, sql=query.sql)
+    record(query.tag, table=query.table, use_cases=query.use_cases, question=query.question, need=query.need,
+           declared=query.declared, output=query.output, sql=query.sql)
 
 
 def test_read_only_select(query):
@@ -143,7 +152,8 @@ def test_result_matches_oracle(query, db, data):
     cols, rows = run(db, query.sql)
     want_cols, want = ORACLES[query.tag](data)
     from conftest import record
-    record(query.tag, columns_out=cols, rows=[[None if v is None else str(v) for v in r] for r in rows])
+    record(query.tag, columns_out=cols, rows=[[None if v is None else str(v) for v in r] for r in rows],
+           expected={"columns": want_cols, "rows": strs(want)})
     assert cols == want_cols, f"columns {cols} != {want_cols}"
     assert len(rows) == len(want), f"{len(rows)} rows, oracle has {len(want)}"
     for i, (g, w) in enumerate(zip(rows, want), 1):
@@ -156,6 +166,29 @@ def test_result_is_deterministic(query, db):
 
 
 # ============================================================================ behaviour (targeted)
+# Each behaviour test is one "case": its inputs (rows added, statements run), the oracle's expected
+# result on the changed data, and MySQL's actual result are logged and written to the results
+# snapshot, so the site can show every case. The docstring is the case's description:
+# first line = title, then "Why:" and "Expect:".
+CASE = {}
+
+
+def strs(rows):
+    return [[None if v is None else str(v) for v in r] for r in rows]
+
+
+@pytest.fixture(autouse=True)
+def case_log(request):
+    m = re.match(r"test_s(\d+)_", request.node.name)
+    if m:
+        CASE.clear()
+        CASE.update(tag="S" + m.group(1), inputs=[])
+    yield
+    if m:
+        from conftest import record_case
+        record_case(request.node.name, dict(CASE, doc=(request.node.function.__doc__ or "").strip()))
+
+
 @pytest.fixture
 def tx(db):
     """A cursor inside a transaction that is always rolled back."""
@@ -165,10 +198,15 @@ def tx(db):
     db.rollback()
 
 
+class Written(dict):
+    def __missing__(self, tag):
+        pytest.fail(f"[{tag}] has no statement in single_table.sql yet: write the query under its comment")
+
+
 @pytest.fixture
 def q(pytestconfig):
     from conftest import parse_queries, find_file
-    return {x.tag: x for x in parse_queries(find_file(pytestconfig, "sql"))}
+    return Written({x.tag: x for x in parse_queries(find_file(pytestconfig, "sql"))})
 
 
 def add(cur, tables, table, row):
@@ -177,19 +215,30 @@ def add(cur, tables, table, row):
     vals = [bytes.fromhex(v[2:]) if isinstance(v, str) and v.startswith("0x") else v for v in row.values()]
     cur.execute(f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(['%s'] * len(cols))})", vals)
     tables[table]["rows"].append({k: (None if v is None else str(v)) for k, v in row.items()})
+    CASE.setdefault("inputs", []).append({"kind": "insert", "table": table,
+                                          "row": {k: (None if v is None else str(v)) for k, v in row.items()}})
+
+
+def change(cur, sql):
+    """Run a data change inside tx (it is rolled back) and log it as a case input."""
+    cur.execute(sql)
+    CASE.setdefault("inputs", []).append({"kind": "update", "sql": sql, "rows": cur.rowcount})
 
 
 def check(cur, query, tables):
     cur.execute(query.sql)
     got = [tuple(canon(v) for v in r) for r in cur.fetchall()]
-    want = ORACLES[query.tag](tables)[1]
+    want_cols, want = ORACLES[query.tag](tables)
+    CASE.update(columns=want_cols, expected=strs(want), got=strs(got))
     assert got == want, f"MySQL {got} != oracle {want}"
     return got
 
 
 def test_s1_verified_artist_without_country_is_held(tx, q, data):
-    """The 'no payment country' branch: never reached by the sample data (the one artist with no country
-    is also unverified, and the first WHEN wins)."""
+    """A verified artist with no payment country is held, not paid.
+    Why: the sample data never reaches this CASE branch (its one artist with no country is also unverified,
+    and the first WHEN wins).
+    Expect: artist 9001 reads 'HOLD: no payment country', payee 'Zero Country (--)'."""
     t = copy.deepcopy(data)
     add(tx, t, "artist", {"artist_id": 9001, "stage_name": "Zero Country", "country": None,
                           "joined_date": "2026-09-01", "payout_rate": "0.0020", "verified": 1})
@@ -199,6 +248,9 @@ def test_s1_verified_artist_without_country_is_held(tx, q, data):
 
 
 def test_s1_equal_rates_break_ties_on_artist_id(tx, q, data):
+    """Two payable artists on the same rate are ordered by artist_id.
+    Why: without a tie-break the order of equal rates is up to MySQL and could change between runs.
+    Expect: artist 900 (rate 0.0040, same as 1042) is listed first, 1042 second."""
     t = copy.deepcopy(data)
     add(tx, t, "artist", {"artist_id": 900, "stage_name": "Aardvark Tie", "country": "US",
                           "joined_date": "2026-01-01", "payout_rate": "0.0040", "verified": 1})
@@ -207,6 +259,9 @@ def test_s1_equal_rates_break_ties_on_artist_id(tx, q, data):
 
 
 def test_s2_unscored_new_release_stays_off_the_shelf(tx, q, data):
+    """The newest upload stays off the shelf until it is scored.
+    Why: only scored recordings can be streamed, so date alone must not put a track on the shelf.
+    Expect: track 9100 (released 2026-09-29, awaiting scoring) is not in the result."""
     t = copy.deepcopy(data)
     add(tx, t, "track", {"track_id": 9100, "artist_id": 1042, "title": "Fresh But Unscored", "duration": 200,
                          "release_date": "2026-09-29", "audio_checksum": "0x" + "01" * 32, "ingest_status": "awaiting scoring"})
@@ -215,6 +270,9 @@ def test_s2_unscored_new_release_stays_off_the_shelf(tx, q, data):
 
 
 def test_s2_same_day_releases_order_by_track_id(tx, q, data):
+    """Two releases on the same day are ordered by track_id, and run time is shown as m:ss.
+    Why: same-day releases tie on the date; 61 seconds checks the seconds are zero-padded.
+    Expect: 4800 then 4828 at the top; 4800's run_time is '1:01'."""
     t = copy.deepcopy(data)
     add(tx, t, "track", {"track_id": 4800, "artist_id": 1043, "title": "Same Day", "duration": 61,
                          "release_date": "2026-07-10", "audio_checksum": "0x" + "02" * 32, "ingest_status": "scored"})
@@ -223,6 +281,9 @@ def test_s2_same_day_releases_order_by_track_id(tx, q, data):
 
 
 def test_s2_shelf_never_holds_more_than_five(tx, q, data):
+    """The shelf never shows more than five recordings.
+    Why: the sample data has exactly enough scored tracks that LIMIT 5 is never pushed.
+    Expect: 5 rows, newest first: track 9202 (released 2026-09-22)."""
     t = copy.deepcopy(data)
     for k in range(3):
         add(tx, t, "track", {"track_id": 9200 + k, "artist_id": 1044, "title": f"New {k}", "duration": 120,
@@ -232,16 +293,22 @@ def test_s2_shelf_never_holds_more_than_five(tx, q, data):
 
 
 def test_s3_genre_without_description_is_hidden(tx, q, data):
+    """A genre with no description is flagged to be hidden from the blend composer.
+    Why: every genre in the sample data has a description, so the HIDE branch is never reached.
+    Expect: genre 9 (rock) shows 'rock: (no description)' and 'HIDE: no description for the composer'."""
     t = copy.deepcopy(data)
-    tx.execute("UPDATE genre SET description = NULL WHERE genre_id = 9")
+    change(tx, "UPDATE genre SET description = NULL WHERE genre_id = 9")
     [g for g in t["genre"]["rows"] if g["genre_id"] == "9"][0]["description"] = None
     rows = check(tx, q["S3"], t)
-    assert rows[9][2:] == ("(no description)", "HIDE: no description for the composer")
+    assert rows[9][2:] == ("rock: (no description)", "HIDE: no description for the composer")
 
 
 def test_s4_tier_with_no_listeners_is_absent(tx, q, data):
+    """A plan tier nobody is on does not appear in the subscriber mix.
+    Why: every tier has listeners in the sample data; GROUP BY must not invent an empty tier.
+    Expect: only standard and free, in tier order, standard with 5 listeners."""
     t = copy.deepcopy(data)
-    tx.execute("UPDATE listener SET plan_tier = 'standard' WHERE plan_tier = 'premium'")
+    change(tx, "UPDATE listener SET plan_tier = 'standard' WHERE plan_tier = 'premium'")
     for l in t["listener"]["rows"]:
         if l["plan_tier"] == "premium": l["plan_tier"] = "standard"
     rows = check(tx, q["S4"], t)
@@ -249,15 +316,21 @@ def test_s4_tier_with_no_listeners_is_absent(tx, q, data):
 
 
 def test_s5_accuracy_tie_prefers_the_newer_version(tx, q, data):
+    """On equal holdout accuracy the more recently deployed version becomes the default.
+    Why: the sample's top version has no tie, so the deployed_on tie-break is never used for the default.
+    Expect: tie_newer (accuracy 0.7887 like beardown_3sec, but deployed later, 2026-09-01) is the one default."""
     t = copy.deepcopy(data)
     add(tx, t, "scoring_model", {"model_id": 6, "version_label": "tie_newer", "fusion_type": "gated",
                                  "embedding_dimension": 256, "segment_length": 10, "training_corpus": "GTZAN",
                                  "holdout_accuracy": "0.7887", "deployed_on": "2026-09-01"})
     rows = check(tx, q["S5"], t)
-    assert [r[0] for r in rows] == ["tie_newer", "beardown_3sec", "beardown_rrm"]
+    assert [r[0] for r in rows] == ["tie_newer"]
 
 
 def test_s6_window_of_exactly_half_is_not_wide(tx, q, data):
+    """An ambiguity window of exactly 0.50 is not counted as wide.
+    Why: 'wide' means more than half the range; the boundary itself is not in the sample data.
+    Expect: model 3 (only station 7799, window 0.25 to 0.75): 1 station, avg_window 0.50, 0 wide."""
     t = copy.deepcopy(data)
     add(tx, t, "station", {"station_id": 7799, "listener_id": 20938, "model_id": 3, "name": "Edge Window",
                            "minimum_ambiguity": "0.25", "maximum_ambiguity": "0.75", "created_on": "2026-09-01"})
@@ -267,18 +340,46 @@ def test_s6_window_of_exactly_half_is_not_wide(tx, q, data):
 
 
 def test_s7_new_rejection_is_counted_in_pipeline_order(tx, q, data):
+    """A new rejection is counted, and statuses stay in pipeline order, not alphabetical.
+    Why: ingest_status is an ENUM; ORDER BY must follow awaiting scoring, scored, rejected.
+    Expect: rejected shows 2 recordings, earliest release 2026-09-22 (8 days ago), 'never streamable: rejected'."""
     t = copy.deepcopy(data)
     add(tx, t, "track", {"track_id": 9300, "artist_id": 1049, "title": "Clipped Master", "duration": 30,
                          "release_date": "2026-09-28", "audio_checksum": "0x" + "03" * 32, "ingest_status": "rejected"})
     rows = check(tx, q["S7"], t)
     assert [r[0] for r in rows] == ["awaiting scoring", "scored", "rejected"]
-    assert rows[2][1:4] == (2, "2026-09-28", 2)
+    assert rows[2][1:] == (2, "2026-09-22", -8, "never streamable: rejected")
+
+
+def test_s7_unscored_recording_before_its_release_is_on_time(tx, q, data):
+    """An unscored recording whose release date is still ahead is on time, not late.
+    Why: the sample's one unscored recording is already past its release date (LATE), so the on-time branch is
+    never reached.
+    Expect: with its release moved to 2026-10-15, awaiting scoring reads 15 days ahead, 'on time: release date still ahead'."""
+    t = copy.deepcopy(data)
+    change(tx, "UPDATE track SET release_date = '2026-10-15' WHERE ingest_status = 'awaiting scoring'")
+    for r in t["track"]["rows"]:
+        if r["ingest_status"] == "awaiting scoring": r["release_date"] = "2026-10-15"
+    rows = check(tx, q["S7"], t)
+    assert rows[0][1:] == (1, "2026-10-15", 15, "on time: release date still ahead")
+
+
+def test_s7_release_due_on_the_report_date_is_late(tx, q, data):
+    """A release due on the report date itself, still unscored, is already late.
+    Why: the boundary: on its release day the recording must already be streamable, so 'reached' includes the day.
+    Expect: with its release moved to 2026-09-30, awaiting scoring reads 0 days, 'LATE: release date reached, still unscored'."""
+    t = copy.deepcopy(data)
+    change(tx, "UPDATE track SET release_date = '2026-09-30' WHERE ingest_status = 'awaiting scoring'")
+    for r in t["track"]["rows"]:
+        if r["ingest_status"] == "awaiting scoring": r["release_date"] = "2026-09-30"
+    rows = check(tx, q["S7"], t)
+    assert rows[0][1:] == (1, "2026-09-30", 0, "LATE: release date reached, still unscored")
 
 
 # ============================================================================ expected errors
 def test_expected_error_is_raised(error_case, db, data, use_cases):
     """The database refuses the write with exactly the expected error, and nothing changes.
-    Statements live in expected_errors.sql; each answers a use case marked expectsError."""
+    The [E#] statements sit at the end of single_table.sql; each answers a use case marked expectsError."""
     import pymysql
     e = error_case
     assert e.tag and e.tag.startswith("E"), "error statements are tagged [E#]"
@@ -303,7 +404,7 @@ def test_expected_error_is_raised(error_case, db, data, use_cases):
         after = cur.fetchone()[0]
     db.rollback()
     from conftest import record
-    record(e.tag, table=table, use_cases=e.use_cases, question=e.question, sql=e.sql, kind="expected_error",
+    record(e.tag, table=table, use_cases=e.use_cases, question=e.question, need=e.need, sql=e.sql, kind="expected_error",
            expects=f"{code_} {constraint}", got=(f"{got.args[0]} {got.args[1]}" if got else "no error"))
     assert got is not None, "the statement succeeded; it must be refused"
     assert got.args[0] == code_, f"error {got.args[0]} ({got.args[1]}), expected {code_}"
@@ -313,9 +414,14 @@ def test_expected_error_is_raised(error_case, db, data, use_cases):
 
 # ============================================================================ coverage (whole file)
 @pytest.fixture(scope="module")
-def all_queries(pytestconfig):
+def all_statements(pytestconfig):
     from conftest import parse_queries, find_file
     return parse_queries(find_file(pytestconfig, "sql"))
+
+
+@pytest.fixture(scope="module")
+def all_queries(all_statements):
+    return [x for x in all_statements if not x.is_error]
 
 
 def test_every_non_associative_table_is_queried(all_queries):
@@ -329,15 +435,19 @@ def test_each_requirement_is_met_at_least_twice(all_queries):
     assert not weak, f"requirements met fewer than twice: {weak} (all: {counts})"
 
 
-def test_every_single_table_use_case_is_answered(all_queries, use_cases):
-    from conftest import parse_queries, ERRORS_FILE
-    errors = parse_queries(ERRORS_FILE) if ERRORS_FILE.is_file() else []
-    claimed = {(u, x.table) for x in list(all_queries) + errors for u in x.use_cases}
+def test_every_single_table_use_case_is_answered(all_statements, use_cases):
+    claimed = {(u, x.table) for x in all_statements for u in x.use_cases}
     missing = [u["id"] for u in use_cases.values() if u.get("single")
                and not any((u["id"], t) in claimed for t in u["single"])]
     assert not missing, f"single-table use cases with no query: {missing}"
 
 
-def test_tags_are_unique_and_in_order(all_queries):
-    tags = [x.tag for x in all_queries]
-    assert tags == [f"S{i}" for i in range(1, len(tags) + 1)], f"tags {tags}"
+def test_tags_are_unique_and_in_order(all_statements):
+    """Queries S1, S2, ... in order, then the EXPECTED TO FAIL statements E1, E2, ... last: an error stops a
+    script run, so nothing may come after one."""
+    tags = [x.tag for x in all_statements]
+    s = [t for t in tags if t and t[0] == "S"]
+    e = [t for t in tags if t and t[0] == "E"]
+    assert s == [f"S{i}" for i in range(1, len(s) + 1)], f"query tags {s}"
+    assert e == [f"E{i}" for i in range(1, len(e) + 1)], f"error tags {e}"
+    assert tags == s + e, f"every [E#] statement must come after every [S#] query; file order is {tags}"

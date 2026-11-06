@@ -1,0 +1,8 @@
+# Binary files: never convert line endings. ReportLab PDFs are pure ASCII, so Git's
+# own guess (no NUL byte = text) would treat them as text and corrupt them on checkout.
+*.pdf   binary
+*.zip   binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.xlsx  binary

@@ -6,33 +6,105 @@
 <title>Use cases</title>
 <link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
-<link rel="stylesheet" href="../../assets/site.css?v=9bc5a236">
+<link rel="stylesheet" href="../../assets/site.css?v=cb25b6e1">
 <script src="../data/usecases.js"></script>
+<script src="../data/single_table_results.js"></script>
+<style>
+  /* file views */
+  .uc-files { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; border-bottom: 2px solid var(--rule); }
+  .uc-file { display: flex; flex-direction: column; gap: 2px; padding: 9px 16px 8px; margin-bottom: -2px; cursor: pointer; text-align: left;
+    background: #f6f8fa; border: 1px solid var(--rule); border-bottom: 2px solid var(--rule); border-radius: 4px 4px 0 0; color: var(--ink-2); }
+  .uc-file code { font: 600 14px var(--mono); color: var(--ink); background: none; }
+  .uc-file .ft { font: 12px var(--mono); }
+  .uc-file .ft.ok { color: #2e8b57; } .uc-file .ft.todo { color: #8a98a5; }
+  .uc-file:hover { border-color: var(--cyan); }
+  .uc-file[aria-selected="true"] { background: #fff; border-color: var(--cyan) var(--cyan) #fff; border-bottom: 2px solid #fff; box-shadow: inset 0 3px 0 var(--cyan); }
+  .uc-table td.by { white-space: nowrap; }
+  .uc-table td.st { white-space: nowrap; text-align: right; }
+  .tagchip { display: inline-block; font: 600 12px var(--mono); padding: 0 5px; margin: 0 3px 3px 0; border-radius: 3px; border: 1px solid #b9dcec; background: var(--cyan-wash); color: #075d80; }
+  .tagchip.e { border-color: #f1b8ae; background: #fdeeea; color: #a3260f; }
+  .okn { font: 12px var(--mono); color: #2e8b57; } .badn { font: 12px var(--mono); color: var(--ares); } .non { font: 12px var(--mono); color: #8a98a5; }
+  /* right panel: RA or the chosen use case */
+  .rp-tabs { display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid var(--rule); }
+  .rp-tab { font: 600 14px var(--body); padding: 7px 13px; cursor: pointer; color: var(--ink-2); background: #f6f8fa; border: 1px solid var(--rule); border-bottom: 0; border-radius: 4px 4px 0 0; }
+  .rp-tab[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: inset 0 3px 0 var(--amber); position: relative; top: 1px; }
+  .rp-tab:disabled { opacity: .5; cursor: default; }
+  .rp-tabs .note { margin-left: auto; padding-bottom: 6px; }
+  .ra-pane { border-top: 0; }
+  .ev { cursor: pointer; }
+  .ev:hover { background: #fff3cf; }
+  /* cases view */
+  .cs-pane { padding: 14px 18px 28px; }
+  .cs-empty { color: var(--ink-2); padding: 30px 6px; }
+  .cs-h { margin: 2px 0 2px; font: 600 18px/1.3 var(--body); }
+  .cs-h .id { font: 600 15px var(--mono); color: var(--ink-2); margin-right: 6px; }
+  .cs-q { margin: 0 0 6px; color: var(--ink-2); }
+  .cs-rest { font-size: 13px; color: #6c7a86; border-left: 3px solid var(--rule); padding: 2px 10px; margin: 6px 0 12px; }
+  .cs-card { border: 1px solid var(--rule); border-radius: 4px; margin: 14px 0; }
+  .cs-card > header { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 9px 12px; background: #f6f8fa; border-bottom: 1px solid var(--rule); }
+  .cs-card > header .qq { flex: 1; min-width: 200px; font-weight: 600; }
+  .cs-card .bd { padding: 6px 12px 12px; }
+  .cs-card h5 { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); margin: 12px 0 5px; }
+  .cs-card h5 b { color: var(--ink); letter-spacing: 0; text-transform: none; font: 600 12px var(--body); margin-left: 6px; }
+  .cols code { font-size: 12px; background: #f3f7fa; padding: 0 4px; margin: 0 3px 3px 0; display: inline-block; }
+  .cs-card details summary { cursor: pointer; font: 13px var(--mono); color: var(--cyan); margin: 4px 0; }
+  .cs-card pre { margin: 4px 0; font: 12.5px/1.45 var(--mono); background: #f7f9fb; border: 1px solid var(--grid); padding: 8px 10px; overflow-x: auto; }
+  .rt { max-height: 290px; overflow: auto; border: 1px solid var(--rule); }
+  .rt table.grid { font-size: 12.5px; }
+  .rt table.grid td { padding: 3px 9px; }
+  .rt tr.new td { background: #eaf7ee; }
+  .rt tr.bad td { background: #fdeeea; }
+  .rt tr.gone td { background: #f6f8fa; color: #8a98a5; text-decoration: line-through; }
+  .verdict { font: 12.5px/1.5 var(--mono); margin: 6px 0 0; }
+  .verdict.ok { color: #2e8b57; } .verdict.bad { color: var(--ares); }
+  .checks { list-style: none; padding: 0; margin: 0; font-size: 13px; }
+  .checks li { padding: 2px 0; }
+  .checks .k { display: inline-block; width: 18px; font-weight: 700; }
+  .checks .k.ok { color: #2e8b57; } .checks .k.bad { color: var(--ares); }
+  .case { border: 1px solid var(--grid); border-left: 3px solid #2e8b57; border-radius: 3px; padding: 8px 11px 10px; margin: 10px 0; }
+  .case.bad { border-left-color: var(--ares); }
+  .case .ct { font-weight: 600; }
+  .cs-card p.need { margin: 0; font-size: 14px; }
+  .case .why { font-size: 13px; color: var(--ink-2); margin: 3px 0 0; }
+  .case .exp { font-size: 13px; margin: 4px 0 0; }
+  .case .exp b { font-weight: 600; }
+  .kv { border-collapse: collapse; font: 12px var(--mono); margin: 2px 0; }
+  .kv th, .kv td { border: 1px solid var(--grid); padding: 2px 7px; text-align: left; white-space: nowrap; }
+  .kv th { background: #f3f7fa; font-weight: 600; color: var(--ink-2); }
+  .kvwrap { overflow-x: auto; }
+  .legend-mini { font: 12px var(--mono); color: var(--ink-2); margin: 4px 0 0; }
+  .legend-mini i { display: inline-block; width: 11px; height: 11px; vertical-align: -1px; margin: 0 4px 0 10px; border: 1px solid var(--rule); }
+  .legend-mini i.new { background: #eaf7ee; } .legend-mini i.bad { background: #fdeeea; }
+</style>
 </head>
 <body>
 <div class="panel wide uc-page">
   <h1>Use cases</h1>
-  <p class="group-line">From the Project 1 requirements analysis &middot; mapped to the Project 2 queries</p>
-  <p class="lede"><span id="uc-n">The</span> use cases, each built only from what the requirements analysis says the data is for. Hover a row to see the exact
-    phrases it rests on, highlighted in the requirements analysis on the right, and the columns it reads, outlined in the coverage map below. Click a row to pin it.</p>
+  <p class="group-line">From the Project 1 requirements analysis &middot; mapped to the Project 2 queries and their tests</p>
+  <p class="lede"><span id="uc-n">The</span> use cases, each built only from what the requirements analysis says the data is for. Pick a file, then click a use case: the
+    right panel shows each query's inputs, its expected output and every test case. Hover a use case to see the phrases it rests on in the requirements
+    analysis; click a highlighted phrase there to open its use case.</p>
 
   <div class="uc-tiles" id="tiles"></div>
 
+  <nav class="uc-files" id="files" role="tablist" aria-label="Project 2 file"></nav>
+
   <div class="uc-split">
     <section class="uc-left">
-      <h2>Use cases &times; tables</h2>
-      <p class="note"><span class="dot full"></span> answered by that table alone &nbsp;
-        <span class="dot part"></span> partly; the rest needs a join &nbsp;&middot;&nbsp; the six columns are the non-associative tables (Task 2)</p>
+      <h2 id="left-title">Use cases</h2>
+      <p class="note" id="left-note"></p>
       <div class="uc-tablewrap">
         <table class="uc-table" id="uc-table"></table>
       </div>
     </section>
     <aside class="uc-right">
-      <div class="ra-head">
-        <h2>Requirements analysis</h2>
+      <div class="rp-tabs" role="tablist" aria-label="Right panel">
+        <button class="rp-tab" role="tab" data-pane="ra" aria-selected="true">Requirements analysis</button>
+        <button class="rp-tab" role="tab" data-pane="cases" aria-selected="false" id="tab-cases">Cases</button>
         <span class="note" id="ra-status">hover a use case</span>
       </div>
       <div class="ra-pane" id="ra"></div>
+      <div class="ra-pane cs-pane" id="cases" hidden></div>
     </aside>
   </div>
 
@@ -61,6 +133,7 @@
   var SHORT = { artist: "artist", track: "track", genre: "genre", listener: "listener", scoring_model: "scoring_model", station: "station" };
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function pct(a, b) { return Math.round(100 * a / b) + "%"; }
+  function byId(id) { return U.useCases.filter(function (x) { return x.id === id; })[0]; }
 
   document.getElementById("uc-n").textContent = U.useCases.length;
   /* ---------------------------------------------------------------- tiles */
@@ -129,24 +202,195 @@
   var ra = document.getElementById("ra");
   ra.innerHTML = html;
 
-  /* ---------------------------------------------------------------- use case table */
-  var head = "<thead><tr><th>UC</th><th>Use case</th>" +
-    NONASSOC.map(function (t) { return '<th class="tcol"><span>' + SHORT[t] + "</span></th>"; }).join("") +
-    "<th>Also needs</th></tr></thead>";
-  var body = U.useCases.map(function (u) {
-    var cells = NONASSOC.map(function (t) {
-      var s = (u.single || {})[t];
-      return '<td class="c">' + (s === "full" ? '<span class="dot full" title="answered by ' + t + ' alone"></span>' :
-        s === "partial" ? '<span class="dot part" title="partly answered by ' + t + '"></span>' : "") + "</td>";
-    }).join("");
-    var other = Object.keys(u.columns).filter(function (t) { return !(u.single || {})[t]; });
-    var q = u.question ? '<span class="q">' + esc(u.question) + "</span>" : '<span class="q none">no single-table question</span>';
-    return '<tr data-uc="' + u.id + '"><td class="id">' + u.id + '</td><td class="t"><b>' + esc(u.title) + "</b>" + q +
-      (u.rest ? '<span class="rest">' + esc(u.rest) + "</span>" : "") + "</td>" + cells +
-      '<td class="need">' + other.map(function (t) { return "<code>" + t + "</code>"; }).join(" ") + "</td></tr>";
+  /* ---------------------------------------------------------------- the three files
+     Each view lists the use cases for one Project 2 file. A file's tests write a results snapshot
+     (single_table_results.js -> window.P2_SINGLE); its queries name their use cases, which is how a
+     use case is "answered". Until a file has tests its view lists candidates only. */
+  var VIEWS = {
+    single:   { file: "single_table.sql",   task: "Task 2", R: window.P2_SINGLE,
+                ucs: U.useCases.filter(function (u) { return Object.keys(u.single || {}).length; }),
+                none: "" },
+    multiple: { file: "multiple_table.sql", task: "Task 3", R: window.P2_MULTIPLE,
+                ucs: U.useCases.filter(function (u) { return Object.keys(u.columns).length > 1; }),
+                none: "Candidates: the use cases whose data spans two or more tables. None is assigned to multiple_table.sql yet; " +
+                      "each one gets its query, expected output and test cases here once the file and its tests exist." },
+    routines: { file: "routines.sql",       task: "Task 4", R: window.P2_ROUTINES,
+                ucs: U.useCases.slice(),
+                none: "routines.sql is not started. Every use case is a candidate until its 2 procedures + 1 function (or 1 + 2) are chosen; " +
+                      "their inputs, expected outputs and test cases will appear here." }
+  };
+  var ORDER = ["single", "multiple", "routines"];
+  function tagsFor(view, uid) {
+    var R = VIEWS[view].R; if (!R) return [];
+    return Object.keys(R.queries).filter(function (t) { return (R.queries[t].use_cases || []).indexOf(uid) >= 0; })
+      .sort(function (a, b) { return (a[0] === b[0] ? 0 : a[0] === "S" ? -1 : 1) || (+a.slice(1) - +b.slice(1)); });
+  }
+  function casesFor(R, tag) { return (R.cases || []).filter(function (c) { return c.tag === tag; }); }
+  function tally(view, uid) {           // [passed, total] over every check and case behind this use case
+    var R = VIEWS[view].R, p = 0, n = 0; if (!R) return null;
+    tagsFor(view, uid).forEach(function (t) {
+      (R.tests[t] || []).forEach(function (x) { n++; if (x.outcome === "passed") p++; });
+      casesFor(R, t).forEach(function (c) { n++; if (c.outcome === "passed") p++; });
+    });
+    return n ? [p, n] : null;
+  }
+  document.getElementById("files").innerHTML = ORDER.map(function (k) {
+    var v = VIEWS[k], R = v.R;
+    var ft = R ? '<span class="ft ' + (R.failed ? "todo" : "ok") + '">' + R.passed + "/" + (R.passed + R.failed) + " tests passed</span>"
+               : '<span class="ft todo">' + v.task + " &middot; not started</span>";
+    return '<button class="uc-file" role="tab" data-view="' + k + '" aria-selected="false"><code>' + v.file + "</code>" + ft + "</button>";
   }).join("");
-  var tbl = document.getElementById("uc-table");
-  tbl.innerHTML = head + "<tbody>" + body + "</tbody>";
+
+  /* ---------------------------------------------------------------- left table for the current view */
+  var tbl = document.getElementById("uc-table"), view = "single";
+  function drawTable() {
+    var v = VIEWS[view], withTests = !!v.R;
+    document.getElementById("left-title").innerHTML = "Use cases &middot; <code>" + v.file + "</code>";
+    document.getElementById("left-note").innerHTML = withTests
+      ? '<span class="dot full"></span> answered by that table alone &nbsp;<span class="dot part"></span> partly; the rest needs a join &nbsp;&middot;&nbsp; ' +
+        "last test run " + esc(v.R.generated.replace("T", " ")) + ": " + v.R.passed + " passed, " + v.R.failed + " failed"
+      : esc(v.none);
+    var head, body;
+    if (view === "single") {
+      head = "<thead><tr><th>UC</th><th>Use case</th>" + NONASSOC.map(function (t) { return '<th class="tcol"><span>' + SHORT[t] + "</span></th>"; }).join("") +
+        "<th>Answered by</th><th>Tests</th></tr></thead>";
+      body = v.ucs.map(function (u) {
+        var cells = NONASSOC.map(function (t) {
+          var s = (u.single || {})[t];
+          return '<td class="c">' + (s === "full" ? '<span class="dot full" title="answered by ' + t + ' alone"></span>' :
+            s === "partial" ? '<span class="dot part" title="partly answered by ' + t + '"></span>' : "") + "</td>";
+        }).join("");
+        var tags = tagsFor(view, u.id), tl = tally(view, u.id);
+        return '<tr data-uc="' + u.id + '"><td class="id">' + u.id + '</td><td class="t"><b>' + esc(u.title) + '</b><span class="q">' + esc(u.question || "") + "</span></td>" + cells +
+          '<td class="by">' + (tags.length ? tags.map(function (t) { return '<span class="tagchip' + (t[0] === "E" ? " e" : "") + '">' + t + "</span>"; }).join("") : '<span class="non">none</span>') + "</td>" +
+          '<td class="st">' + (tl ? '<span class="' + (tl[0] === tl[1] ? "okn" : "badn") + '">' + tl[0] + "/" + tl[1] + "</span>" : '<span class="non">&ndash;</span>') + "</td></tr>";
+      }).join("");
+    } else {
+      head = "<thead><tr><th>UC</th><th>Use case</th><th>Tables it needs</th><th>Tests</th></tr></thead>";
+      body = v.ucs.map(function (u) {
+        return '<tr data-uc="' + u.id + '"><td class="id">' + u.id + '</td><td class="t"><b>' + esc(u.title) + "</b>" +
+          (u.question ? '<span class="q">' + esc(u.question) + "</span>" : "") + (u.rest ? '<span class="rest">' + esc(u.rest) + "</span>" : "") + "</td>" +
+          '<td class="need">' + Object.keys(u.columns).map(function (t) { return "<code>" + t + "</code>"; }).join(" ") + "</td>" +
+          '<td class="st"><span class="non">not written</span></td></tr>';
+      }).join("");
+    }
+    tbl.innerHTML = head + "<tbody>" + body + "</tbody>";
+    Array.prototype.forEach.call(document.querySelectorAll(".uc-file"), function (b) { b.setAttribute("aria-selected", b.dataset.view === view ? "true" : "false"); });
+  }
+
+  /* ---------------------------------------------------------------- right panel: the chosen use case */
+  var NAMES = {
+    test_comment_contract: "Comment carries tag, table, use cases, question and requirements",
+    test_read_only_select: "One read-only SELECT; no SELECT *; only the crossfade schema",
+    test_reads_exactly_one_table: "MySQL's plan (EXPLAIN) reads only its one table",
+    test_requirements_match_declared: "Requirements (a)-(e) it declares are exactly the ones it uses",
+    test_columns_match_use_cases: "Reads only columns its use cases declare",
+    test_result_matches_oracle: "Result equals the oracle, row for row, in order",
+    test_result_is_deterministic: "Two runs give the same result",
+    test_expected_error_is_raised: "MySQL refuses it with exactly the expected error; table unchanged"
+  };
+  function grid(cols, rows, marks) {
+    return '<div class="rt"><table class="grid"><thead><tr>' + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function (r, i) {
+        return '<tr class="' + ((marks && marks[i]) || "") + '">' + r.map(function (v) {
+          return v === null ? '<td class="null">NULL</td>' : "<td>" + esc(v) + "</td>"; }).join("") + "</tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+  function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function docParts(doc) {           // first line = title; "Why:" and "Expect:" run to the next marker
+    var lines = doc.split(/\n/).map(function (l) { return l.trim(); }), out = { title: lines[0] || "", why: "", expect: "" }, cur = null;
+    lines.slice(1).forEach(function (l) {
+      var m = l.match(/^(Why|Expect):\s*(.*)$/);
+      if (m) { cur = m[1] === "Why" ? "why" : "expect"; out[cur] = m[2]; }
+      else if (cur && l) out[cur] += " " + l;
+    });
+    return out;
+  }
+  function inputHtml(inp) {
+    if (inp.kind === "insert") {
+      var ks = Object.keys(inp.row);
+      return "<div>Insert into <code>" + esc(inp.table) + '</code>:</div><div class="kvwrap"><table class="kv"><tr>' +
+        ks.map(function (k) { return "<th>" + esc(k) + "</th>"; }).join("") + "</tr><tr>" +
+        ks.map(function (k) { var v = inp.row[k]; return "<td>" + (v === null ? "NULL" : esc(v.length > 22 ? v.slice(0, 20) + "…" : v)) + "</td>"; }).join("") + "</tr></table></div>";
+    }
+    return "<pre>" + esc(inp.sql) + ";</pre><div class=\"note\">" + inp.rows + " row" + (inp.rows === 1 ? "" : "s") + " changed</div>";
+  }
+  function queryCard(R, tag, u) {
+    var q = R.queries[tag], ts = R.tests[tag] || [], ok = ts.filter(function (x) { return x.outcome === "passed"; }).length;
+    var h = '<article class="cs-card"><header><span class="tagchip' + (tag[0] === "E" ? " e" : "") + '">' + tag + "</span><code>" + esc(q.table || "") + '</code><span class="qq">' + esc(q.question || "") + "</span>" +
+      '<span class="' + (ok === ts.length ? "okn" : "badn") + '">' + ok + "/" + ts.length + " checks</span></header><div class=\"bd\">";
+    if (q.need) h += '<h5>Business need</h5><p class="need">' + esc(q.need) + "</p>";
+    if (q.kind === "expected_error") {
+      h += "<h5>Input<b>a write the database must refuse &middot; EXPECTED TO FAIL, last statement in the file</b></h5><pre>" + esc(q.sql) + ";</pre>";
+      h += "<h5>Expected output</h5><div>MySQL raises error <code>" + esc(q.expects) + "</code> and <code>" + esc(q.table) + "</code> keeps its " + "rows unchanged.</div>";
+      h += '<div class="verdict ' + (ok === ts.length ? "ok" : "bad") + '">got: ' + esc((q.got || "not run").replace(/Duplicate entry '.*' for key/, "Duplicate entry '…' for key")) + "</div>";
+    } else {
+      h += "<h5>Input<b>the Project 1 sample data, through this query</b></h5>" +
+        '<div class="cols">Reads <code>crossfade.' + esc(q.table) + "</code>: " + (q.columns || []).map(function (c) { return "<code>" + esc(c) + "</code>"; }).join("") + "</div>" +
+        (q.output ? '<div class="cols">Answers with: ' + q.output.map(function (c) { return "<code>" + esc(c) + "</code>"; }).join("") + "</div>" : "") +
+        "<details><summary>show the SQL</summary><pre>" + esc(q.sql) + ";</pre></details>";
+      if (q.expected) {
+        var marks = q.expected.rows.map(function (r, i) { return same(r, (q.rows || [])[i]) ? "" : "bad"; });
+        var bad = marks.filter(Boolean).length || (q.rows || []).length !== q.expected.rows.length;
+        h += "<h5>Expected output<b>" + q.expected.rows.length + " rows, computed in Python from data.csv (oracle.py)</b></h5>" + grid(q.expected.columns, q.expected.rows, marks) +
+          '<div class="verdict ' + (bad ? "bad" : "ok") + '">' + (bad ? "MySQL differs: rows marked red (" + (q.rows || []).length + " rows returned)"
+            : "MySQL returned the same " + q.rows.length + " rows, same columns, same order") + "</div>";
+      }
+    }
+    h += "<h5>Checks</h5><ul class=\"checks\">" + ts.map(function (x) {
+      var base = x.test.replace(/\[.*$/, ""), pass = x.outcome === "passed";
+      return '<li><span class="k ' + (pass ? "ok" : "bad") + '">' + (pass ? "✓" : "✗") + "</span>" + esc(NAMES[base] || base) + "</li>";
+    }).join("") + "</ul>";
+    var cs = casesFor(R, tag);
+    if (cs.length) {
+      h += "<h5>Cases<b>data the sample never reaches; each runs in a transaction that is rolled back</b></h5>";
+      cs.forEach(function (c) {
+        var d = docParts(c.doc || c.test), pass = c.outcome === "passed";
+        var base = (q.expected || {}).rows || [];
+        var marks = (c.expected || []).map(function (r, i) {
+          if (!same(r, (c.got || [])[i])) return "bad";
+          return base.some(function (b) { return same(b, r); }) ? "" : "new";
+        });
+        h += '<div class="case' + (pass ? "" : " bad") + '"><div class="ct">' + (pass ? "✓ " : "✗ ") + esc(d.title) + "</div>" +
+          (d.why ? '<p class="why"><b>Why:</b> ' + esc(d.why) + "</p>" : "") +
+          "<h5>Input</h5>" + (c.inputs || []).map(inputHtml).join("") +
+          '<p class="exp"><b>Expect:</b> ' + esc(d.expect) + "</p>" +
+          (c.columns ? "<h5>Expected output<b>oracle on the changed data</b></h5>" + grid(c.columns, c.expected || [], marks) +
+            '<div class="legend-mini"><i class="new"></i>row changed by the input<i class="bad"></i>MySQL differs</div>' : "") +
+          '<div class="verdict ' + (pass ? "ok" : "bad") + '">' + (pass ? "passed: MySQL matched" : "failed") + " &middot; <code>" + esc(c.test) + "</code></div></div>";
+      });
+    }
+    return h + "</div></article>";
+  }
+  function drawCases() {
+    var pane = document.getElementById("cases"), u = byId(pinned), v = VIEWS[view];
+    document.getElementById("tab-cases").textContent = u ? "Cases · " + u.id : "Cases";
+    if (!u) { pane.innerHTML = '<p class="cs-empty">Click a use case on the left to see its query inputs, expected outputs and test cases.</p>'; return; }
+    var h = '<h3 class="cs-h"><span class="id">' + u.id + "</span>" + esc(u.title) + "</h3>" + (u.question ? '<p class="cs-q">' + esc(u.question) + "</p>" : "") +
+      (u.rest ? '<p class="cs-rest">' + esc(u.rest) + "</p>" : "");
+    var tags = tagsFor(view, u.id);
+    if (v.R && tags.length) {
+      h += tags.map(function (t) { return queryCard(v.R, t, u); }).join("");
+    } else {
+      h += '<article class="cs-card"><header><span class="qq">Not in <code>' + v.file + "</code> yet</span></header><div class=\"bd\">" +
+        "<h5>Data it needs</h5>" + Object.keys(u.columns).map(function (t) {
+          return '<div class="cols"><code>' + t + "</code>: " + u.columns[t].map(function (c) { return "<code>" + c + "</code>"; }).join("") + "</div>"; }).join("") +
+        '<p class="note">Its query, expected output and test cases appear here once ' + esc(v.file) + " and its tests are written.</p></div></article>";
+    }
+    pane.innerHTML = h;
+    pane.scrollTop = 0;
+  }
+
+  /* ---------------------------------------------------------------- right panel tabs */
+  var paneNow = "ra";
+  function showPane(p) {
+    paneNow = p;
+    document.getElementById("ra").hidden = p !== "ra";
+    document.getElementById("cases").hidden = p !== "cases";
+    Array.prototype.forEach.call(document.querySelectorAll(".rp-tab"), function (b) { b.setAttribute("aria-selected", b.dataset.pane === p ? "true" : "false"); });
+    applyFocus();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".rp-tab"), function (b) { b.addEventListener("click", function () { showPane(b.dataset.pane); }); });
 
   /* ---------------------------------------------------------------- heat map */
   var mode = "all";
@@ -197,11 +441,11 @@
     });
   });
 
-  /* ---------------------------------------------------------------- hover / pin */
+  /* ---------------------------------------------------------------- hover / pin, and the address */
   var pinned = null, hovered = null;
   function current() { return hovered || pinned; }
   function applyFocus() {
-    var id = current(), u = U.useCases.filter(function (x) { return x.id === id; })[0];
+    var id = current(), u = byId(id);
     Array.prototype.forEach.call(document.querySelectorAll(".ev"), function (s) {
       s.classList.toggle("on", !!id && (" " + s.dataset.uc + " ").indexOf(" " + id + " ") >= 0);
     });
@@ -220,14 +464,29 @@
       c.classList.toggle("dim", !!u && !cols[c.dataset.col]);
     });
     var st = document.getElementById("ra-status");
+    if (paneNow === "cases") { st.textContent = pinned ? VIEWS[view].file : ""; return; }
     if (!u) { st.textContent = "hover a use case"; return; }
     var first = ra.querySelector(".ev.on");
-    st.textContent = u.id + ": " + u.evidence.length + " passages" + (pinned === u.id ? " (pinned, click again to release)" : "");
+    st.textContent = u.id + ": " + u.evidence.length + " passages";
     if (first) {
       var top = first.getBoundingClientRect().top - ra.getBoundingClientRect().top + ra.scrollTop - 60;
       ra.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     }
   }
+  /* address: #<view>[/<UC-xx>], so a view and a use case can be linked and survive a reload */
+  function go(v, uid) { location.hash = v + (uid ? "/" + uid : ""); }
+  function fromHash() {
+    var p = location.hash.replace(/^#/, "").split("/"), v = VIEWS[p[0]] ? p[0] : "single", uid = byId(p[1]) ? p[1] : null;
+    var redraw = v !== view || !tbl.rows.length;
+    view = v; pinned = uid;
+    if (redraw) drawTable();
+    drawCases();
+    if (uid) showPane("cases"); else applyFocus();
+  }
+  window.addEventListener("hashchange", fromHash);
+  document.getElementById("files").addEventListener("click", function (e) {
+    var b = e.target.closest(".uc-file"); if (b) go(b.dataset.view, pinned && VIEWS[b.dataset.view].ucs.some(function (u) { return u.id === pinned; }) ? pinned : null);
+  });
   tbl.addEventListener("mouseover", function (e) {
     var r = e.target.closest("tbody tr"); if (!r || r.dataset.uc === hovered) return;
     hovered = r.dataset.uc; applyFocus();
@@ -235,8 +494,20 @@
   tbl.addEventListener("mouseleave", function () { hovered = null; applyFocus(); });
   tbl.addEventListener("click", function (e) {
     var r = e.target.closest("tbody tr"); if (!r) return;
-    pinned = pinned === r.dataset.uc ? null : r.dataset.uc; applyFocus();
+    hovered = null;
+    if (pinned === r.dataset.uc && paneNow === "cases") go(view, null);
+    else if (pinned === r.dataset.uc) showPane("cases");
+    else go(view, r.dataset.uc);
   });
+  /* a highlighted phrase in the RA opens its use case (in this view if it is listed here, else the first view that lists it) */
+  ra.addEventListener("click", function (e) {
+    var s = e.target.closest(".ev"); if (!s) return;
+    var ids = s.dataset.uc.split(" "), uid = ids[(ids.indexOf(pinned) + 1) % ids.length];
+    var v = VIEWS[view].ucs.some(function (u) { return u.id === uid; }) ? view
+      : ORDER.filter(function (k) { return VIEWS[k].ucs.some(function (u) { return u.id === uid; }); })[0] || view;
+    go(v, uid);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".ev"), function (s) { s.title = s.dataset.uc.replace(/ /g, ", ") + " (click to open)"; });
 
   /* heat-map tooltip */
   var tip = document.getElementById("tip");
@@ -252,6 +523,7 @@
   document.getElementById("hm").addEventListener("mouseleave", function () { tip.hidden = true; });
 
   drawMap();
+  fromHash();
 })();
 </script>
 </body>

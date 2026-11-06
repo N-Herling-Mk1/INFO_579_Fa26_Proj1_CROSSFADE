@@ -12,7 +12,7 @@ Restarted Nov 6, 2026. The earlier plan (to-do list, requirements tracker, `buil
 | File | Task | Weight | Status |
 |---|---|---|---|
 | `database_implementation.sql` | 1. Create the Project 1 tables and insert the Project 1 sample data | 25% | ready to test |
-| `single_table.sql` | 2. Single-table queries, one per non-associative table, covering (a) to (e) | 25% | ready to test (64 tests) |
+| `single_table.sql` | 2. Single-table queries, one per non-associative table, covering (a) to (e) | 25% | ready to test (66 tests) |
 | `multiple_table.sql` | 3. INNER JOIN over an associative table, LEFT OUTER JOIN, set operation, multi-row subquery, WITH | 25% | not started |
 | `routines.sql` | 4. 2 procedures + 1 function, or 1 procedure + 2 functions | 25% | not started |
 
@@ -48,13 +48,16 @@ against `data.xlsx`), checks the integrity rules, prints PASS or FAIL. Needs onl
 ## Task 2: single_table.sql
 
 Seven queries, S1 to S7: one per single-table use case (UC-01 to UC-06, UC-08, UC-10), so every non-associative table
-is queried and track twice. Each comment carries a tag, its use cases, a business question and the brief
-requirements it meets ((a) S1 to S7, (b) S4 S6 S7, (c) all, (d) S2 S5, (e) S1 S3 S6 S7). Day counts use the fixed
-report date 2026-09-30, so results are reproducible.
+is queried and track twice. Each comment carries a tag, its use cases, the business need it serves (citing the RA), a
+business question, the brief requirements it meets ((a) S1 to S7, (b) S4 S6 S7, (c) all, (d) S2 S5, (e) S1 S3 S6 S7)
+and its output columns. Day counts use the fixed report date 2026-09-30, so results are reproducible.
 
-Tests: `project2/tests/` (pytest + PyMySQL), 64 tests: contract, correctness against an independent Python oracle,
-behaviour (rolled-back transactions), one expected error (UC-15: a duplicate upload must be refused with error 1062)
-and whole-file coverage. See `project2/tests/README.md`.
+The last statement, `[E1]`, is **EXPECTED TO FAIL**: it re-uploads an existing audio file, and MySQL must refuse it with
+error 1062 on `uq_track_audio_checksum` (UC-15). It is last because an error stops a script run; every query above it
+has already run.
+
+Tests: `project2/tests/` (pytest + PyMySQL), 66 tests: contract, correctness against an independent Python oracle,
+behaviour (rolled-back transactions), the expected error [E1] and whole-file coverage. See `project2/tests/README.md`.
 `python project2/tests/build_kit.py` rebuilds the downloadable test kit.
 
 ```
@@ -62,6 +65,19 @@ pip install -r project2/tests/requirements.txt
 $env:CROSSFADE_DB_PASSWORD = "your-root-password"
 python -m pytest project2/tests
 ```
+
+Starter kit: `tests/crossfade_p2_starter_kit.zip`, built by `python project2/scripts/build_starter.py`: the same
+comments (the specification) with every statement removed, plus the tests and both input files. See the kit's README.
+
+Both kits carry two PDFs from `python project2/scripts/build_docs.py`: `run_tests_locally.pdf` (every step) and
+`use_case_reference.pdf` (each use case's tables, columns, input and expected output). Rebuild order after a change:
+tests (`python -m pytest project2/tests`), `build_usecases.py`, `build_docs.py`, then `build_kit.py` and `build_starter.py`.
+
+## Task 4: routines.sql (plan)
+
+Error *handling* belongs here. UC-15's refusal already happens in the database ([E1] in `single_table.sql` shows the raw
+1062); a routine shows the business answering it: an upload procedure with `DECLARE ... HANDLER FOR 1062` that catches
+the duplicate and returns a message to the uploader instead of stopping, so no script halts and it counts toward Task 4.
 
 ## Layout
 

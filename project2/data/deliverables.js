@@ -38,18 +38,21 @@ window.P2 = {
       id: "single", task: "Task 2", file: "single_table.sql",
       title: "Single-table queries", weight: 25, state: "ready to test",
       summary: "Seven queries, S1 to S7, one per question a single table answers: every non-associative table, " +
-        "track twice. Each is tagged with its use cases and the brief requirements it meets, and is checked " +
-        "by 63 unit tests and one expected-error case (UC-15, a duplicate upload MySQL must refuse) against an independent Python answer computed from the Project 1 data.",
+        "track twice. Each comment names its use cases, the business need it serves, the brief requirements it meets and its " +
+        "output columns. The file ends with [E1], EXPECTED TO FAIL: a duplicate upload MySQL must refuse with error 1062 (UC-15). " +
+        "66 tests check it against an independent Python answer computed from the Project 1 data. " +
+        "The starter kit is the same file with every comment and no SQL, plus the tests and both input files.",
       results: "single_table_results.js",
-      kit: "../tests/crossfade_p2_test_kit.zip",
+      kit: "../tests/crossfade_p2_test_kit.zip", kitLocked: true,   // answer-key kit: stays in the repo, no download button
+      starter: "../tests/crossfade_p2_starter_kit.zip",
       test: [
-        "Download the test kit (button above) and unzip it. Install once: <code>pip install -r requirements.txt</code>",
-        "Into the same folder, download <code>data.csv</code> (Home \u2192 Project 1 data \u2192 Bulk) and " +
-          "<code>database_implementation.sql</code> (Project 2 \u2192 database_implementation).",
+        "Download the starter kit (button above) and unzip it: tests, <code>data.csv</code> and <code>database_implementation.sql</code> are inside. " +
+          "Install once: <code>pip install -r requirements.txt</code>",
+        "Download <code>single_table.sql</code> (button above) and put it in the kit folder, replacing the blank one.",
         "Build the database: run <code>database_implementation.sql</code> in Workbench, or " +
           "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
         "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-password\"</code> then " +
-          "<code>python -m pytest</code>. Expect 64 passed. Results land in <code>results/</code>.",
+          "<code>python -m pytest</code>. Expect 66 passed. Results land in <code>results/</code>.",
         "From a clone of the repo instead: <code>python -m pytest project2/tests</code> (it finds every file itself)."
       ],
       reqs: [

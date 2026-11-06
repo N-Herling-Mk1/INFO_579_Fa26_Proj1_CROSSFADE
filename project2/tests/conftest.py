@@ -146,6 +146,15 @@ class Query:
         self.declared = sorted(set(re.findall(r"\(([a-e])\)", m.group(1)))) if m else []
         m = re.search(r"Expects:\s*(\d+)\s+(\w+)", comment)
         self.expects = (int(m.group(1)), m.group(2)) if m else None
+        m = re.search(r"Output:\s*([^\n]+)", comment)
+        self.output = [c.strip() for c in m.group(1).split(",") if c.strip()] if m else []
+        m = re.search(r"Business need:\s*(.+?)(?:\n\s*Business question:|$)", comment, re.S)
+        self.need = re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
+
+    @property
+    def is_error(self):
+        """[E#] statements are writes the database must refuse; [S#] statements are queries."""
+        return bool(self.tag and self.tag.startswith("E"))
 
     def __repr__(self):
         return self.tag or self.sql[:30]
@@ -156,16 +165,15 @@ def parse_queries(path):
 
 
 # ----------------------------------------------------------------------------- collection: one test per query
-ERRORS_FILE = HERE / "expected_errors.sql"
-
-
+# single_table.sql holds the queries ([S1]...) and, last, the statements that must fail ([E1]...).
 def pytest_generate_tests(metafunc):
+    stmts = parse_queries(find_file(metafunc.config, "sql"))
     if "query" in metafunc.fixturenames:
-        qs = parse_queries(find_file(metafunc.config, "sql"))
+        qs = [s for s in stmts if not s.is_error]
         metafunc.parametrize("query", qs, ids=[q.tag or f"stmt{i + 1}" for i, q in enumerate(qs)])
     if "error_case" in metafunc.fixturenames:
-        es = parse_queries(ERRORS_FILE) if ERRORS_FILE.is_file() else []
-        metafunc.parametrize("error_case", es, ids=[e.tag or f"err{i + 1}" for i, e in enumerate(es)])
+        es = [s for s in stmts if s.is_error]
+        metafunc.parametrize("error_case", es, ids=[e.tag for e in es])
 
 
 # ----------------------------------------------------------------------------- database
@@ -271,11 +279,16 @@ def pytest_report_header(config):
     return lines
 
 
-SNAPSHOT = {"queries": {}, "outcomes": {}}
+SNAPSHOT = {"queries": {}, "outcomes": {}, "cases": {}}
 
 
 def record(tag, **kw):
     SNAPSHOT["queries"].setdefault(tag, {}).update(kw)
+
+
+def record_case(name, case):
+    """A behaviour case: tag, inputs, expected and actual rows, docstring (see test_single_table.py)."""
+    SNAPSHOT["cases"][name] = case
 
 
 def pytest_runtest_logreport(report):
@@ -298,7 +311,9 @@ def pytest_sessionfinish(session, exitstatus):
     doc = {"file": "single_table.sql", "generated": datetime.datetime.now().isoformat(timespec="seconds"),
            "passed": sum(1 for o in SNAPSHOT["outcomes"].values() if o == "passed"),
            "failed": sum(1 for o in SNAPSHOT["outcomes"].values() if o != "passed"),
-           "queries": SNAPSHOT["queries"], "tests": tests}
+           "queries": SNAPSHOT["queries"], "tests": tests,
+           "cases": [dict(c, test=n, outcome=next((o for k, o in SNAPSHOT["outcomes"].items() if k.endswith("::" + n)), "not run"))
+                     for n, c in SNAPSHOT["cases"].items()]}
     js = json.dumps(doc, indent=1, default=str, ensure_ascii=False)
     (out / "single_table_results.json").write_text(js, encoding="utf-8")
     (out / "single_table_results.js").write_text(

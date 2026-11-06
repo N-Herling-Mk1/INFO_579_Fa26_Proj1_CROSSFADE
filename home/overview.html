@@ -5,72 +5,170 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CROSSFADE</title>
 <link rel="icon" href="../assets/images/favicon.ico" sizes="any">
-<link rel="stylesheet" href="../assets/site.css?v=9bc5a236">
+<link rel="stylesheet" href="../assets/site.css?v=cb25b6e1">
+<link rel="stylesheet" href="../assets/splash.css?v=0bff86bf">
 <script src="../project1/data/site_data.js"></script>
 <script src="../project2/data/deliverables.js"></script>
+<script src="../project2/data/single_table_results.js"></script>
 </head>
-<body>
-<div class="ov">
-  <section class="ov-hero" style="background-image:url('../assets/images/crossfade_wave.jpg')">
-    <div class="ov-hero-text">
-      <h1>CROSSFADE</h1>
-      <p>A streaming service for independent artists, indexed by where a track sits between genres. One business, carried through the course's three projects: designed, then built as an SQL database, then as a NoSQL database.</p>
-      <p class="ov-meta">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
-      <span class="ov-course"><img src="../assets/images/INFO_579_logo.png" width="424" height="480" alt="INFO 579 course logo">INFO 579: SQL/NoSQL Databases &middot; Fall 2026</span>
+<body class="sp-page">
+<div class="sp">
+  <section class="sp-hero">
+    <div class="sp-hero-img" aria-hidden="true"></div>
+    <canvas id="wave" aria-hidden="true"></canvas>
+    <div class="sp-hero-text">
+      <p class="sp-boot rise" style="--d:0"><span class="led"></span>System online<span class="sep">//</span><span class="dim">INFO 579 &middot; Fall 2026</span><span class="caret"></span></p>
+      <h1 class="sp-title rise" style="--d:1">CROSSFADE</h1>
+      <p class="sp-sub rise" style="--d:2">Between-genres streaming &middot; one business, three databases</p>
+      <p class="sp-lede rise" style="--d:3">A streaming service for independent artists, indexed by <b>where a track sits between genres</b>. The course's three projects carry the same business through: designed, then built as an SQL database, then as a NoSQL database.</p>
+      <p class="sp-who rise" style="--d:4"><span><img src="../assets/images/INFO_579_logo.png" width="424" height="480" alt="INFO 579 course logo">INFO 579: SQL/NoSQL Databases</span><span class="grp">info579_group_1</span><span>Herling, Nathan &middot; Pabari, Nidhi Nilesh</span></p>
     </div>
   </section>
 
-  <section class="ov-body">
-    <h2>Projects</h2>
-    <div class="cards ov-cards">
-      <a class="card" href="../project1/">
-        <span class="num">PROJECT 1</span>
-        <span class="title">Database Design</span>
-        <span class="desc">Requirements analysis, conceptual model, sample data and physical model.</span>
-        <span class="meta"><span>Due Sep 27, 2026</span><span id="p1-status">&nbsp;</span></span>
+  <section class="sp-tele" aria-label="Status">
+    <div class="rise" style="--d:3"><span class="k">Tables</span><span class="v cy" id="t-tables">10</span></div>
+    <div class="rise" style="--d:4"><span class="k">Sample rows</span><span class="v cy" id="t-rows">401</span></div>
+    <div class="rise" style="--d:5"><span class="k">P2 files</span><span class="v" id="t-files">&ndash;<small>/ 4</small></span></div>
+    <div class="rise" style="--d:6"><span class="k">P2 tests</span><span class="v" id="t-tests">&ndash;</span></div>
+    <div class="rise" style="--d:7"><span class="k">Next due</span><span class="v" id="t-due">&ndash;</span></div>
+  </section>
+
+  <section class="sp-body">
+    <h2 class="sp-h">Projects</h2>
+    <div class="sp-cards">
+      <a class="pc p1 rise" style="--d:4" href="../project1/" data-due="2026-09-27">
+        <span class="ix" aria-hidden="true">01</span>
+        <span class="tag">Project 1</span>
+        <span class="ti">Database Design</span>
+        <span class="de">Requirements analysis, conceptual model, sample data and physical model.</span>
+        <span class="bar"><i id="p1-bar"></i></span>
+        <span class="ft"><span>Due Sep 27, 2026</span><span class="st" id="p1-status">&nbsp;</span></span>
       </a>
-      <a class="card" href="../project2/" style="--accent: var(--g4)">
-        <span class="num">PROJECT 2</span>
-        <span class="title">SQL Database</span>
-        <span class="desc">The Project 1 design built and queried as a relational database.</span>
-        <span class="meta"><span>Due Nov 8, 2026</span><span id="p2-status" class="todo">0/4 files</span></span>
+      <a class="pc p2 rise" style="--d:5" href="../project2/" data-due="2026-11-08">
+        <span class="ix" aria-hidden="true">02</span>
+        <span class="tag">Project 2</span>
+        <span class="ti">SQL Database</span>
+        <span class="de">The Project 1 design built and queried as a relational database.</span>
+        <span class="bar"><i id="p2-bar"></i></span>
+        <span class="ft"><span>Due Nov 8, 2026</span><span class="st todo" id="p2-status">&ndash;/4 files</span></span>
       </a>
-      <a class="card" href="../project3/" style="--accent: var(--g8)">
-        <span class="num">PROJECT 3</span>
-        <span class="title">NoSQL Database</span>
-        <span class="desc">The same business modelled in a NoSQL database.</span>
-        <span class="meta"><span>Due Dec 13, 2026</span><span class="todo">Not started</span></span>
+      <a class="pc p3 rise" style="--d:6" href="../project3/" data-due="2026-12-13">
+        <span class="ix" aria-hidden="true">03</span>
+        <span class="tag">Project 3</span>
+        <span class="ti">NoSQL Database</span>
+        <span class="de">The same business modelled in a NoSQL database.</span>
+        <span class="bar"><i></i></span>
+        <span class="ft"><span>Due Dec 13, 2026</span><span class="st idle">Not started</span></span>
       </a>
-      <a class="card" href="../design/" style="--accent: var(--ink-2)">
-        <span class="num">DESIGN</span>
-        <span class="title">Top-level design</span>
-        <span class="desc">The business, its ten entities, and how each project builds on the last.</span>
-        <span class="meta"><span>All projects</span><span></span></span>
+      <a class="pc ds rise" style="--d:7" href="../design/">
+        <span class="ix" aria-hidden="true">&#9671;</span>
+        <span class="tag">Design</span>
+        <span class="ti">Top-level design</span>
+        <span class="de">The business, its ten entities, and how each project builds on the last.</span>
+        <span class="bar"><i style="width:100%"></i></span>
+        <span class="ft"><span>All projects</span><span class="st">Reference</span></span>
       </a>
     </div>
 
-    <h2>Quick access</h2>
-    <div class="ov-quick">
-      <a class="tile" href="../index.html#home/p1"><span class="tile-num">01</span><span class="tile-label">Project 1</span><span class="tile-sub">Instructions and the completed submission</span></a>
-      <a class="tile" href="../index.html#home/data"><span class="tile-num">02</span><span class="tile-label">Project 1 data</span><span class="tile-sub">The bulk data.csv, or one CSV per table</span></a>
-      <a class="tile" href="../index.html#home/brief"><span class="tile-num">03</span><span class="tile-label">Project 2 brief</span><span class="tile-sub">Assignment instructions (PDF)</span></a>
+    <h2 class="sp-h">Quick access</h2>
+    <div class="sp-quick">
+      <a class="qa rise" style="--d:6" href="../index.html#home/p1"><span class="n">01</span><span><span class="l">Project 1</span><span class="s">Instructions and the completed submission</span></span><span class="go" aria-hidden="true">&rsaquo;</span></a>
+      <a class="qa rise" style="--d:7" href="../index.html#home/data"><span class="n">02</span><span><span class="l">Project 1 data</span><span class="s">The bulk data.csv, or one CSV per table</span></span><span class="go" aria-hidden="true">&rsaquo;</span></a>
+      <a class="qa rise" style="--d:8" href="../index.html#home/brief"><span class="n">03</span><span><span class="l">Project 2 brief</span><span class="s">Assignment instructions (PDF)</span></span><span class="go" aria-hidden="true">&rsaquo;</span></a>
     </div>
+
+    <p class="sp-foot"><span>CROSSFADE &middot; INFO 579 Group 1</span><a href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" target="_blank" rel="noopener">GitHub repository &rsaquo;</a><span>Alt+1&ndash;5 &middot; jump between sections</span></p>
   </section>
 </div>
 <script>
 (function () {
-  var s = (window.SITE && window.SITE.status) || {}, keys = Object.keys(s), el = document.getElementById("p1-status");
+  function $(id) { return document.getElementById(id); }
+  function bar(id, frac) { var b = $(id); if (b) requestAnimationFrame(function () { setTimeout(function () { b.style.width = Math.round(frac * 100) + "%"; }, 350); }); }
+
+  /* Project 1 deliverables + data size */
+  var S = window.SITE || {}, st = S.status || {}, keys = Object.keys(st);
   if (keys.length) {
-    var done = keys.filter(function (k) { return s[k]; }).length;
-    el.textContent = done + "/" + keys.length + " deliverables"; el.className = done === keys.length ? "done" : "todo";
+    var done = keys.filter(function (k) { return st[k]; }).length;
+    $("p1-status").textContent = done + "/" + keys.length + " deliverables";
+    $("p1-status").className = "st " + (done === keys.length ? "done" : "todo");
+    bar("p1-bar", done / keys.length);
   }
+  if (S.tables) {
+    $("t-tables").textContent = S.tables.length;
+    $("t-rows").textContent = S.tables.reduce(function (n, t) { return n + t.rows.length; }, 0);
+  }
+
+  /* Project 2 files present on the server */
   if (window.P2) {
-    var have = 0, seen = 0, p2 = document.getElementById("p2-status");
+    var have = 0, seen = 0, n = window.P2.files.length;
     window.P2.present("../project2/", function (f, ok) {
       seen++; if (ok) have++;
-      if (seen === window.P2.files.length) { p2.textContent = have + "/" + seen + " files"; p2.className = have === seen ? "done" : "todo"; }
+      if (seen !== n) return;
+      $("p2-status").textContent = have + "/" + n + " files";
+      $("p2-status").className = "st " + (have === n ? "done" : "todo");
+      $("t-files").innerHTML = have + "<small>/ " + n + "</small>";
+      $("t-files").className = "v " + (have === n ? "ok" : "warn");
+      bar("p2-bar", have / n);
     });
   }
+
+  /* latest pytest run of single_table.sql */
+  var R = window.P2_SINGLE;
+  if (R) {
+    var tot = R.passed + R.failed;
+    $("t-tests").innerHTML = R.passed + "<small>/ " + tot + "</small>";
+    $("t-tests").className = "v " + (R.failed ? "warn" : "ok");
+    $("t-tests").title = "single_table.sql, run " + R.generated.replace("T", " ");
+  }
+
+  /* countdown to the next due date (end of that day, local time) */
+  var now = new Date(), next = null;
+  Array.prototype.forEach.call(document.querySelectorAll(".pc[data-due]"), function (c) {
+    var d = new Date(c.dataset.due + "T23:59:00");
+    if (d >= now && (!next || d < next.d)) next = { d: d, c: c };
+  });
+  if (next) {
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var dueDay = new Date(next.d.getFullYear(), next.d.getMonth(), next.d.getDate());
+    var days = Math.round((dueDay - today) / 864e5), lbl = next.c.querySelector(".tag").textContent.replace("Project ", "P");
+    $("t-due").innerHTML = lbl + "<small>" + (days === 0 ? "today" : days === 1 ? "tomorrow" : "in " + days + " days") + "</small>";
+    $("t-due").title = "Due " + next.c.dataset.due + ", 11:59 PM";
+    $("t-due").className = "v " + (days <= 3 ? "warn" : "cy");
+    next.c.classList.add("live");
+  }
+
+  /* hero: two families of strands fading into each other (the crossfade) */
+  var cv = $("wave"), cx = cv.getContext("2d"), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function size() { W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  var STR = 14;
+  function frame(t) {
+    t = t / 1000;
+    cx.clearRect(0, 0, W, H);
+    cx.globalCompositeOperation = "lighter";
+    var x0 = W * (W > 900 ? 0.5 : 0.3), span = W - x0;
+    var g = cx.createLinearGradient(x0, 0, W, 0);
+    g.addColorStop(0, "rgba(139,61,255,0)"); g.addColorStop(0.18, "rgba(139,61,255,.55)"); g.addColorStop(0.45, "rgba(47,107,255,.6)");
+    g.addColorStop(0.72, "rgba(54,211,153,.6)"); g.addColorStop(1, "rgba(245,213,71,.55)");
+    cx.strokeStyle = g;
+    for (var k = 0; k < STR; k++) {
+      var ph = k / STR, amp = H * (0.10 + 0.16 * Math.sin(ph * Math.PI));
+      cx.lineWidth = 0.6 + 1.1 * Math.sin(ph * Math.PI);
+      cx.beginPath();
+      for (var x = 0; x <= span; x += 6) {
+        var u = x / span;                                          // 0 -> 1 across the fade
+        var a = Math.sin(u * 7.0 + t * 0.9 + ph * 2.2);            // genre A
+        var b = Math.sin(u * 11.0 - t * 0.6 + ph * 3.1);           // genre B
+        var y = H * 0.52 + amp * ((1 - u) * a + u * b) * Math.sin(Math.PI * Math.min(1, u * 1.15));
+        if (x === 0) cx.moveTo(x0 + x, y); else cx.lineTo(x0 + x, y);
+      }
+      cx.stroke();
+    }
+    cx.globalCompositeOperation = "source-over";
+    if (!still) requestAnimationFrame(frame);
+  }
+  size(); window.addEventListener("resize", size);
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
