@@ -14,7 +14,20 @@ window.P2 = {
   files: [
     {
       id: "implementation", task: "Task 1", file: "database_implementation.sql",
-      title: "Database implementation", weight: 25,
+      title: "Database implementation", weight: 25, state: "ready to test",
+      summary: "Builds the Project 1 physical model as the MySQL database crossfade (10 tables, every key, " +
+        "index and CHECK named) and loads the Project 1 sample data unchanged: 401 rows. " +
+        "Drops and rebuilds the database, so it can be run any number of times.",
+      test: [
+        "Download the script with the button above.",
+        "MySQL Workbench: File \u2192 Open SQL Script, then Execute (the lightning bolt). " +
+          "Or from a terminal in the download folder (works in PowerShell too): " +
+          "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
+        "Refresh the schema list: <code>crossfade</code> should hold 10 tables. " +
+          "<code>SELECT COUNT(*) FROM crossfade.genre_probability;</code> returns 270.",
+        "Full check, from the repo root: <code>python project2/scripts/check_implementation.py</code>. " +
+          "It runs the script twice, compares all 401 rows with data.xlsx and checks integrity rules I1, I2, I3, I5 and I7; it ends with PASS."
+      ],
       reqs: [
         "SQL statements that create the tables of the Project 1 design.",
         "SQL statements that insert the sample data provided in Project 1.",

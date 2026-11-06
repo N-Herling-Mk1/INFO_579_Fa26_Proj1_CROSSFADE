@@ -1,8 +1,9 @@
 """Export the graded Project 1 sample data (data.xlsx) as one CSV per table.
 
 Reads project1/deliverables/data.xlsx, the file handed in for Project 1, and writes
+    project1/data_export/data.csv               bulk: the whole sheet, laid out as in data.xlsx
     project1/data_export/csv/<table>.csv        one file per table, header = xlsx column names
-    project1/data_export/crossfade_project1_data.zip   data.xlsx + the 10 CSVs + README.txt
+    project1/data_export/crossfade_project1_data.zip   data.xlsx + data.csv + the 10 CSVs + README.txt
 then reads every CSV back and checks it cell-for-cell against the workbook.
 
 Value rules (no rounding, no rebuilding):
@@ -92,8 +93,24 @@ for n, (title, header, data) in enumerate(tables, 1):
     written.append((title, path, header, data))
     bar(n, len(tables), slug(title))
 
+BULK = os.path.join(OUT, "data.csv")
+ncol_sheet = ws.max_column
+with open(BULK, "w", encoding="utf-8", newline="") as f:
+    w = csv.writer(f, lineterminator="\n")
+    for r in rows:
+        w.writerow([fmt(c) for c in r[:ncol_sheet]])
+print(f"      bulk: data.csv, the whole sheet as laid out in data.xlsx ({len(rows)} rows x {ncol_sheet} columns)", flush=True)
+
 print("[3/4] checking every CSV against the workbook", flush=True)
 bad = 0
+with open(BULK, encoding="utf-8", newline="") as f:
+    bulk_back = list(csv.reader(f))
+if len(bulk_back) != len(rows):
+    print("      data.csv: row count mismatch"); bad += 1
+for r_cells, r_back in zip(rows, bulk_back):
+    for c, s in zip(r_cells[:ncol_sheet], r_back):
+        if s != fmt(c):
+            print(f"      data.csv {c.coordinate}: {c.value!r} -> {s!r}"); bad += 1
 for n, (title, path, header, data) in enumerate(written, 1):
     with open(path, encoding="utf-8", newline="") as f:
         back = list(csv.reader(f))
@@ -118,7 +135,9 @@ print("[4/4] building " + os.path.relpath(ZIP, ROOT), flush=True)
 readme = """CROSSFADE - INFO 579 Project 1 sample data (info579_group_1)
 
 data.xlsx        the sample data exactly as handed in for Project 1
-csv/<table>.csv  the same data, one file per table, exported by tools/export_p1_data.py
+data.csv         bulk: the whole sheet as one CSV, laid out as in data.xlsx
+                 (each table = title row, header row, data rows, blank row)
+csv/<table>.csv  the same data, one file per table
 
 CSV conventions
   header row     the column names used in data.xlsx
@@ -140,8 +159,9 @@ def add(z, arcname, data):
 with zipfile.ZipFile(ZIP, "w") as z:
     add(z, "README.txt", readme)
     add(z, "data.xlsx", open(XLSX, "rb").read())
+    add(z, "data.csv", open(BULK, "rb").read())
     for title, path, _, _ in written:
         add(z, "csv/" + os.path.basename(path), open(path, "rb").read())
-print(f"      {os.path.getsize(ZIP):,} bytes, {len(written) + 2} files", flush=True)
+print(f"      {os.path.getsize(ZIP):,} bytes, {len(written) + 3} files", flush=True)
 for t, _, _, d in written:
     print(f"      {slug(t):<20}{len(d):>4} rows")

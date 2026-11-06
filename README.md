@@ -10,15 +10,16 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 |---|---|---|---|
 | [`design/`](design/) | Top-level design shared by all three | | |
 | [`project1/`](project1/) | Project 1: Database Design | Sep 27, 2026 | All 4 deliverables; submission zip in `project1/submission/` |
-| [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | Restarted Nov 6: four `.sql` deliverables, see [`project2/README.md`](project2/README.md) |
+| [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | 1 of 4 `.sql` files (Task 1 ready to test), see [`project2/README.md`](project2/README.md) |
 | [`project3/`](project3/) | Project 3: NoSQL Database | Dec 13, 2026 | Not started |
 
 ## Layout
 
 ```
-index.html       front page: art | title on top, quick-access rail | view below.
-                 Rail: 01 Project 1 (brief + completed submission + supporting docs),
-                 02 Project 1 data (download), 03 Project 2 brief. Views open at #p1, #data, #brief.
+index.html       front page. Top: art | description + the four project cards.
+                 Below: rail | view. Rail: 01 Project 1 (brief + completed submission + supporting
+                 docs), 02 Project 1 data (bulk data.csv or per-table CSVs), 03 Project 2 brief.
+                 Views open at #p1 (default), #data/bulk, #data/tables, #brief.
 assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png), CROSSFADE artwork
 tools/           build_banner.py: writes the shared top banner into every top-level page
                  stamp_assets.py: tags every link to site.css / panel.js with a content hash
@@ -26,7 +27,7 @@ tools/           build_banner.py: writes the shared top banner into every top-le
 assets/vendor/   jszip.min.js (JSZip 3.10.1, MIT): builds the Project 1 submission zip in the browser
 design/          top-level design: the business and its ten entities
 project1/        Database Design: deliverables, sources, docs, its own site
-  data_export/   the graded data.xlsx as one CSV per table, plus crossfade_project1_data.zip
+  data_export/   the graded data.xlsx as data.csv (whole sheet) and csv/<table>.csv, plus crossfade_project1_data.zip
   brief/         (to add) info579_project01.pdf; the front page shows it once it exists
 project2/        SQL Database
 project3/        NoSQL Database
@@ -42,7 +43,7 @@ Each project's graded submission is built from that project's `deliverables/` fo
 python tools/export_p1_data.py
 ```
 
-Reads `project1/deliverables/data.xlsx` (the file handed in), writes `project1/data_export/csv/<table>.csv` for all 10 tables (401 rows), checks every CSV cell against the workbook, then builds `crossfade_project1_data.zip` (data.xlsx + CSVs + README.txt). Empty field = NULL; dates `yyyy-mm-dd`; timestamps `yyyy-mm-dd hh:mm:ss`; decimals exact.
+Reads `project1/deliverables/data.xlsx` (the file handed in) and writes two views of it: `project1/data_export/data.csv`, the whole sheet laid out as in the workbook, and `project1/data_export/csv/<table>.csv` for each of the 10 tables (401 rows). Checks every cell of both against the workbook, then builds `crossfade_project1_data.zip` (data.xlsx + data.csv + CSVs + README.txt). Empty field = NULL; dates `yyyy-mm-dd`; timestamps `yyyy-mm-dd hh:mm:ss`; decimals exact.
 
 ## Course materials (transport only)
 

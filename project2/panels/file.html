@@ -6,7 +6,7 @@
 <title>Deliverable</title>
 <link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
-<link rel="stylesheet" href="../../assets/site.css?v=5f5f8128">
+<link rel="stylesheet" href="../../assets/site.css?v=44ce316d">
 <script src="../data/deliverables.js"></script>
 </head>
 <body>
@@ -14,9 +14,15 @@
   <p class="group-line" id="kicker"></p>
   <h1 id="name"></h1>
   <p class="lede" id="title"></p>
+  <p class="prose" id="summary" hidden></p>
 
   <h2>Requirements</h2>
   <ul class="prose" id="reqs"></ul>
+
+  <div id="test" hidden>
+    <h2>Test it locally</h2>
+    <ol class="prose" id="test-steps"></ol>
+  </div>
 
   <h2>Script</h2>
   <div id="script">
@@ -36,13 +42,22 @@
   document.getElementById("title").textContent = f.title;
   document.getElementById("path").textContent = "project2/deliverables/" + f.file;
   document.getElementById("reqs").innerHTML = f.reqs.map(function (r) { return "<li>" + r + "</li>"; }).join("");
+  if (f.summary) { var sm = document.getElementById("summary"); sm.textContent = f.summary; sm.hidden = false; }
   var url = "../deliverables/" + f.file;
   fetch(url, { cache: "no-store" }).then(function (r) {
     if (!r.ok) return;
     return r.text().then(function (sql) {
       var box = document.getElementById("script");
       box.innerHTML = '<div class="toolbar"><a class="btn" download></a><span class="note"></span></div><div class="prose"><pre><code></code></pre></div>';
-      var a = box.querySelector("a"); a.href = url; a.textContent = "Download " + f.file;
+      var a = box.querySelector("a"); a.href = url; a.textContent = "Download " + f.file; a.className = "btn primary";
+      if (f.test) {
+        document.getElementById("test-steps").innerHTML = f.test.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+        document.getElementById("test").hidden = false;
+        var top = document.createElement("div"); top.className = "toolbar";
+        top.innerHTML = '<a class="btn primary" download></a>';
+        top.firstChild.href = url; top.firstChild.textContent = "Download " + f.file;
+        document.getElementById("title").after(top);
+      }
       box.querySelector(".note").textContent = sql.split("\n").length + " lines";
       box.querySelector("code").textContent = sql;
     });

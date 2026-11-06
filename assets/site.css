@@ -464,3 +464,125 @@ table.files tfoot td { font: 600 13px var(--mono); color: var(--ink-2); border-b
   table.files .acts .mark { min-width: 0; white-space: normal; }
   table.files .acts .btn { display: flex; justify-content: center; margin: 3px 0; padding: 8px 6px; }
 }
+
+/* front page: project cards in the top panel, beside the description */
+.home-head { flex-direction: row; align-items: center; gap: 36px; }
+.head-text { flex: 1 1 auto; min-width: 0; max-width: 62ch; }
+.head-cards {
+  flex: 0 0 auto; margin-left: auto;
+  display: grid; grid-template-columns: repeat(2, 230px); gap: 12px;
+}
+.head-cards .card { padding: 12px 14px 10px; gap: 4px; }
+.head-cards .card .title { font-size: 16px; }
+.head-cards .card .meta { font-size: 12px; padding-top: 6px; }
+@media (max-width: 1250px) { .home-head { flex-direction: column; align-items: stretch; } .head-cards { margin-left: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .head-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* data view: bulk / per-table tabs */
+.tabs { display: flex; gap: 0; margin: 4px 0 16px; border-bottom: 2px solid var(--rule); }
+.tab {
+  padding: 9px 16px; margin-bottom: -2px; font: 600 15px var(--body); color: var(--ink-2);
+  text-decoration: none; border-bottom: 3px solid transparent;
+}
+.tab .mono { font-weight: 400; font-size: 13px; margin-left: 4px; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--line, #5b5cf0); }
+.tabpane .toolbar { margin-bottom: 14px; }
+.tabpane .tablewrap { max-height: calc(100vh - 160px); }
+#csv-preview { max-height: 60vh; }
+.btn[aria-pressed="true"] { border-color: var(--cyan); background: var(--cyan-wash); }
+
+/* bulk sheet: spreadsheet look */
+.sheet table.grid td, .sheet table.grid th { border-right: 1px solid var(--grid); }
+.sheet table.grid th { text-align: center; color: var(--ink-2); font-family: var(--mono); font-weight: 400; }
+.sheet td.rn, .sheet th.rn { position: sticky; left: 0; background: #f3f7fa; color: var(--ink-2); text-align: right; font-size: 12px; min-width: 44px; }
+.sheet tr.title td:not(.rn) { font: 700 14px var(--body); color: var(--ink); background: #f1f1fe; border-top: 2px solid var(--line, #5b5cf0); }
+.sheet tr.hdr td:not(.rn) { font: 600 13px var(--body); background: #f7f9fb; }
+.sheet tr.blank td { height: 14px; padding: 0; }
+.sheet td.pad { background: #fbfcfd; }
+.head-cards .card .meta { flex-direction: column; gap: 0; }
+
+/* ------------------------------------------------------------ front page: CRT logo (RGB shear + vertical roll) */
+.home-art .crt {
+  position: relative; width: 260px; height: 260px; border-radius: 10px; overflow: hidden;
+  background: #000; isolation: isolate;
+  box-shadow: 0 10px 30px -12px rgba(20, 10, 60, .55);
+}
+.crt .ch {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+  mix-blend-mode: screen; will-change: transform;
+}
+.crt .ch-r { filter: url(#cf-r); animation: crt-shear-r 5.5s steps(1, end) infinite, crt-slip 9s ease-in-out infinite; }
+.crt .ch-g { filter: url(#cf-g); animation: crt-slip 9s ease-in-out infinite; }
+.crt .ch-b { filter: url(#cf-b); animation: crt-shear-b 5.5s steps(1, end) infinite, crt-slip 9s ease-in-out infinite; }
+
+/* RGB shear: red and blue sit a hair apart at rest and split wide, sheared, in short bursts.
+   The channel layers are never clipped, so the picture keeps its full colour. */
+@keyframes crt-shear-r {
+  0%, 100% { transform: translateX(-1px); }
+  62%      { transform: translateX(-6px) skewX(-5deg); }
+  63.5%    { transform: translateX(4px)  skewX(3deg); }
+  65%      { transform: translateX(-2px); }
+  88%      { transform: translateX(-8px) skewX(-6deg); }
+  89%      { transform: translateX(-1px); }
+}
+@keyframes crt-shear-b {
+  0%, 100% { transform: translateX(1px); }
+  62%      { transform: translateX(6px)  skewX(5deg); }
+  63.5%    { transform: translateX(-4px) skewX(-3deg); }
+  65%      { transform: translateX(2px); }
+  88%      { transform: translateX(8px)  skewX(6deg); }
+  89%      { transform: translateX(1px); }
+}
+/* sync tear: full-colour copies of single horizontal bands, shown only during a burst */
+.crt-slice {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; z-index: 1; pointer-events: none;
+}
+.crt-slice.s1 { animation: crt-tear-1 5.5s steps(1, end) infinite; }
+.crt-slice.s2 { animation: crt-tear-2 5.5s steps(1, end) infinite; }
+@keyframes crt-tear-1 {
+  0%, 100% { opacity: 0; }
+  62%      { opacity: 1; transform: translateX(14px);  clip-path: inset(66% 0 20% 0); }
+  63.5%    { opacity: 1; transform: translateX(-9px);  clip-path: inset(30% 0 58% 0); }
+  65%      { opacity: 0; }
+  88%      { opacity: 1; transform: translateX(-16px); clip-path: inset(70% 0 14% 0); }
+  89%      { opacity: 0; }
+}
+@keyframes crt-tear-2 {
+  0%, 100% { opacity: 0; }
+  62%      { opacity: 1; transform: translateX(-6px); clip-path: inset(20% 0 72% 0); }
+  63.5%    { opacity: 1; transform: translateX(11px); clip-path: inset(74% 0 12% 0); }
+  65%      { opacity: 0; }
+  88%      { opacity: 1; transform: translateX(7px);  clip-path: inset(40% 0 52% 0); }
+  89%      { opacity: 0; }
+}
+/* a light vertical-hold slip: the picture rolls down a few pixels and settles back */
+@keyframes crt-slip {
+  0%, 70%, 100% { translate: 0 0; }
+  73%           { translate: 0 6px; }
+  75%           { translate: 0 -2px; }
+  77%           { translate: 0 0; }
+}
+
+/* scanlines + phosphor flicker */
+.crt-scan {
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background:
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,.28) 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%);
+  animation: crt-flicker 3.2s steps(1, end) infinite;
+}
+@keyframes crt-flicker { 0%, 100% { opacity: .9; } 41% { opacity: .78; } 43% { opacity: .95; } 77% { opacity: .82; } }
+
+/* the roll: a soft bright band drifting top to bottom */
+.crt-roll {
+  position: absolute; left: 0; right: 0; top: 0; height: 38%; pointer-events: none; z-index: 3;
+  background: linear-gradient(to bottom, transparent, rgba(190, 220, 255, .10) 40%, rgba(255, 255, 255, .16) 50%, rgba(190, 220, 255, .10) 60%, transparent);
+  mix-blend-mode: screen;
+  animation: crt-roll 6.5s linear infinite;
+}
+@keyframes crt-roll { from { transform: translateY(-100%); } to { transform: translateY(270%); } }
+
+@media (max-width: 900px) { .home-art .crt { width: 160px; height: 160px; } }
+@media (prefers-reduced-motion: reduce) { .crt .ch-r, .crt .ch-b { transform: none; } .crt-slice { display: none; } }

@@ -6,7 +6,7 @@
 <title>Deliverables</title>
 <link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
-<link rel="stylesheet" href="../../assets/site.css?v=5f5f8128">
+<link rel="stylesheet" href="../../assets/site.css?v=44ce316d">
 <script src="../data/deliverables.js"></script>
 </head>
 <body>
@@ -40,7 +40,7 @@
   P.present("../", function (f, ok) {
     if (!ok) return;
     var m = document.getElementById("m-" + f.id);
-    m.textContent = "draft"; m.className = "mark ready";
+    m.textContent = f.state || "draft"; m.className = "mark ready";
   });
 })();
 </script>

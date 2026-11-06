@@ -21,7 +21,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
 <script src="data/deliverables.js"></script>
-<link rel="stylesheet" href="../assets/site.css?v=5f5f8128">
+<link rel="stylesheet" href="../assets/site.css?v=44ce316d">
 </head>
 <body>
 <div class="shell">
@@ -73,7 +73,7 @@
     var have = 0, seen = 0;
     P.present("", function (f, ok) {
       var s = document.querySelector('.state[data-file="' + f.file + '"]');
-      s.textContent = ok ? "draft" : "--";
+      s.textContent = ok ? "\u2713" : "--";
       s.className = "state " + (ok ? "done" : "todo");
       seen++; if (ok) have++;
       if (seen === P.files.length) {
