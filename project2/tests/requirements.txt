@@ -1,0 +1,3 @@
+pytest>=8
+pymysql>=1.1
+cryptography>=42   # needed by PyMySQL for MySQL 8's default sign-in (caching_sha2_password)

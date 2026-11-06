@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 1 data</title>
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/site.css?v=9bc5a236">
+</head>
+<body>
+<div class="panel home-panel">
+    
+      <h2>Project 1 sample data</h2>
+      <p class="note">The data handed in with Project 1, which Project 2 loads: 10 tables, 401 rows. Both views below are exported from the graded <code>data.xlsx</code>, and every cell was checked against the workbook.</p>
+
+      <div class="tabs" role="tablist">
+        <a class="tab" role="tab" href="#bulk" data-tab="bulk">Bulk <span class="mono">data.csv</span></a>
+        <a class="tab" role="tab" href="#tables" data-tab="tables">Per table <span class="mono">10 CSVs</span></a>
+      </div>
+
+      <div class="tabpane" id="tab-bulk">
+        <p class="note">The whole sheet as one CSV, laid out exactly as in <code>data.xlsx</code>: each table is a title row, a header row, its data rows and a blank row. Row numbers match the spreadsheet.</p>
+        <div class="toolbar">
+          <a class="btn primary" href="../project1/data_export/data.csv" download>Download data.csv</a>
+          <a class="btn" href="../project1/deliverables/data.xlsx" download>data.xlsx</a>
+          <a class="btn" href="../project1/data_export/crossfade_project1_data.zip" download>Everything (.zip, 30 KB)</a>
+          <span class="note">13 KB &middot; 430 rows &times; 8 columns</span>
+        </div>
+        <div class="tablewrap sheet" id="bulk-grid"><p class="note" style="padding:12px">Loading&hellip;</p></div>
+      </div>
+
+      <div class="tabpane" id="tab-tables" hidden>
+        <p class="note">One CSV per table, header row first. Empty field = <code>NULL</code>; dates <code>yyyy-mm-dd</code>; timestamps <code>yyyy-mm-dd hh:mm:ss</code>; decimals exact, no rounding.</p>
+        <div class="toolbar">
+          <a class="btn primary" href="../project1/data_export/crossfade_project1_data.zip" download>Download crossfade_project1_data.zip</a>
+          <span class="note">30 KB &middot; data.xlsx + data.csv + 10 CSVs + README</span>
+        </div>
+        <table class="files">
+          <thead><tr><th>CSV</th><th class="num">Rows</th><th class="num">Columns</th><th></th></tr></thead>
+          <tbody id="csv-rows"></tbody>
+          <tfoot><tr><td>10 tables</td><td class="num">401</td><td></td><td></td></tr></tfoot>
+        </table>
+        <h3 id="csv-preview-title" hidden></h3>
+        <div class="tablewrap" id="csv-preview" hidden></div>
+      </div>
+    </div>
+<script>
+(function () {
+  /* ---------- CSV helpers */
+  function parseCSV(text) {
+    var rows = [], row = [], f = "", q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+      else if (c === '"') q = true;
+      else if (c === ",") { row.push(f); f = ""; }
+      else if (c === "\n") { row.push(f); rows.push(row); row = []; f = ""; }
+      else if (c !== "\r") f += c;
+    }
+    if (f !== "" || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+  function esc(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  var NUM = /^-?\d+(\.\d+)?$/;
+  function cell(v) {
+    if (v === "") return '<td class="null">NULL</td>';
+    return "<td" + (NUM.test(v) ? ' class="num"' : "") + ">" + esc(v) + "</td>";
+  }
+
+  /* ---------- bulk: data.csv as the spreadsheet looks */
+  var bulkDone = false;
+  function loadBulk() {
+    if (bulkDone) return; bulkDone = true;
+    fetch("../project1/data_export/data.csv").then(function (r) { return r.text(); }).then(function (t) {
+      var rows = parseCSV(t), w = rows[0].length, cols = "ABCDEFGHIJ".slice(0, w).split("");
+      var h = '<table class="grid"><thead><tr><th class="rn"></th>' + cols.map(function (c) { return "<th>" + c + "</th>"; }).join("") + "</tr></thead><tbody>";
+      var nextIsHeader = false, width = w;
+      rows.forEach(function (r, i) {
+        var used = r.filter(function (v) { return v !== ""; }).length;
+        var rn = '<td class="rn">' + (i + 1) + "</td>";
+        if (used === 0) { h += '<tr class="blank">' + rn + '<td colspan="' + w + '"></td></tr>'; return; }
+        if (used === 1 && r[0] !== "" && !NUM.test(r[0])) {
+          h += '<tr class="title">' + rn + '<td colspan="' + w + '">' + esc(r[0]) + "</td></tr>"; nextIsHeader = true; return;
+        }
+        if (nextIsHeader) {
+          width = r.filter(function (v) { return v !== ""; }).length;            // this table's column count
+          h += '<tr class="hdr">' + rn + r.map(function (v) { return "<td>" + esc(v) + "</td>"; }).join("") + "</tr>"; nextIsHeader = false; return;
+        }
+        h += "<tr>" + rn + r.map(function (v, j) { return j < width ? cell(v) : '<td class="pad"></td>'; }).join("") + "</tr>";
+      });
+      document.getElementById("bulk-grid").innerHTML = h + "</tbody></table>";
+    }).catch(function () {
+      document.getElementById("bulk-grid").innerHTML = '<p class="note" style="padding:12px">Preview needs the site served over http; download data.csv instead.</p>';
+    });
+  }
+
+  /* ---------- per table: list + inline preview */
+  var CSV = [["artist", 8, 6], ["track", 15, 7], ["genre", 10, 3], ["listener", 8, 5],
+             ["scoring_model", 5, 8], ["station", 8, 7], ["track_score", 27, 8],
+             ["genre_probability", 270, 4], ["station_blend", 19, 3], ["play", 31, 8]];
+  document.getElementById("csv-rows").innerHTML = CSV.map(function (c) {
+    var href = "../project1/data_export/csv/" + c[0] + ".csv";
+    return "<tr><td><code>" + c[0] + ".csv</code></td><td class=\"num\">" + c[1] +
+      "</td><td class=\"num\">" + c[2] + "</td><td class=\"acts\"><button class=\"btn\" data-csv=\"" + c[0] +
+      "\" aria-pressed=\"false\">View</button><a class=\"btn\" href=\"" + href + "\" download>Download</a></td></tr>";
+  }).join("");
+  Array.prototype.forEach.call(document.querySelectorAll("[data-csv]"), function (b) {
+    b.addEventListener("click", function () {
+      var name = b.dataset.csv, box = document.getElementById("csv-preview"), ttl = document.getElementById("csv-preview-title");
+      var open = b.getAttribute("aria-pressed") === "true";
+      Array.prototype.forEach.call(document.querySelectorAll("[data-csv]"), function (x) { x.setAttribute("aria-pressed", "false"); });
+      if (open) { box.hidden = ttl.hidden = true; return; }
+      b.setAttribute("aria-pressed", "true");
+      fetch("../project1/data_export/csv/" + name + ".csv").then(function (r) { return r.text(); }).then(function (t) {
+        var rows = parseCSV(t);
+        ttl.textContent = name + ".csv"; ttl.hidden = false;
+        box.innerHTML = '<table class="grid"><thead><tr>' + rows[0].map(function (v) { return "<th>" + esc(v) + "</th>"; }).join("") +
+          "</tr></thead><tbody>" + rows.slice(1).map(function (r) { return "<tr>" + r.map(cell).join("") + "</tr>"; }).join("") + "</tbody></table>";
+        box.hidden = false;
+        ttl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  });
+
+
+  /* ---------- tabs: #bulk (default) or #tables */
+  function show() {
+    var tab = location.hash === "#tables" ? "tables" : "bulk";
+    document.getElementById("tab-bulk").hidden = tab !== "bulk";
+    document.getElementById("tab-tables").hidden = tab !== "tables";
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
+      t.setAttribute("aria-selected", t.dataset.tab === tab ? "true" : "false");
+    });
+    if (tab === "bulk") loadBulk();
+  }
+  window.addEventListener("hashchange", show);
+  show();
+})();
+</script>
+</body>
+</html>

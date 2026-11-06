@@ -1,0 +1,649 @@
+{
+ "about": "CROSSFADE use cases, drawn from the Project 1 requirements analysis (RA). Each evidence phrase is quoted word for word from the RA block it cites; build_usecases.py fails if one is not found. 'columns' = every column the use case needs. 'single' = how far a non-associative table answers it alone (full or partial); 'singleColumns' = the columns that single-table part reads, when different. 'expectsError' marks a use case whose correct outcome is an error raised by the database.",
+ "useCases": [
+  {
+   "id": "UC-01",
+   "title": "Pay each artist a per-stream royalty",
+   "question": "What is each artist paid per qualifying stream?",
+   "evidence": [
+    {
+     "block": "overview",
+     "phrase": "paying artists their per stream royalty"
+    },
+    {
+     "block": "ent:artist",
+     "phrase": "is paid a per stream royalty on plays of those recordings"
+    },
+    {
+     "block": "attr:artist.payout_rate",
+     "phrase": "The amount in United States dollars the artist is paid for a single qualifying stream"
+    },
+    {
+     "block": "attr:play.royalty_amount",
+     "phrase": "The amount in United States dollars accrued to the artist for this play"
+    },
+    {
+     "block": "rule:I7",
+     "phrase": "Royalty Amount equals the artist's Payout Rate for a play of 30 seconds or more and zero otherwise"
+    }
+   ],
+   "columns": {
+    "artist": [
+     "artist_id",
+     "stage_name",
+     "payout_rate"
+    ],
+    "track": [
+     "track_id",
+     "artist_id"
+    ],
+    "play": [
+     "track_id",
+     "seconds_played",
+     "royalty_amount"
+    ]
+   },
+   "single": {
+    "artist": "partial"
+   },
+   "singleColumns": {
+    "artist": [
+     "artist_id",
+     "stage_name",
+     "payout_rate"
+    ]
+   },
+   "rest": "Amounts actually owed need play, track and artist together (Task 3 or 4)."
+  },
+  {
+   "id": "UC-02",
+   "title": "Route payments by country; pay only verified artists",
+   "question": "Who is payable in this royalty run, who is on hold, and why?",
+   "evidence": [
+    {
+     "block": "attr:artist.country",
+     "phrase": "used to determine which royalty payment channels and tax treatments apply"
+    },
+    {
+     "block": "attr:artist.verified",
+     "phrase": "Whether the service has confirmed the artist's identity and their right to licence the material they upload"
+    },
+    {
+     "block": "attr:artist.joined_date",
+     "phrase": "their direct streaming licence took effect"
+    }
+   ],
+   "columns": {
+    "artist": [
+     "artist_id",
+     "stage_name",
+     "country",
+     "joined_date",
+     "verified"
+    ]
+   },
+   "single": {
+    "artist": "full"
+   }
+  },
+  {
+   "id": "UC-03",
+   "title": "Surface new uploads as readily as hits",
+   "question": "Which are the newest recordings listeners can stream?",
+   "evidence": [
+    {
+     "block": "overview",
+     "phrase": "a track uploaded an hour ago is as recommendable as one with a million plays, which is the operational advantage the service is built around"
+    },
+    {
+     "block": "ent:track",
+     "phrase": "made available for streaming once it has been scored by at least one model"
+    },
+    {
+     "block": "attr:track.release_date",
+     "phrase": "The date on which the recording became available to listeners"
+    }
+   ],
+   "columns": {
+    "track": [
+     "track_id",
+     "title",
+     "duration",
+     "release_date",
+     "ingest_status"
+    ]
+   },
+   "single": {
+    "track": "full"
+   }
+  },
+  {
+   "id": "UC-04",
+   "title": "Track the upload pipeline; reject duplicate uploads",
+   "question": "How many recordings sit at each stage of the upload pipeline?",
+   "evidence": [
+    {
+     "block": "attr:track.ingest_status",
+     "phrase": "The stage the recording has reached in the upload pipeline"
+    },
+    {
+     "block": "attr:track.audio_checksum",
+     "phrase": "used to detect duplicate uploads"
+    },
+    {
+     "block": "rel:track-scoring_model",
+     "phrase": "none while it is awaiting scoring, at least one before it is released"
+    },
+    {
+     "block": "rule:I5",
+     "phrase": "A recording's Ingest Status is scored only if it has at least one Track Score."
+    }
+   ],
+   "columns": {
+    "track": [
+     "track_id",
+     "release_date",
+     "audio_checksum",
+     "ingest_status"
+    ],
+    "track_score": [
+     "track_id"
+    ]
+   },
+   "single": {
+    "track": "partial"
+   },
+   "singleColumns": {
+    "track": [
+     "track_id",
+     "release_date",
+     "audio_checksum",
+     "ingest_status"
+    ]
+   },
+   "rest": "Checking rule I5 needs track_score (Task 3)."
+  },
+  {
+   "id": "UC-05",
+   "title": "Show the genre legend while listeners compose a blend",
+   "question": "Is every genre ready to show in the blend composer, in model class order?",
+   "evidence": [
+    {
+     "block": "ent:genre",
+     "phrase": "forming the coordinate system in which listeners describe the blend they want"
+    },
+    {
+     "block": "attr:genre.genre_id",
+     "phrase": "equal to the class index the scoring models output for that genre"
+    },
+    {
+     "block": "attr:genre.name",
+     "phrase": "The label by which the genre is known to listeners"
+    },
+    {
+     "block": "attr:genre.description",
+     "phrase": "shown to listeners when they are composing a station blend, and kept to one line of 80 characters"
+    }
+   ],
+   "columns": {
+    "genre": [
+     "genre_id",
+     "name",
+     "description"
+    ]
+   },
+   "single": {
+    "genre": "full"
+   }
+  },
+  {
+   "id": "UC-06",
+   "title": "Bill subscribers by plan tier from their signup date",
+   "question": "What is the subscriber mix by plan tier, and how long has each tier been billing?",
+   "evidence": [
+    {
+     "block": "attr:listener.plan_tier",
+     "phrase": "which determines the monthly charge and the limits placed on station creation and offline listening"
+    },
+    {
+     "block": "attr:listener.signup_date",
+     "phrase": "used to anchor the monthly billing cycle"
+    },
+    {
+     "block": "attr:listener.email",
+     "phrase": "to send billing correspondence"
+    }
+   ],
+   "columns": {
+    "listener": [
+     "listener_id",
+     "email",
+     "plan_tier",
+     "signup_date"
+    ]
+   },
+   "single": {
+    "listener": "full"
+   }
+  },
+  {
+   "id": "UC-07",
+   "title": "Share stations under the creator's display name",
+   "question": null,
+   "evidence": [
+    {
+     "block": "attr:listener.display_name",
+     "phrase": "The name the subscriber chooses to be shown by when a station they created is shared with other subscribers"
+    },
+    {
+     "block": "attr:station.name",
+     "phrase": "which appears in their library and in any share link"
+    },
+    {
+     "block": "attr:play.station_id",
+     "phrase": "Because stations can be shared, the station may belong to a different listener from the one recorded on the play"
+    },
+    {
+     "block": "rule:I6",
+     "phrase": "A play's Station ID may refer to a station created by another listener."
+    }
+   ],
+   "columns": {
+    "listener": [
+     "listener_id",
+     "display_name"
+    ],
+    "station": [
+     "station_id",
+     "listener_id",
+     "name"
+    ],
+    "play": [
+     "listener_id",
+     "station_id"
+    ]
+   },
+   "single": {},
+   "rest": "Alone, listener only yields a list of names, which is not a real question. Needs station and play (Task 3)."
+  },
+  {
+   "id": "UC-08",
+   "title": "Weight each model version by its measured accuracy",
+   "question": "Which model versions should carry the most weight, and which should a new station default to?",
+   "evidence": [
+    {
+     "block": "ent:scoring_model",
+     "phrase": "Several versions are in service at once because they differ in architecture and therefore disagree with one another"
+    },
+    {
+     "block": "attr:scoring_model.holdout_accuracy",
+     "phrase": "used to decide how much weight its output carries in a blended placement"
+    },
+    {
+     "block": "attr:scoring_model.version_label",
+     "phrase": "used in internal reporting and in the artist analytics product"
+    },
+    {
+     "block": "attr:scoring_model.training_corpus",
+     "phrase": "recorded so that results from differently trained versions are never silently compared"
+    },
+    {
+     "block": "rel:scoring_model-station",
+     "phrase": "Each station is evaluated against the output of one nominated model version"
+    }
+   ],
+   "columns": {
+    "scoring_model": [
+     "model_id",
+     "version_label",
+     "fusion_type",
+     "embedding_dimension",
+     "segment_length",
+     "training_corpus",
+     "holdout_accuracy",
+     "deployed_on"
+    ],
+    "station": [
+     "station_id",
+     "model_id"
+    ]
+   },
+   "single": {
+    "scoring_model": "full",
+    "station": "partial"
+   },
+   "singleColumns": {
+    "station": [
+     "station_id",
+     "model_id"
+    ]
+   }
+  },
+  {
+   "id": "UC-09",
+   "title": "Find scoring results that predate a model redeployment",
+   "question": null,
+   "evidence": [
+    {
+     "block": "attr:track_score.scored_on",
+     "phrase": "used to establish which results predate a model redeployment and must be recomputed"
+    },
+    {
+     "block": "attr:scoring_model.deployed_on",
+     "phrase": "The date the model version was placed in service and began scoring incoming uploads"
+    }
+   ],
+   "columns": {
+    "track_score": [
+     "track_id",
+     "model_id",
+     "scored_on"
+    ],
+    "scoring_model": [
+     "model_id",
+     "deployed_on"
+    ]
+   },
+   "single": {},
+   "rest": "Needs track_score and scoring_model together (Task 3)."
+  },
+  {
+   "id": "UC-10",
+   "title": "Define stations by ambiguity window; measure how long they stay in use",
+   "question": "How adventurous is each station, how long has it been in use, and which model does it rely on?",
+   "evidence": [
+    {
+     "block": "ent:station",
+     "phrase": "A station stores the blend and the ambiguity range the listener wants rather than a fixed list of recordings"
+    },
+    {
+     "block": "attr:station.minimum_ambiguity",
+     "phrase": "raising it excludes recordings that sit squarely inside a single genre"
+    },
+    {
+     "block": "attr:station.maximum_ambiguity",
+     "phrase": "lowering it excludes recordings the models cannot place with any confidence"
+    },
+    {
+     "block": "attr:station.created_on",
+     "phrase": "to measure how long a station remains in use"
+    },
+    {
+     "block": "rule:I4",
+     "phrase": "Minimum Ambiguity does not exceed Maximum Ambiguity."
+    },
+    {
+     "block": "rule:I1",
+     "phrase": "its weights sum to exactly 1.00"
+    }
+   ],
+   "columns": {
+    "station": [
+     "station_id",
+     "listener_id",
+     "model_id",
+     "name",
+     "minimum_ambiguity",
+     "maximum_ambiguity",
+     "created_on"
+    ],
+    "station_blend": [
+     "station_id",
+     "genre_id",
+     "weight"
+    ]
+   },
+   "single": {
+    "station": "full"
+   },
+   "singleColumns": {
+    "station": [
+     "station_id",
+     "model_id",
+     "name",
+     "minimum_ambiguity",
+     "maximum_ambiguity",
+     "created_on"
+    ]
+   },
+   "rest": "The blend weights (rule I1) live in station_blend (Task 3)."
+  },
+  {
+   "id": "UC-11",
+   "title": "Place each recording between genres",
+   "question": null,
+   "evidence": [
+    {
+     "block": "overview",
+     "phrase": "the model returns a probability distribution across a fixed set of genres together with measures of how uncertain and how internally inconsistent that distribution is"
+    },
+    {
+     "block": "ent:track_score",
+     "phrase": "the full genre distribution is held in Genre Probability rows that belong to it"
+    },
+    {
+     "block": "attr:track_score.posterior_entropy",
+     "phrase": "a high value means the recording sits between categories rather than inside one"
+    },
+    {
+     "block": "attr:track_score.model_divergence",
+     "phrase": "How far this model's distribution sits from those produced by the other model versions that have scored the same recording"
+    },
+    {
+     "block": "attr:track_score.segment_variance",
+     "phrase": "which identifies tracks that change character partway through"
+    },
+    {
+     "block": "rule:I2",
+     "phrase": "A scoring result has exactly one probability for each of the ten genres, and they sum to one."
+    },
+    {
+     "block": "rule:I3",
+     "phrase": "agree with the probabilities in Genre Probability"
+    }
+   ],
+   "columns": {
+    "track_score": [
+     "track_id",
+     "model_id",
+     "genre_id",
+     "top_probability",
+     "posterior_entropy",
+     "model_divergence",
+     "segment_variance"
+    ],
+    "genre_probability": [
+     "track_id",
+     "model_id",
+     "genre_id",
+     "probability"
+    ],
+    "genre": [
+     "genre_id",
+     "name"
+    ]
+   },
+   "single": {},
+   "rest": "Lives in the associative tables track_score and genre_probability (Task 3)."
+  },
+  {
+   "id": "UC-12",
+   "title": "Fill a station with recordings that match its blend and window",
+   "question": null,
+   "evidence": [
+    {
+     "block": "overview",
+     "phrase": "the service returns recordings that genuinely occupy that region"
+    },
+    {
+     "block": "ent:track_score",
+     "phrase": "stored on this row so that stations can filter without reading ten rows per score"
+    },
+    {
+     "block": "rel:scoring_model-station",
+     "phrase": "so that a station's contents do not change meaning when a different version scores the catalogue"
+    },
+    {
+     "block": "attr:track.duration",
+     "phrase": "to estimate station running time"
+    }
+   ],
+   "columns": {
+    "station": [
+     "station_id",
+     "model_id",
+     "minimum_ambiguity",
+     "maximum_ambiguity"
+    ],
+    "station_blend": [
+     "station_id",
+     "genre_id",
+     "weight"
+    ],
+    "track_score": [
+     "track_id",
+     "model_id",
+     "posterior_entropy"
+    ],
+    "genre_probability": [
+     "track_id",
+     "model_id",
+     "genre_id",
+     "probability"
+    ],
+    "track": [
+     "track_id",
+     "title",
+     "duration",
+     "ingest_status"
+    ]
+   },
+   "single": {},
+   "rest": "Five tables; the natural home is a procedure (Task 4)."
+  },
+  {
+   "id": "UC-13",
+   "title": "Learn listener taste from completions, saves and skips",
+   "question": null,
+   "evidence": [
+    {
+     "block": "overview",
+     "phrase": "learning listener taste"
+    },
+    {
+     "block": "ent:play",
+     "phrase": "it is the record from which listener taste is inferred"
+    },
+    {
+     "block": "attr:play.seconds_played",
+     "phrase": "how strong a taste signal it carries"
+    },
+    {
+     "block": "attr:play.completed",
+     "phrase": "distinguishing a genuine listen from an abandoned one"
+    },
+    {
+     "block": "attr:play.reaction",
+     "phrase": "which is treated as a stronger signal than duration alone"
+    }
+   ],
+   "columns": {
+    "play": [
+     "listener_id",
+     "track_id",
+     "played_at",
+     "seconds_played",
+     "completed",
+     "reaction"
+    ],
+    "track": [
+     "track_id",
+     "duration"
+    ]
+   },
+   "single": {},
+   "rest": "Lives in the associative table play (Task 3)."
+  },
+  {
+   "id": "UC-14",
+   "title": "Keep an exact royalty ledger",
+   "question": null,
+   "evidence": [
+    {
+     "block": "assoc:intro2",
+     "phrase": "which is what keeps a double-counted royalty out of the ledger"
+    },
+    {
+     "block": "attr:play.played_at",
+     "phrase": "to assign the play to a billing period"
+    },
+    {
+     "block": "attr:play.royalty_amount",
+     "phrase": "copied so that a later rate change never rewrites the royalty ledger"
+    },
+    {
+     "block": "attr:track.duration",
+     "phrase": "used to decide whether a play qualifies for royalty"
+    },
+    {
+     "block": "rule:I7",
+     "phrase": "Royalty Amount is computed once, when the play is recorded, and never updated."
+    }
+   ],
+   "columns": {
+    "play": [
+     "listener_id",
+     "track_id",
+     "played_at",
+     "seconds_played",
+     "completed",
+     "royalty_amount"
+    ],
+    "track": [
+     "track_id",
+     "artist_id",
+     "duration"
+    ],
+    "artist": [
+     "artist_id",
+     "payout_rate"
+    ]
+   },
+   "single": {},
+   "rest": "play, track and artist together (Task 3 or 4)."
+  },
+  {
+   "id": "UC-15",
+   "title": "Reject a duplicate upload",
+   "question": "What happens when an artist uploads an audio file that is already in the catalogue?",
+   "evidence": [
+    {
+     "block": "attr:track.audio_checksum",
+     "phrase": "used to detect duplicate uploads"
+    },
+    {
+     "block": "ent:artist",
+     "phrase": "registered with the service to upload recordings under a direct streaming licence"
+    }
+   ],
+   "columns": {
+    "track": [
+     "track_id",
+     "artist_id",
+     "title",
+     "duration",
+     "audio_checksum"
+    ]
+   },
+   "single": {
+    "track": "full"
+   },
+   "expectsError": {
+    "code": 1062,
+    "constraint": "uq_track_audio_checksum",
+    "why": "The database itself must refuse the write: the UNIQUE index on audio_checksum is what detects the duplicate."
+   },
+   "rest": "An error case: tested by an expected-error test ([E1] in project2/tests/expected_errors.sql), not by a query in single_table.sql, which must run clean."
+  }
+ ]
+}

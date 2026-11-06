@@ -20,85 +20,18 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/site.css?v=44ce316d">
-<script src="data/site_data.js"></script>
-</head>
-<body>
-<div class="shell">
-<!-- BANNER:BEGIN -->
-<header class="banner">
-  <a class="brand" href="../" aria-label="CROSSFADE home">
-    <span class="brand-wave" style="background-image:url('../assets/images/crossfade_wave.jpg')" aria-hidden="true"></span>
-    <span class="brand-text">
-      <img class="brand-mark" src="../assets/images/crossfade_wordmark.png" width="441" height="72" alt="crossfade">
-      <span class="brand-context">Project 1 · Database Design</span>
-    </span>
-  </a>
-  <nav class="banner-nav" aria-label="Projects">
-      <a class="nav-btn" href="../"><span class="nav-label">Home</span></a>
-      <a class="nav-btn" href="../project1/" aria-current="page"><span class="nav-label">Project 1</span><span class="nav-sub">Database Design</span></a>
-      <a class="nav-btn" href="../project2/"><span class="nav-label">Project 2</span><span class="nav-sub">SQL Database</span></a>
-      <a class="nav-btn" href="../project3/"><span class="nav-label">Project 3</span><span class="nav-sub">NoSQL Database</span></a>
-  </nav>
-  <a class="banner-repo" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" aria-label="GitHub repository" title="GitHub repository">
-    <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-  </a>
-</header>
-<!-- BANNER:END -->
-  <div class="frame">
-    <nav class="rail" aria-label="Project sections">
-      <h2>Overview</h2>
-      <button class="navbtn" data-panel="home">Home</button>
-      <h2>Deliverables</h2>
-      <button class="navbtn" data-panel="requirements" data-file="requirements_analysis.pdf">Requirements analysis<span class="state"></span></button>
-      <button class="navbtn" data-panel="conceptual" data-file="conceptual_data_model.png">Conceptual model<span class="state"></span></button>
-      <button class="navbtn" data-panel="data" data-file="data.xlsx">Sample data<span class="state"></span></button>
-      <button class="navbtn" data-panel="physical" data-file="physical_data_model.png">Physical model<span class="state"></span></button>
-      <button class="navbtn" data-panel="physical_mk1">&nbsp;&nbsp;&#8627; mk1 draft</button>
-      <h2>Reference</h2>
-      <button class="navbtn" data-panel="dictionary">Data dictionary</button>
-      <button class="navbtn" data-panel="changes">Change log</button>
-      <button class="navbtn" data-panel="files">Files</button>
-    </nav>
-    <main class="viewport">
-      <iframe id="view" title="Project panel" src="panels/home.html"></iframe>
-    </main>
-  </div>
-</div>
+
+<noscript><meta http-equiv="refresh" content="0; url=../#p1"></noscript>
 <script>
+/* This page moved into the site shell. Keep deep links working: project1/#x -> ../#p1/x */
 (function () {
-  var buttons = Array.prototype.slice.call(document.querySelectorAll(".navbtn"));
-  var view = document.getElementById("view");
-  var ids = buttons.map(function (b) { return b.dataset.panel; });
-  var status = (window.SITE && window.SITE.status) || {};
-
-  buttons.forEach(function (b) {
-    var s = b.querySelector(".state");
-    if (s && b.dataset.file) {
-      var done = !!status[b.dataset.file];
-      s.textContent = done ? "done" : "next";
-      s.className = "state " + (done ? "done" : "todo");
-    }
-    b.addEventListener("click", function () { location.hash = b.dataset.panel; });
-  });
-
-  function show() {
-    var id = location.hash.replace("#", "") || "home";
-    var anchor = "";
-    if (id.indexOf("/") > 0) { anchor = "#" + id.split("/")[1]; id = id.split("/")[0]; }
-    if (ids.indexOf(id) < 0) id = "home";
-    var src = "panels/" + id + ".html" + anchor;
-    if (view.getAttribute("src") !== src) view.setAttribute("src", src);
-    buttons.forEach(function (b) {
-      if (b.dataset.panel === id) b.setAttribute("aria-current", "page");
-      else b.removeAttribute("aria-current");
-    });
-    var label = buttons[ids.indexOf(id)].childNodes[0].textContent.trim();
-    document.title = label + " | CROSSFADE";
-  }
-  window.addEventListener("hashchange", show);
-  show();
+  var h = location.hash.replace(/^#/, "");
+  var url = new URL("../#p1" + (h ? "/" + h : ""), location.href).href;
+  try { (window.top || window).location.replace(url); } catch (e) { location.replace(url); }
 })();
 </script>
+</head>
+<body>
+<p><a href="../#p1">Continue to this page of the CROSSFADE site</a>.</p>
 </body>
 </html>

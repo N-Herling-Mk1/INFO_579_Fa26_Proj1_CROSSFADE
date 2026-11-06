@@ -36,7 +36,22 @@ window.P2 = {
     },
     {
       id: "single", task: "Task 2", file: "single_table.sql",
-      title: "Single-table queries", weight: 25,
+      title: "Single-table queries", weight: 25, state: "ready to test",
+      summary: "Seven queries, S1 to S7, one per question a single table answers: every non-associative table, " +
+        "track twice. Each is tagged with its use cases and the brief requirements it meets, and is checked " +
+        "by 63 unit tests and one expected-error case (UC-15, a duplicate upload MySQL must refuse) against an independent Python answer computed from the Project 1 data.",
+      results: "single_table_results.js",
+      kit: "../tests/crossfade_p2_test_kit.zip",
+      test: [
+        "Download the test kit (button above) and unzip it. Install once: <code>pip install -r requirements.txt</code>",
+        "Into the same folder, download <code>data.csv</code> (Home \u2192 Project 1 data \u2192 Bulk) and " +
+          "<code>database_implementation.sql</code> (Project 2 \u2192 database_implementation).",
+        "Build the database: run <code>database_implementation.sql</code> in Workbench, or " +
+          "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
+        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-password\"</code> then " +
+          "<code>python -m pytest</code>. Expect 64 passed. Results land in <code>results/</code>.",
+        "From a clone of the repo instead: <code>python -m pytest project2/tests</code> (it finds every file itself)."
+      ],
       reqs: [
         "Queries that retrieve data from each non-associative table individually.",
         "(a) At least one query uses single-row functions.",

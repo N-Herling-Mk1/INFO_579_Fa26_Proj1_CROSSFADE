@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 1</title>
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/site.css?v=9bc5a236">
+</head>
+<body>
+<div class="panel home-panel">
+    
+      <h2>Project 1 &middot; Database Design</h2>
+      <p class="note">Graded submission, due Sep 27, 2026. Every file below is the version handed in.</p>
+
+      <h3>Instructions</h3>
+      <table class="files">
+        <tbody>
+          <tr id="p1-brief-row">
+            <td><code>info579_project01.pdf</code><span class="sub">Project 1 assignment brief</span></td>
+            <td class="size">&nbsp;</td>
+            <td class="acts"><span class="mark open" id="p1-brief-state">not in repo yet</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Completed submission</h3>
+      <table class="files">
+        <tbody>
+          <tr>
+            <td><code>requirements_analysis.pdf</code><span class="sub">Requirements analysis: business plan, entities, attributes, relationships</span></td>
+            <td class="size">735 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#requirements">View</a><a class="btn" href="../project1/deliverables/requirements_analysis.pdf" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>conceptual_data_model.png</code><span class="sub">Conceptual data model</span></td>
+            <td class="size">139 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#conceptual">View</a><a class="btn" href="../project1/deliverables/conceptual_data_model.png" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>data.xlsx</code><span class="sub">Sample data, 10 tables, 401 rows</span></td>
+            <td class="size">20 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#data">View</a><a class="btn" href="../project1/deliverables/data.xlsx" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>physical_data_model.png</code><span class="sub">Physical data model</span></td>
+            <td class="size">122 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#physical">View</a><a class="btn" href="../project1/deliverables/physical_data_model.png" download>Download</a></td>
+          </tr>
+          <tr class="total">
+            <td><code>project01_info579_group_1.zip</code><span class="sub">The four files above, as uploaded to D2L</span></td>
+            <td class="size">970 KB</td>
+            <td class="acts"><a class="btn primary" href="../project1/submission/project01_info579_group_1.zip" download>Download zip</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Supporting documents</h3>
+      <table class="files">
+        <tbody>
+          <tr>
+            <td><code>DATA_DICTIONARY.md</code><span class="sub">Every column: type, length, nullability and reason</span></td>
+            <td class="size">37 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#dictionary">View</a><a class="btn" href="../project1/docs/DATA_DICTIONARY.md" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>CHANGES.md</code><span class="sub">Change log for the requirements analysis and models</span></td>
+            <td class="size">23 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#changes">View</a><a class="btn" href="../project1/CHANGES.md" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>requirements_analysis.tex</code><span class="sub">LaTeX source of the requirements analysis</span></td>
+            <td class="size">55 KB</td>
+            <td class="acts"><a class="btn" href="../project1/source/requirements_analysis/requirements_analysis.tex" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>crossfade_schema.sql</code><span class="sub">DDL behind the physical model: 10 tables with PK, FK, UNIQUE and CHECK</span></td>
+            <td class="size">6.2 KB</td>
+            <td class="acts"><a class="btn" href="../project1/source/physical_model/crossfade_schema.sql" download>Download</a></td>
+          </tr>
+          <tr>
+            <td><code>physical_data_model_mk1.png</code><span class="sub">First physical model draft, kept with what it missed</span></td>
+            <td class="size">657 KB</td>
+            <td class="acts"><a class="btn" href="../project1/#physical_mk1">View</a><a class="btn" href="../project1/source/physical_model/physical_data_model_mk1.png" download>Download</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <p><a href="../project1/">Open the full Project 1 site &rarr;</a></p>
+    </div>
+<script>
+(function () {
+  /* Project 1 brief: shown once project1/brief/info579_project01.pdf is in the repo */
+  var P1_BRIEF = "../project1/brief/info579_project01.pdf";
+  fetch(P1_BRIEF, { method: "HEAD", cache: "no-store" }).then(function (r) {
+    if (!r.ok) return;
+    var row = document.getElementById("p1-brief-row");
+    var n = +r.headers.get("content-length");
+    if (n) row.querySelector(".size").textContent = Math.round(n / 1024) + " KB";
+    row.querySelector(".acts").innerHTML =
+      '<a class="btn" href="' + P1_BRIEF + '" target="_blank" rel="noopener">View</a>' +
+      '<a class="btn" href="' + P1_BRIEF + '" download>Download</a>';
+  }).catch(function () {});
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top-level design</title>
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/site.css?v=9bc5a236">
+</head>
+<body>
+<div class="panel">
+  <h1>Top-level design</h1>
+  <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
+  <p class="lede">What stays the same across all three projects: the business and the data it has to manage.</p>
+  <h2>The business</h2>
+  <div class="prose">
+    <p>CROSSFADE is a streaming service for independent artists. Artists upload recordings directly under their own licence, so the catalogue is almost entirely new material. Every track is scored at upload by several versions of the <a href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">BEARDOWN</a> genre classifier, each returning a probability for all ten genres. Listeners don't browse genre names. They build stations from a target blend (say 60% jazz, 40% hip hop) and an allowed range of ambiguity, so a track uploaded an hour ago is as findable as one with a million plays.</p>
+    <p>The database holds the artist roster and catalogue, the model versions and every result they produced, listener accounts and their stations, and every play, which is both the taste signal and the billable event for royalties.</p>
+  </div>
+  <h2>The data</h2>
+  <div class="prose">
+    <p>Ten entities, fixed in Project 1 and reused by the later projects.</p>
+    <table>
+      <tr><th>Kind</th><th>Entities</th></tr>
+      <tr><td>Entity (6)</td><td>Artist, Track, Genre, Listener, Scoring Model, Station</td></tr>
+      <tr><td>Associative entity (4)</td><td>Track Score, Genre Probability, Station Blend, Play</td></tr>
+    </table>
+    <p>The <a href="../project1/#conceptual">conceptual model</a> shows how they relate, and the <a href="../project1/#dictionary">data dictionary</a> says what every attribute is for.</p>
+  </div>
+  <h2>One design, three databases</h2>
+  <div class="prose">
+    <table>
+      <tr><th>Project</th><th>What it does with the design</th><th>Due</th></tr>
+      <tr><td><a href="../project1/">1. Database Design</a></td><td>Defines it: requirements analysis, conceptual model, sample data, physical model.</td><td>Sep 27, 2026</td></tr>
+      <tr><td><a href="../project2/">2. SQL Database</a></td><td>Builds it as a relational database.</td><td>Nov 8, 2026</td></tr>
+      <tr><td><a href="../project3/">3. NoSQL Database</a></td><td>Models the same business in a NoSQL database.</td><td>Dec 13, 2026</td></tr>
+    </table>
+  </div>
+  <h2>Repository layout</h2>
+  <div class="prose">
+<pre><code>index.html     the site shell: banner, project rail, one main panel
+assets/        shared styles, logo, icons, social card
+home/          front-page panels: overview, Project 1 package, data, brief
+design/        this page: the top-level design
+project1/      Database Design: deliverables, sources, docs site
+project2/      SQL Database
+project3/      NoSQL Database</code></pre>
+  </div>
+</div>
+</body>
+</html>

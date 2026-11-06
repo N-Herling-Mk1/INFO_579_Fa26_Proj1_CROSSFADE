@@ -20,374 +20,202 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/site.css?v=44ce316d">
+<link rel="stylesheet" href="assets/site.css?v=9bc5a236">
 <script src="project1/data/site_data.js"></script>
 </head>
-<body>
-<!-- BANNER:BEGIN -->
-<header class="banner">
-  <a class="brand" href="./" aria-label="CROSSFADE home">
-    <span class="brand-wave" style="background-image:url('assets/images/crossfade_wave.jpg')" aria-hidden="true"></span>
-    <span class="brand-text">
-      <img class="brand-mark" src="assets/images/crossfade_wordmark.png" width="441" height="72" alt="crossfade">
-      <span class="brand-context">INFO 579 · SQL/NoSQL Databases · Fall 2026</span>
-    </span>
-  </a>
-  <nav class="banner-nav" aria-label="Projects">
-      <a class="nav-btn" href="./" aria-current="page"><span class="nav-label">Home</span></a>
-      <a class="nav-btn" href="project1/"><span class="nav-label">Project 1</span><span class="nav-sub">Database Design</span></a>
-      <a class="nav-btn" href="project2/"><span class="nav-label">Project 2</span><span class="nav-sub">SQL Database</span></a>
-      <a class="nav-btn" href="project3/"><span class="nav-label">Project 3</span><span class="nav-sub">NoSQL Database</span></a>
-  </nav>
-  <a class="banner-repo" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" aria-label="GitHub repository" title="GitHub repository">
-    <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-  </a>
-</header>
-<!-- BANNER:END -->
-<main class="home">
-  <div class="home-art">
-    <!-- CRT logo: three single-channel copies of the artwork, screen-blended back into full colour,
-         so each channel can shear on its own; two full-colour slice copies tear sideways during a burst;
-         plus scanlines, a rolling bright band and a vignette. -->
-    <div class="crt">
-      <img class="ch ch-r" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="CROSSFADE artwork: a scattered violet and blue signal converging into a single gold waveform above the word crossfade">
-      <img class="ch ch-g" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
-      <img class="ch ch-b" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
-      <img class="crt-slice s1" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
-      <img class="crt-slice s2" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
-      <span class="crt-scan" aria-hidden="true"></span>
-      <span class="crt-roll" aria-hidden="true"></span>
-    </div>
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-      <filter id="cf-r"><feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter>
-      <filter id="cf-g"><feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter>
-      <filter id="cf-b"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
-    </svg>
-  </div>
-
-  <section class="home-head">
-    <div class="head-text">
-      <h1>CROSSFADE</h1>
-      <p>A streaming service for independent artists, indexed by where a track sits between genres. One business, carried through the course's three projects: designed, then built as an SQL database, then as a NoSQL database.</p>
-      <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
-      <span class="course-badge"><img src="assets/images/INFO_579_logo.png" width="424" height="480" alt="INFO 579 course logo"><span class="group-line">INFO 579: SQL/NoSQL Databases</span></span>
-    </div>
-    <nav class="head-cards" aria-label="Projects">
-      <a class="card" href="project1/">
-          <span class="num">PROJECT 1</span>
-          <span class="title">Database Design</span>
-          <span class="meta"><span>Due Sep 27, 2026</span><span id="p1-status">&nbsp;</span></span>
-        </a>
-      <a class="card" href="project2/" style="--accent: var(--g4)">
-          <span class="num">PROJECT 2</span>
-          <span class="title">SQL Database</span>
-          <span class="meta"><span>Due Nov 8, 2026</span><span id="p2-status" class="todo">0/4 files</span></span>
-        </a>
-      <a class="card" href="project3/" style="--accent: var(--g8)">
-          <span class="num">PROJECT 3</span>
-          <span class="title">NoSQL Database</span>
-          <span class="meta"><span>Due Dec 13, 2026</span><span class="todo">Not started</span></span>
-        </a>
-      <a class="card" href="design/" style="--accent: var(--ink-2)">
-          <span class="num">DESIGN</span>
-          <span class="title">Top-level design</span>
-          <span class="meta"><span>All projects</span><span></span></span>
-        </a>
-    </nav>
-  </section>
-
-  <nav class="home-rail" aria-label="Quick access">
-    <a class="tile" href="#p1" data-view="p1">
-      <span class="tile-num">01</span>
-      <span class="tile-label">Project 1</span>
-      <span class="tile-sub">Instructions and the completed submission</span>
+<body class="shell-body">
+<div class="app" id="app">
+  <header class="topbar">
+    <button class="rail-toggle" id="rail-toggle" aria-label="Hide the menu" aria-expanded="true" title="Hide / show the menu">
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <a class="tb-brand" href="#home" aria-label="CROSSFADE home">
+      <img class="tb-mark" src="assets/images/crossfade_wordmark.png" width="441" height="72" alt="crossfade">
+      <span class="tb-ctx" id="tb-ctx">INFO 579 &middot; Fall 2026</span>
     </a>
-    <a class="tile" href="#data" data-view="data">
-      <span class="tile-num">02</span>
-      <span class="tile-label">Project 1 data</span>
-      <span class="tile-sub">Sample data: the bulk data.csv, or one CSV per table</span>
+    <nav class="tb-nav" aria-label="Sections" id="tb-nav"></nav>
+    <a class="tb-repo" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" aria-label="GitHub repository" title="GitHub repository">
+      <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
     </a>
-    <a class="tile" href="#brief" data-view="brief">
-      <span class="tile-num">03</span>
-      <span class="tile-label">Project 2 brief</span>
-      <span class="tile-sub">Assignment instructions (PDF)</span>
+  </header>
+
+  <aside class="side" id="side">
+    <a class="side-logo" href="#home" aria-label="CROSSFADE home">
+      <!-- CRT logo: three single-channel copies screen-blended back to full colour so each can shear;
+           two full-colour slices tear during a burst; scanlines, a rolling band and a vignette on top. -->
+      <span class="crt mini">
+        <img class="ch ch-r" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="CROSSFADE">
+        <img class="ch ch-g" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
+        <img class="ch ch-b" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
+        <img class="crt-slice s1" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
+        <img class="crt-slice s2" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
+        <span class="crt-scan" aria-hidden="true"></span>
+        <span class="crt-roll" aria-hidden="true"></span>
+      </span>
     </a>
-  </nav>
+    <nav class="side-nav" id="side-nav" aria-label="Section pages"></nav>
+  </aside>
 
-  <section class="home-view">
-
-    <!-- ===================================================== 01: project 1 -->
-    <div class="view" id="view-p1">
-      <h2>Project 1 &middot; Database Design</h2>
-      <p class="note">Graded submission, due Sep 27, 2026. Every file below is the version handed in.</p>
-
-      <h3>Instructions</h3>
-      <table class="files">
-        <tbody>
-          <tr id="p1-brief-row">
-            <td><code>info579_project01.pdf</code><span class="sub">Project 1 assignment brief</span></td>
-            <td class="size">&nbsp;</td>
-            <td class="acts"><span class="mark open" id="p1-brief-state">not in repo yet</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>Completed submission</h3>
-      <table class="files">
-        <tbody>
-          <tr>
-            <td><code>requirements_analysis.pdf</code><span class="sub">Requirements analysis: business plan, entities, attributes, relationships</span></td>
-            <td class="size">735 KB</td>
-            <td class="acts"><a class="btn" href="project1/#requirements">View</a><a class="btn" href="project1/deliverables/requirements_analysis.pdf" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>conceptual_data_model.png</code><span class="sub">Conceptual data model</span></td>
-            <td class="size">139 KB</td>
-            <td class="acts"><a class="btn" href="project1/#conceptual">View</a><a class="btn" href="project1/deliverables/conceptual_data_model.png" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>data.xlsx</code><span class="sub">Sample data, 10 tables, 401 rows</span></td>
-            <td class="size">20 KB</td>
-            <td class="acts"><a class="btn" href="project1/#data">View</a><a class="btn" href="project1/deliverables/data.xlsx" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>physical_data_model.png</code><span class="sub">Physical data model</span></td>
-            <td class="size">122 KB</td>
-            <td class="acts"><a class="btn" href="project1/#physical">View</a><a class="btn" href="project1/deliverables/physical_data_model.png" download>Download</a></td>
-          </tr>
-          <tr class="total">
-            <td><code>project01_info579_group_1.zip</code><span class="sub">The four files above, as uploaded to D2L</span></td>
-            <td class="size">970 KB</td>
-            <td class="acts"><a class="btn primary" href="project1/submission/project01_info579_group_1.zip" download>Download zip</a></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>Supporting documents</h3>
-      <table class="files">
-        <tbody>
-          <tr>
-            <td><code>DATA_DICTIONARY.md</code><span class="sub">Every column: type, length, nullability and reason</span></td>
-            <td class="size">37 KB</td>
-            <td class="acts"><a class="btn" href="project1/#dictionary">View</a><a class="btn" href="project1/docs/DATA_DICTIONARY.md" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>CHANGES.md</code><span class="sub">Change log for the requirements analysis and models</span></td>
-            <td class="size">23 KB</td>
-            <td class="acts"><a class="btn" href="project1/#changes">View</a><a class="btn" href="project1/CHANGES.md" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>requirements_analysis.tex</code><span class="sub">LaTeX source of the requirements analysis</span></td>
-            <td class="size">55 KB</td>
-            <td class="acts"><a class="btn" href="project1/source/requirements_analysis/requirements_analysis.tex" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>crossfade_schema.sql</code><span class="sub">DDL behind the physical model: 10 tables with PK, FK, UNIQUE and CHECK</span></td>
-            <td class="size">6.2 KB</td>
-            <td class="acts"><a class="btn" href="project1/source/physical_model/crossfade_schema.sql" download>Download</a></td>
-          </tr>
-          <tr>
-            <td><code>physical_data_model_mk1.png</code><span class="sub">First physical model draft, kept with what it missed</span></td>
-            <td class="size">657 KB</td>
-            <td class="acts"><a class="btn" href="project1/#physical_mk1">View</a><a class="btn" href="project1/source/physical_model/physical_data_model_mk1.png" download>Download</a></td>
-          </tr>
-        </tbody>
-      </table>
-      <p><a href="project1/">Open the full Project 1 site &rarr;</a></p>
-    </div>
-
-    <!-- ===================================================== 02: project 1 data -->
-    <div class="view" id="view-data" hidden>
-      <h2>Project 1 sample data</h2>
-      <p class="note">The data handed in with Project 1, which Project 2 loads: 10 tables, 401 rows. Both views below are exported from the graded <code>data.xlsx</code>, and every cell was checked against the workbook.</p>
-
-      <div class="tabs" role="tablist">
-        <a class="tab" role="tab" href="#data/bulk" data-tab="bulk">Bulk <span class="mono">data.csv</span></a>
-        <a class="tab" role="tab" href="#data/tables" data-tab="tables">Per table <span class="mono">10 CSVs</span></a>
-      </div>
-
-      <div class="tabpane" id="tab-bulk">
-        <p class="note">The whole sheet as one CSV, laid out exactly as in <code>data.xlsx</code>: each table is a title row, a header row, its data rows and a blank row. Row numbers match the spreadsheet.</p>
-        <div class="toolbar">
-          <a class="btn primary" href="project1/data_export/data.csv" download>Download data.csv</a>
-          <a class="btn" href="project1/deliverables/data.xlsx" download>data.xlsx</a>
-          <a class="btn" href="project1/data_export/crossfade_project1_data.zip" download>Everything (.zip, 30 KB)</a>
-          <span class="note">13 KB &middot; 430 rows &times; 8 columns</span>
-        </div>
-        <div class="tablewrap sheet" id="bulk-grid"><p class="note" style="padding:12px">Loading&hellip;</p></div>
-      </div>
-
-      <div class="tabpane" id="tab-tables" hidden>
-        <p class="note">One CSV per table, header row first. Empty field = <code>NULL</code>; dates <code>yyyy-mm-dd</code>; timestamps <code>yyyy-mm-dd hh:mm:ss</code>; decimals exact, no rounding.</p>
-        <div class="toolbar">
-          <a class="btn primary" href="project1/data_export/crossfade_project1_data.zip" download>Download crossfade_project1_data.zip</a>
-          <span class="note">30 KB &middot; data.xlsx + data.csv + 10 CSVs + README</span>
-        </div>
-        <table class="files">
-          <thead><tr><th>CSV</th><th class="num">Rows</th><th class="num">Columns</th><th></th></tr></thead>
-          <tbody id="csv-rows"></tbody>
-          <tfoot><tr><td>10 tables</td><td class="num">401</td><td></td><td></td></tr></tfoot>
-        </table>
-        <h3 id="csv-preview-title" hidden></h3>
-        <div class="tablewrap" id="csv-preview" hidden></div>
-      </div>
-    </div>
-
-    <!-- ===================================================== 03: project 2 brief -->
-    <div class="view" id="view-brief" hidden>
-      <h2>Project 2 brief</h2>
-      <p class="note">Database Implementation and Querying &middot; due Nov 8, 2026 11:59 PM</p>
-      <div class="toolbar">
-        <a class="btn" href="project2/brief/info579_project02.pdf" target="_blank" rel="noopener">Open in a new tab</a>
-        <a class="btn" href="project2/brief/info579_project02.pdf" download>Download PDF</a>
-        <a class="btn" href="project2/">Project 2 deliverables &rarr;</a>
-      </div>
-      <iframe class="pdf" data-src="project2/brief/info579_project02.pdf" title="Project 2 brief PDF"></iframe>
-    </div>
-
-  </section>
-</main>
+  <main class="stage">
+    <iframe id="main" title="CROSSFADE panel"></iframe>
+  </main>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="cf-r"><feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter>
+  <filter id="cf-g"><feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter>
+  <filter id="cf-b"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
+</svg>
 <script src="project2/data/deliverables.js"></script>
 <script>
+/* CROSSFADE site shell. One page: top bar (sections), side rail (that section's pages), one iframe (the page).
+   Routes: #<section>/<page>[/<anchor...>], e.g. #p2/usecases, #p1/dictionary/artist, #home/data/tables.
+   Old URLs (project1/#x, project2/#x, ...) redirect here, and links inside panels that point at those old
+   pages are caught and turned into routes, so the panels themselves did not have to change. */
 (function () {
-  /* Project 1 card: deliverables present, from site_data.js */
-  var s = (window.SITE && window.SITE.status) || {}, keys = Object.keys(s);
-  var el = document.getElementById("p1-status");
-  if (keys.length) {
-    var done = keys.filter(function (k) { return s[k]; }).length;
-    el.textContent = done + "/" + keys.length + " deliverables";
-    el.className = done === keys.length ? "done" : "todo";
-  }
+  var SECTIONS = {
+    home: { label: "Home", ctx: "INFO 579 · SQL/NoSQL Databases · Fall 2026", groups: [
+      ["", [["overview", "Overview", "home/overview.html"]]],
+      ["Quick access", [["p1", "Project 1", "home/p1.html", "01", "Instructions + submission"],
+                        ["data", "Project 1 data", "home/data.html", "02", "Bulk or per-table CSV"],
+                        ["brief", "Project 2 brief", "home/brief.html", "03", "Assignment PDF"]]]] },
+    p1: { label: "Project 1", short: "P1", sub: "Database Design", ctx: "Project 1 · Database Design", groups: [
+      ["Overview", [["home", "Home", "project1/panels/home.html"]]],
+      ["Deliverables", [["requirements", "Requirements analysis", "project1/panels/requirements.html", null, null, "requirements_analysis.pdf"],
+                        ["conceptual", "Conceptual model", "project1/panels/conceptual.html", null, null, "conceptual_data_model.png"],
+                        ["data", "Sample data", "project1/panels/data.html", null, null, "data.xlsx"],
+                        ["physical", "Physical model", "project1/panels/physical.html", null, null, "physical_data_model.png"],
+                        ["physical_mk1", "↳ mk1 draft", "project1/panels/physical_mk1.html"]]],
+      ["Reference", [["dictionary", "Data dictionary", "project1/panels/dictionary.html"],
+                     ["changes", "Change log", "project1/panels/changes.html"],
+                     ["files", "Files", "project1/panels/files.html"]]]] },
+    p2: { label: "Project 2", short: "P2", sub: "SQL Database", ctx: "Project 2 · SQL Database", groups: [
+      ["Overview", [["overview", "Deliverables", "project2/panels/overview.html"],
+                    ["usecases", "Use cases", "project2/panels/usecases.html"]]],
+      ["Files", [["implementation", "database_implementation", "project2/panels/file.html?f=implementation"],
+                 ["single", "single_table", "project2/panels/file.html?f=single"],
+                 ["multiple", "multiple_table", "project2/panels/file.html?f=multiple"],
+                 ["routines", "routines", "project2/panels/file.html?f=routines"]]],
+      ["Reference", [["brief", "Assignment brief", "project2/panels/brief.html"]]]] },
+    p3: { label: "Project 3", short: "P3", sub: "NoSQL Database", ctx: "Project 3 · NoSQL Database", groups: [
+      ["", [["overview", "Overview", "project3/panel.html"]]]] },
+    design: { label: "Design", sub: "All projects", ctx: "Top-level design", groups: [
+      ["", [["overview", "Top-level design", "design/panel.html"]]]] }
+  };
+  var ORDER = ["home", "p1", "p2", "p3", "design"];
+  var FOLDER = { project1: "p1", project2: "p2", project3: "p3", design: "design" };
+  var LEGACY_HOME = { p1: 1, data: 1, brief: 1 };          // old front-page views: #p1, #data/..., #brief
 
-  /* Project 2 card: how many of the four .sql files exist */
-  if (window.P2) {
-    var have = 0, seen = 0, p2 = document.getElementById("p2-status");
-    window.P2.present("project2/", function (f, ok) {
-      seen++; if (ok) have++;
-      if (seen === window.P2.files.length) {
-        p2.textContent = have + "/" + seen + " files";
-        p2.className = have === seen ? "done" : "todo";
-      }
-    });
-  }
+  var app = document.getElementById("app"), frame = document.getElementById("main");
+  var tbNav = document.getElementById("tb-nav"), sideNav = document.getElementById("side-nav");
+  var cur = { sec: null, page: null };
 
-  /* Project 1 brief: shown once project1/brief/info579_project01.pdf is in the repo */
-  var P1_BRIEF = "project1/brief/info579_project01.pdf";
-  fetch(P1_BRIEF, { method: "HEAD", cache: "no-store" }).then(function (r) {
-    if (!r.ok) return;
-    var row = document.getElementById("p1-brief-row");
-    var n = +r.headers.get("content-length");
-    if (n) row.querySelector(".size").textContent = Math.round(n / 1024) + " KB";
-    row.querySelector(".acts").innerHTML =
-      '<a class="btn" href="' + P1_BRIEF + '" target="_blank" rel="noopener">View</a>' +
-      '<a class="btn" href="' + P1_BRIEF + '" download>Download</a>';
-  }).catch(function () {});
+  function pages(sec) { var out = []; SECTIONS[sec].groups.forEach(function (g) { out = out.concat(g[1]); }); return out; }
+  function page(sec, id) { return pages(sec).filter(function (p) { return p[0] === id; })[0]; }
 
-  /* ---------- CSV helpers */
-  function parseCSV(text) {
-    var rows = [], row = [], f = "", q = false;
-    for (var i = 0; i < text.length; i++) {
-      var c = text[i];
-      if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
-      else if (c === '"') q = true;
-      else if (c === ",") { row.push(f); f = ""; }
-      else if (c === "\n") { row.push(f); rows.push(row); row = []; f = ""; }
-      else if (c !== "\r") f += c;
-    }
-    if (f !== "" || row.length) { row.push(f); rows.push(row); }
-    return rows;
-  }
-  function esc(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
-  var NUM = /^-?\d+(\.\d+)?$/;
-  function cell(v) {
-    if (v === "") return '<td class="null">NULL</td>';
-    return "<td" + (NUM.test(v) ? ' class="num"' : "") + ">" + esc(v) + "</td>";
-  }
-
-  /* ---------- bulk: data.csv as the spreadsheet looks */
-  var bulkDone = false;
-  function loadBulk() {
-    if (bulkDone) return; bulkDone = true;
-    fetch("project1/data_export/data.csv").then(function (r) { return r.text(); }).then(function (t) {
-      var rows = parseCSV(t), w = rows[0].length, cols = "ABCDEFGHIJ".slice(0, w).split("");
-      var h = '<table class="grid"><thead><tr><th class="rn"></th>' + cols.map(function (c) { return "<th>" + c + "</th>"; }).join("") + "</tr></thead><tbody>";
-      var nextIsHeader = false, width = w;
-      rows.forEach(function (r, i) {
-        var used = r.filter(function (v) { return v !== ""; }).length;
-        var rn = '<td class="rn">' + (i + 1) + "</td>";
-        if (used === 0) { h += '<tr class="blank">' + rn + '<td colspan="' + w + '"></td></tr>'; return; }
-        if (used === 1 && r[0] !== "" && !NUM.test(r[0])) {
-          h += '<tr class="title">' + rn + '<td colspan="' + w + '">' + esc(r[0]) + "</td></tr>"; nextIsHeader = true; return;
-        }
-        if (nextIsHeader) {
-          width = r.filter(function (v) { return v !== ""; }).length;            // this table's column count
-          h += '<tr class="hdr">' + rn + r.map(function (v) { return "<td>" + esc(v) + "</td>"; }).join("") + "</tr>"; nextIsHeader = false; return;
-        }
-        h += "<tr>" + rn + r.map(function (v, j) { return j < width ? cell(v) : '<td class="pad"></td>'; }).join("") + "</tr>";
-      });
-      document.getElementById("bulk-grid").innerHTML = h + "</tbody></table>";
-    }).catch(function () {
-      document.getElementById("bulk-grid").innerHTML = '<p class="note" style="padding:12px">Preview needs the site served over http; download data.csv instead.</p>';
-    });
-  }
-
-  /* ---------- per table: list + inline preview */
-  var CSV = [["artist", 8, 6], ["track", 15, 7], ["genre", 10, 3], ["listener", 8, 5],
-             ["scoring_model", 5, 8], ["station", 8, 7], ["track_score", 27, 8],
-             ["genre_probability", 270, 4], ["station_blend", 19, 3], ["play", 31, 8]];
-  document.getElementById("csv-rows").innerHTML = CSV.map(function (c) {
-    var href = "project1/data_export/csv/" + c[0] + ".csv";
-    return "<tr><td><code>" + c[0] + ".csv</code></td><td class=\"num\">" + c[1] +
-      "</td><td class=\"num\">" + c[2] + "</td><td class=\"acts\"><button class=\"btn\" data-csv=\"" + c[0] +
-      "\" aria-pressed=\"false\">View</button><a class=\"btn\" href=\"" + href + "\" download>Download</a></td></tr>";
+  /* ---- top bar */
+  tbNav.innerHTML = ORDER.map(function (k) {
+    var s = SECTIONS[k];
+    return '<a class="tb-btn" href="#' + k + '" data-sec="' + k + '"><span class="l">' + s.label + '</span><span class="ls">' + (s.short || s.label) + "</span>" +
+      (s.sub ? '<span class="s">' + s.sub + "</span>" : "") + "</a>";
   }).join("");
-  Array.prototype.forEach.call(document.querySelectorAll("[data-csv]"), function (b) {
-    b.addEventListener("click", function () {
-      var name = b.dataset.csv, box = document.getElementById("csv-preview"), ttl = document.getElementById("csv-preview-title");
-      var open = b.getAttribute("aria-pressed") === "true";
-      Array.prototype.forEach.call(document.querySelectorAll("[data-csv]"), function (x) { x.setAttribute("aria-pressed", "false"); });
-      if (open) { box.hidden = ttl.hidden = true; return; }
-      b.setAttribute("aria-pressed", "true");
-      fetch("project1/data_export/csv/" + name + ".csv").then(function (r) { return r.text(); }).then(function (t) {
-        var rows = parseCSV(t);
-        ttl.textContent = name + ".csv"; ttl.hidden = false;
-        box.innerHTML = '<table class="grid"><thead><tr>' + rows[0].map(function (v) { return "<th>" + esc(v) + "</th>"; }).join("") +
-          "</tr></thead><tbody>" + rows.slice(1).map(function (r) { return "<tr>" + r.map(cell).join("") + "</tr>"; }).join("") + "</tbody></table>";
-        box.hidden = false;
-        ttl.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  /* ---- side rail for one section */
+  function drawRail(sec) {
+    sideNav.innerHTML = SECTIONS[sec].groups.map(function (g) {
+      return (g[0] ? "<h2>" + g[0] + "</h2>" : "") + g[1].map(function (p) {
+        var num = p[3] ? '<span class="n">' + p[3] + "</span>" : "";
+        var sub = p[4] ? '<span class="sb">' + p[4] + "</span>" : "";
+        return '<a class="sn" href="#' + sec + "/" + p[0] + '" data-page="' + p[0] + '"' + (p[5] ? ' data-file="' + p[5] + '"' : "") + ">" +
+          num + '<span class="t">' + p[1] + sub + '</span><span class="state"></span></a>';
+      }).join("");
+    }).join("");
+    statuses(sec);
+  }
+  function setState(sel, text, ok) {
+    var el = sideNav.querySelector(sel + " .state"); if (!el) return;
+    el.textContent = text; el.className = "state " + (ok ? "done" : "todo");
+  }
+  function statuses(sec) {
+    if (sec === "p1" && window.SITE && window.SITE.status) {
+      Array.prototype.forEach.call(sideNav.querySelectorAll("[data-file]"), function (a) {
+        var ok = !!window.SITE.status[a.dataset.file]; setState('[data-page="' + a.dataset.page + '"]', ok ? "done" : "next", ok);
       });
+    }
+    if (sec === "p2" && window.P2) {
+      var have = 0, seen = 0;
+      window.P2.present("project2/", function (f, ok) {
+        setState('[data-page="' + f.id + '"]', ok ? "✓" : "–", ok);
+        seen++; if (ok) have++;
+        if (seen === window.P2.files.length) setState('[data-page="overview"]', have + "/" + seen, have === seen);
+      });
+    }
+  }
+
+  /* ---- routing */
+  function parse(hash) {
+    var parts = hash.replace(/^#/, "").split("/").filter(Boolean);
+    if (!parts.length) return { sec: "home", page: "overview", rest: [] };
+    if (!SECTIONS[parts[0]]) {                               // old front-page hashes
+      if (LEGACY_HOME[parts[0]]) return { sec: "home", page: parts[0], rest: parts.slice(1) };
+      return { sec: "home", page: "overview", rest: [] };
+    }
+    var sec = parts[0], pg = parts[1] && page(sec, parts[1]) ? parts[1] : pages(sec)[0][0];
+    return { sec: sec, page: pg, rest: parts[1] === pg ? parts.slice(2) : [] };
+  }
+  function show() {
+    var r = parse(location.hash), p = page(r.sec, r.page);
+    if (r.sec !== cur.sec) {
+      drawRail(r.sec);
+      Array.prototype.forEach.call(tbNav.children, function (a) { a.toggleAttribute("aria-current", a.dataset.sec === r.sec); });
+      document.getElementById("tb-ctx").textContent = SECTIONS[r.sec].ctx;
+    }
+    Array.prototype.forEach.call(sideNav.querySelectorAll(".sn"), function (a) { a.toggleAttribute("aria-current", a.dataset.page === r.page); });
+    var src = p[2] + (r.rest.length ? "#" + r.rest.join("/") : "");
+    if (frame.getAttribute("src") !== src) frame.setAttribute("src", src);
+    cur = { sec: r.sec, page: r.page };
+    document.title = (r.sec === "home" && r.page === "overview" ? "" : p[1].replace("↳ ", "") + " | " + (r.sec === "home" ? "" : SECTIONS[r.sec].label + " | ")) + "CROSSFADE";
+  }
+  window.addEventListener("hashchange", show);
+
+  /* ---- links inside a panel that point at an old page become routes */
+  var root = location.pathname.replace(/[^\/]*$/, "");
+  function routeOf(url) {
+    if (url.origin !== location.origin || url.pathname.indexOf(root) !== 0) return null;
+    var rel = url.pathname.slice(root.length), h = url.hash.replace(/^#/, "");
+    if (rel === "" || rel === "index.html") return h || "home";
+    var m = rel.match(/^(project1|project2|project3|design)\/(index\.html)?$/);
+    return m ? FOLDER[m[1]] + (h ? "/" + h : "") : null;
+  }
+  frame.addEventListener("load", function () {
+    var doc; try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc) return;
+    doc.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a[href]");
+      if (!a || a.hasAttribute("download") || a.target === "_blank" || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      var r = routeOf(new URL(a.href, doc.baseURI));
+      if (r === null) return;
+      e.preventDefault(); location.hash = r;
+    }, true);
+    /* keep the address bar in step when a panel changes its own #anchor (tabs, dictionary entries) */
+    frame.contentWindow.addEventListener("hashchange", function () {
+      var h = frame.contentWindow.location.hash.replace(/^#/, "");
+      var want = "#" + cur.sec + "/" + cur.page + (h ? "/" + h : "");
+      if (location.hash !== want) history.replaceState(null, "", want);
+      frame.setAttribute("src", page(cur.sec, cur.page)[2] + (h ? "#" + h : ""));
     });
   });
 
-  /* ---------- views: #p1 (default), #data[/bulk|/tables], #brief */
-  var VIEWS = ["p1", "data", "brief"];
-  var tiles = Array.prototype.slice.call(document.querySelectorAll(".tile"));
-  function show() {
-    var parts = location.hash.replace("#", "").split("/"), id = parts[0], sub = parts[1];
-    if (VIEWS.indexOf(id) < 0) id = "p1";
-    Array.prototype.forEach.call(document.querySelectorAll(".view"), function (v) {
-      v.hidden = v.id !== "view-" + id;
-    });
-    tiles.forEach(function (t) {
-      if (t.dataset.view === id) t.setAttribute("aria-current", "true");
-      else t.removeAttribute("aria-current");
-    });
-    if (id === "data") {
-      var tab = sub === "tables" ? "tables" : "bulk";
-      document.getElementById("tab-bulk").hidden = tab !== "bulk";
-      document.getElementById("tab-tables").hidden = tab !== "tables";
-      Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
-        t.setAttribute("aria-selected", t.dataset.tab === tab ? "true" : "false");
-      });
-      if (tab === "bulk") loadBulk();
-    }
-    if (id === "brief") {                                 // load the PDF only when asked for
-      var f = document.querySelector("#view-brief iframe");
-      if (!f.getAttribute("src")) f.setAttribute("src", f.dataset.src);
-    }
-    document.title = tiles[VIEWS.indexOf(id)].querySelector(".tile-label").textContent + " | CROSSFADE | INFO 579 Group 1";
+  /* ---- hide / show the rail (remembered in this browser) */
+  var tog = document.getElementById("rail-toggle");
+  function setRail(open) {
+    app.classList.toggle("rail-hidden", !open);
+    tog.setAttribute("aria-expanded", open ? "true" : "false");
+    tog.setAttribute("aria-label", open ? "Hide the menu" : "Show the menu");
+    try { localStorage.setItem("cf-rail", open ? "1" : "0"); } catch (e) {}
   }
-  window.addEventListener("hashchange", show);
+  tog.addEventListener("click", function () { setRail(app.classList.contains("rail-hidden")); });
+  try { if (localStorage.getItem("cf-rail") === "0") setRail(false); } catch (e) {}
+
   show();
 })();
 </script>

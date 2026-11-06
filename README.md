@@ -15,22 +15,36 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 
 ## Layout
 
+The site is one page, `index.html`: a slim top bar (sections), a side rail (that section's pages) and one
+iframe that every page loads into. Routes are hashes: `#<section>/<page>[/<anchor>]`.
+
+| Route | Loads |
+|---|---|
+| `#home` (default), `#home/p1`, `#home/data[/tables]`, `#home/brief` | `home/overview.html`, `home/p1.html`, `home/data.html`, `home/brief.html` |
+| `#p1/<panel>[/<anchor>]` | `project1/panels/<panel>.html` (unchanged) |
+| `#p2/overview`, `#p2/usecases`, `#p2/brief` | `project2/panels/<panel>.html` |
+| `#p2/implementation`, `#p2/single`, `#p2/multiple`, `#p2/routines` | `project2/panels/file.html?f=<id>` |
+| `#p3`, `#design` | `project3/panel.html`, `design/panel.html` |
+
+`project1/index.html`, `project2/index.html`, `project3/index.html` and `design/index.html` are now redirect
+stubs (`project2/#usecases` → `#p2/usecases`), so old links and bookmarks still work. Links inside a panel that
+point at those old pages are caught by the shell and turned into routes, so the panels did not need editing.
+The ☰ button hides the rail for a full-width panel; the choice is remembered per browser. To add a page,
+add one line to `SECTIONS` in the script at the bottom of `index.html`.
+
 ```
-index.html       front page. Top: art | description + the four project cards.
-                 Below: rail | view. Rail: 01 Project 1 (brief + completed submission + supporting
-                 docs), 02 Project 1 data (bulk data.csv or per-table CSVs), 03 Project 2 brief.
-                 Views open at #p1 (default), #data/bulk, #data/tables, #brief.
+index.html       the site shell (top bar, rail, iframe, router)
+home/            front-page panels: overview, Project 1 package, Project 1 data (bulk / per table), Project 2 brief
 assets/          shared site.css, panel.js, logo, favicons, social card (og_card.png), CROSSFADE artwork
-tools/           build_banner.py: writes the shared top banner into every top-level page
-                 stamp_assets.py: tags every link to site.css / panel.js with a content hash
-                 export_p1_data.py: data.xlsx -> project1/data_export/ (one CSV per table + zip)
+tools/           stamp_assets.py: tags every link to site.css / panel.js with a content hash
+                 export_p1_data.py: data.xlsx -> project1/data_export/ (data.csv + one CSV per table + zip)
 assets/vendor/   jszip.min.js (JSZip 3.10.1, MIT): builds the Project 1 submission zip in the browser
-design/          top-level design: the business and its ten entities
-project1/        Database Design: deliverables, sources, docs, its own site
+design/          top-level design (panel.html)
+project1/        Database Design: deliverables, sources, docs, panels
   data_export/   the graded data.xlsx as data.csv (whole sheet) and csv/<table>.csv, plus crossfade_project1_data.zip
-  brief/         (to add) info579_project01.pdf; the front page shows it once it exists
-project2/        SQL Database
-project3/        NoSQL Database
+  brief/         (to add) info579_project01.pdf; the Project 1 page shows it once it exists
+project2/        SQL Database: deliverables, panels, use cases, scripts
+project3/        NoSQL Database (panel.html)
 course_materials/  course zips kept for transport only; not linked from the site (see below)
 boot_site.ps1    local preview server for the whole repo
 ```
@@ -62,10 +76,6 @@ The repository is public, so these files can be downloaded by anyone who browses
 ```
 .\boot_site.ps1
 ```
-
-## Banner
-
-Every top-level page shares one banner: the CROSSFADE wave and wordmark, a context line, and Home / Project 1 / Project 2 / Project 3 buttons with a hover effect. After changing it, run `python tools/build_banner.py` from the repository root; it rewrites the block between the `BANNER` markers in each page.
 
 ## After editing site.css or panel.js
 

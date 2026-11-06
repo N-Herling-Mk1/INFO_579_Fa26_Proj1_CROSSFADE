@@ -6,7 +6,7 @@
 <title>Deliverable</title>
 <link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
-<link rel="stylesheet" href="../../assets/site.css?v=44ce316d">
+<link rel="stylesheet" href="../../assets/site.css?v=9bc5a236">
 <script src="../data/deliverables.js"></script>
 </head>
 <body>
@@ -22,6 +22,12 @@
   <div id="test" hidden>
     <h2>Test it locally</h2>
     <ol class="prose" id="test-steps"></ol>
+  </div>
+
+  <div id="results" hidden>
+    <h2>Latest test run</h2>
+    <p class="note" id="res-summary"></p>
+    <div id="res-body"></div>
   </div>
 
   <h2>Script</h2>
@@ -56,12 +62,69 @@
         var top = document.createElement("div"); top.className = "toolbar";
         top.innerHTML = '<a class="btn primary" download></a>';
         top.firstChild.href = url; top.firstChild.textContent = "Download " + f.file;
+        if (f.kit) {
+          var k = document.createElement("a"); k.className = "btn"; k.href = f.kit; k.setAttribute("download", "");
+          k.textContent = "Download test kit"; top.appendChild(k);
+        }
         document.getElementById("title").after(top);
       }
       box.querySelector(".note").textContent = sql.split("\n").length + " lines";
       box.querySelector("code").textContent = sql;
     });
   }).catch(function () {});
+
+  /* latest test run, written by project2/tests at the end of a pytest run */
+  if (f.results) {
+    var sc = document.createElement("script");
+    sc.src = "../data/" + f.results + "?t=" + Date.now();
+    sc.onload = function () { if (window.P2_SINGLE) showResults(window.P2_SINGLE); };
+    document.head.appendChild(sc);
+  }
+  function esc(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function showResults(R) {
+    var ok = R.failed === 0;
+    document.getElementById("res-summary").innerHTML =
+      '<span class="mark ' + (ok ? "done" : "partial") + '">' + R.passed + " passed" + (R.failed ? ", " + R.failed + " failed" : "") +
+      "</span> &nbsp;run " + esc(R.generated.replace("T", " ")) + ". Each query's result below is the one the tests checked.";
+    var fileTests = (R.tests.file || []);
+    var h = "";
+    Object.keys(R.queries).sort(function (a, b) { return (a[0] === b[0] ? 0 : a[0] === "S" ? -1 : 1) || (+a.slice(1) - +b.slice(1)); }).forEach(function (tag) {
+      var q = R.queries[tag], ts = R.tests[tag] || [];
+      var bad = ts.filter(function (t) { return t.outcome !== "passed"; }).length;
+      if (q.kind === "expected_error") {
+        var got = String(q.got || "").replace(/entry '.*' for key/, "entry '\u2026' for key");
+        h += '<div class="res-q res-err"><div class="res-head"><b>[' + tag + "] " + esc(q.table || "") + " \u00b7 expected error</b> " +
+          (q.use_cases || []).map(function (u) { return '<span class="chip">' + u + "</span>"; }).join("") +
+          '<span class="mark ' + (bad ? "partial" : "done") + '">' + (bad ? "not refused" : "refused as expected") + "</span></div>" +
+          '<p class="res-question">' + esc(q.question || "") + "</p>" +
+          '<p class="note">expects <code>' + esc(q.expects) + "</code> &middot; MySQL said <code>" + esc(got) + "</code></p>" +
+          '<div class="prose"><pre><code>' + esc(q.sql) + "</code></pre></div>" +
+          '<p class="note">Run inside a transaction that is rolled back; the test also checks <code>' + esc(q.table) + "</code> is unchanged. Source: <code>project2/tests/expected_errors.sql</code>.</p></div>";
+        return;
+      }
+      h += '<div class="res-q"><div class="res-head"><b>[' + tag + "] " + esc(q.table || "") + "</b> " +
+        (q.use_cases || []).map(function (u) { return '<span class="chip">' + u + "</span>"; }).join("") +
+        (q.declared || []).map(function (r) { return '<span class="chip g">(' + r + ")</span>"; }).join("") +
+        '<span class="mark ' + (bad ? "partial" : "done") + '">' + (ts.length - bad) + "/" + ts.length + " tests</span></div>" +
+        '<p class="res-question">' + esc(q.question || "") + "</p>" +
+        (q.columns ? '<p class="note">reads: ' + q.columns.map(function (c) { return "<code>" + c + "</code>"; }).join(" ") + "</p>" : "");
+      if (q.columns_out && q.rows) {
+        h += '<div class="tablewrap res-table"><table class="grid"><thead><tr>' + q.columns_out.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") +
+          "</tr></thead><tbody>" + q.rows.map(function (r) {
+            return "<tr>" + r.map(function (v) { return v === null ? '<td class="null">NULL</td>' : "<td" + (/^-?\d+(\.\d+)?$/.test(v) ? ' class="num"' : "") + ">" + esc(v) + "</td>"; }).join("") + "</tr>";
+          }).join("") + "</tbody></table></div>";
+      }
+      if (bad) h += '<p class="note">failed: ' + ts.filter(function (t) { return t.outcome !== "passed"; }).map(function (t) { return "<code>" + esc(t.test) + "</code>"; }).join(" ") + "</p>";
+      h += "</div>";
+    });
+    var behaviour = Object.keys(R.tests).filter(function (k) { return k === "file"; }).length ? fileTests : [];
+    if (behaviour.length) {
+      h += '<div class="res-q"><div class="res-head"><b>Behaviour and whole-file tests</b></div><ul class="res-list">' +
+        behaviour.map(function (t) { return "<li>" + (t.outcome === "passed" ? "\u2713 " : "\u2717 ") + esc(t.test.replace(/^test_/, "").replace(/_/g, " ")) + "</li>"; }).join("") + "</ul></div>";
+    }
+    document.getElementById("res-body").innerHTML = h;
+    document.getElementById("results").hidden = false;
+  }
 })();
 </script>
 </body>

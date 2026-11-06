@@ -20,66 +20,18 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/site.css?v=44ce316d">
+
+<noscript><meta http-equiv="refresh" content="0; url=../#design"></noscript>
+<script>
+/* This page moved into the site shell. Keep deep links working: design/#x -> ../#design/x */
+(function () {
+  var h = location.hash.replace(/^#/, "");
+  var url = new URL("../#design" + (h ? "/" + h : ""), location.href).href;
+  try { (window.top || window).location.replace(url); } catch (e) { location.replace(url); }
+})();
+</script>
 </head>
 <body>
-<!-- BANNER:BEGIN -->
-<header class="banner">
-  <a class="brand" href="../" aria-label="CROSSFADE home">
-    <span class="brand-wave" style="background-image:url('../assets/images/crossfade_wave.jpg')" aria-hidden="true"></span>
-    <span class="brand-text">
-      <img class="brand-mark" src="../assets/images/crossfade_wordmark.png" width="441" height="72" alt="crossfade">
-      <span class="brand-context">Top-level design</span>
-    </span>
-  </a>
-  <nav class="banner-nav" aria-label="Projects">
-      <a class="nav-btn" href="../"><span class="nav-label">Home</span></a>
-      <a class="nav-btn" href="../project1/"><span class="nav-label">Project 1</span><span class="nav-sub">Database Design</span></a>
-      <a class="nav-btn" href="../project2/"><span class="nav-label">Project 2</span><span class="nav-sub">SQL Database</span></a>
-      <a class="nav-btn" href="../project3/"><span class="nav-label">Project 3</span><span class="nav-sub">NoSQL Database</span></a>
-  </nav>
-  <a class="banner-repo" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" aria-label="GitHub repository" title="GitHub repository">
-    <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-  </a>
-</header>
-<!-- BANNER:END -->
-<div class="panel">
-  <h1>Top-level design</h1>
-  <p class="group-line">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
-  <p class="lede">What stays the same across all three projects: the business and the data it has to manage.</p>
-  <h2>The business</h2>
-  <div class="prose">
-    <p>CROSSFADE is a streaming service for independent artists. Artists upload recordings directly under their own licence, so the catalogue is almost entirely new material. Every track is scored at upload by several versions of the <a href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">BEARDOWN</a> genre classifier, each returning a probability for all ten genres. Listeners don't browse genre names. They build stations from a target blend (say 60% jazz, 40% hip hop) and an allowed range of ambiguity, so a track uploaded an hour ago is as findable as one with a million plays.</p>
-    <p>The database holds the artist roster and catalogue, the model versions and every result they produced, listener accounts and their stations, and every play, which is both the taste signal and the billable event for royalties.</p>
-  </div>
-  <h2>The data</h2>
-  <div class="prose">
-    <p>Ten entities, fixed in Project 1 and reused by the later projects.</p>
-    <table>
-      <tr><th>Kind</th><th>Entities</th></tr>
-      <tr><td>Entity (6)</td><td>Artist, Track, Genre, Listener, Scoring Model, Station</td></tr>
-      <tr><td>Associative entity (4)</td><td>Track Score, Genre Probability, Station Blend, Play</td></tr>
-    </table>
-    <p>The <a href="../project1/#conceptual">conceptual model</a> shows how they relate, and the <a href="../project1/#dictionary">data dictionary</a> says what every attribute is for.</p>
-  </div>
-  <h2>One design, three databases</h2>
-  <div class="prose">
-    <table>
-      <tr><th>Project</th><th>What it does with the design</th><th>Due</th></tr>
-      <tr><td><a href="../project1/">1. Database Design</a></td><td>Defines it: requirements analysis, conceptual model, sample data, physical model.</td><td>Sep 27, 2026</td></tr>
-      <tr><td><a href="../project2/">2. SQL Database</a></td><td>Builds it as a relational database.</td><td>Nov 8, 2026</td></tr>
-      <tr><td><a href="../project3/">3. NoSQL Database</a></td><td>Models the same business in a NoSQL database.</td><td>Dec 13, 2026</td></tr>
-    </table>
-  </div>
-  <h2>Repository layout</h2>
-  <div class="prose">
-<pre><code>index.html     project picker (this site's front page)
-assets/        shared styles, logo, icons, social card
-design/        this page: the top-level design
-project1/      Database Design: deliverables, sources, docs site
-project2/      SQL Database
-project3/      NoSQL Database</code></pre>
-  </div>
-</div>
+<p><a href="../#design">Continue to this page of the CROSSFADE site</a>.</p>
 </body>
 </html>

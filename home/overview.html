@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CROSSFADE</title>
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/site.css?v=9bc5a236">
+<script src="../project1/data/site_data.js"></script>
+<script src="../project2/data/deliverables.js"></script>
+</head>
+<body>
+<div class="ov">
+  <section class="ov-hero" style="background-image:url('../assets/images/crossfade_wave.jpg')">
+    <div class="ov-hero-text">
+      <h1>CROSSFADE</h1>
+      <p>A streaming service for independent artists, indexed by where a track sits between genres. One business, carried through the course's three projects: designed, then built as an SQL database, then as a NoSQL database.</p>
+      <p class="ov-meta">info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
+      <span class="ov-course"><img src="../assets/images/INFO_579_logo.png" width="424" height="480" alt="INFO 579 course logo">INFO 579: SQL/NoSQL Databases &middot; Fall 2026</span>
+    </div>
+  </section>
+
+  <section class="ov-body">
+    <h2>Projects</h2>
+    <div class="cards ov-cards">
+      <a class="card" href="../project1/">
+        <span class="num">PROJECT 1</span>
+        <span class="title">Database Design</span>
+        <span class="desc">Requirements analysis, conceptual model, sample data and physical model.</span>
+        <span class="meta"><span>Due Sep 27, 2026</span><span id="p1-status">&nbsp;</span></span>
+      </a>
+      <a class="card" href="../project2/" style="--accent: var(--g4)">
+        <span class="num">PROJECT 2</span>
+        <span class="title">SQL Database</span>
+        <span class="desc">The Project 1 design built and queried as a relational database.</span>
+        <span class="meta"><span>Due Nov 8, 2026</span><span id="p2-status" class="todo">0/4 files</span></span>
+      </a>
+      <a class="card" href="../project3/" style="--accent: var(--g8)">
+        <span class="num">PROJECT 3</span>
+        <span class="title">NoSQL Database</span>
+        <span class="desc">The same business modelled in a NoSQL database.</span>
+        <span class="meta"><span>Due Dec 13, 2026</span><span class="todo">Not started</span></span>
+      </a>
+      <a class="card" href="../design/" style="--accent: var(--ink-2)">
+        <span class="num">DESIGN</span>
+        <span class="title">Top-level design</span>
+        <span class="desc">The business, its ten entities, and how each project builds on the last.</span>
+        <span class="meta"><span>All projects</span><span></span></span>
+      </a>
+    </div>
+
+    <h2>Quick access</h2>
+    <div class="ov-quick">
+      <a class="tile" href="../index.html#home/p1"><span class="tile-num">01</span><span class="tile-label">Project 1</span><span class="tile-sub">Instructions and the completed submission</span></a>
+      <a class="tile" href="../index.html#home/data"><span class="tile-num">02</span><span class="tile-label">Project 1 data</span><span class="tile-sub">The bulk data.csv, or one CSV per table</span></a>
+      <a class="tile" href="../index.html#home/brief"><span class="tile-num">03</span><span class="tile-label">Project 2 brief</span><span class="tile-sub">Assignment instructions (PDF)</span></a>
+    </div>
+  </section>
+</div>
+<script>
+(function () {
+  var s = (window.SITE && window.SITE.status) || {}, keys = Object.keys(s), el = document.getElementById("p1-status");
+  if (keys.length) {
+    var done = keys.filter(function (k) { return s[k]; }).length;
+    el.textContent = done + "/" + keys.length + " deliverables"; el.className = done === keys.length ? "done" : "todo";
+  }
+  if (window.P2) {
+    var have = 0, seen = 0, p2 = document.getElementById("p2-status");
+    window.P2.present("../project2/", function (f, ok) {
+      seen++; if (ok) have++;
+      if (seen === window.P2.files.length) { p2.textContent = have + "/" + seen + " files"; p2.className = have === seen ? "done" : "todo"; }
+    });
+  }
+})();
+</script>
+</body>
+</html>

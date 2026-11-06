@@ -1,24 +1,30 @@
 /*
-	database_implementation.sql
+	FILE: database_implementation.sql
+	.
 	INFO 579 Project 2, Task 1: Database Implementation
 	CROSSFADE, info579_group_1 (Herling, Nathan; Pabari, Nidhi Nilesh)
-
+	.
+	***** FYI and project descriptions **********
 	CROSSFADE is a streaming service for independent artists whose catalogue is
 	indexed by where a recording sits between genres. This script builds the
 	Project 1 physical data model (physical_data_model.png) as the MySQL database
 	`crossfade` and loads the Project 1 sample data (data.xlsx), unchanged:
 	10 tables, 401 rows.
-
+	
+	***** How to Run *********
 	Run the whole script (MySQL 8.0.16 or later, for CHECK constraints). It drops
 	and rebuilds the database, so it can be run again at any time.
 
+	***** NERD STUFF *********
 	Order: parent tables are created and loaded before the tables that reference
 	them, so every foreign key value already exists when its row is inserted.
 		genre, artist, listener, scoring_model      (no foreign keys)
 		track, station                              (reference the tables above)
 		track_score, genre_probability,
 		station_blend, play                         (associative tables)
+	Data: located and stored at bottom of file, reproduced from the Project1 data file.
 
+	***** Re: Class notes and syntax *****
 	Conventions, following the course examples:
 	- Every constraint is named: pk_<table>, fk_<child>_<parent>, uq_<table>_<column>,
 	  ck_<table>_<rule>. MySQL names the index behind each foreign key after the
@@ -51,7 +57,7 @@ CREATE DATABASE IF NOT EXISTS crossfade DEFAULT CHARACTER SET utf8mb4;
 /* ======================================================================== */
 
 /*
-	GENRE: the fixed set of ten musical categories every scoring model produces a
+	[GENRE]: the fixed set of ten musical categories every scoring model produces a
 	probability for. It is the coordinate system listeners use to describe the
 	blend a station should play, so every model output and every station blend
 	refers to a row here instead of free text.
@@ -71,7 +77,7 @@ CREATE TABLE IF NOT EXISTS crossfade.genre (
 
 
 /*
-	ARTIST: an independent musician or group registered to upload recordings under
+	[ARTIST]: an independent musician or group registered to upload recordings under
 	a direct streaming licence and paid a per-stream royalty. An artist can exist
 	before their first upload.
 	- stage_name is unique because it is how listeners find the artist.
@@ -94,7 +100,7 @@ CREATE TABLE IF NOT EXISTS crossfade.artist (
 
 
 /*
-	LISTENER: a registered subscriber who streams recordings and creates the
+	[LISTENER]: a registered subscriber who streams recordings and creates the
 	stations through which they discover new material.
 	- email is the sign-in address, so it is unique, and the CHECK rejects a value
 	  with no @. VARCHAR(254) is the longest address the email standard allows.
@@ -113,7 +119,7 @@ CREATE TABLE IF NOT EXISTS crossfade.listener (
 
 
 /*
-	SCORING_MODEL: one trained and deployed version of the genre classifier.
+	[SCORING_MODEL]: one trained and deployed version of the genre classifier.
 	Several versions run at once because they disagree, and that disagreement is
 	itself a signal CROSSFADE uses. The five rows are the real BEARDOWN/FORGE
 	model versions.
@@ -139,7 +145,7 @@ CREATE TABLE IF NOT EXISTS crossfade.scoring_model (
 
 
 /*
-	TRACK: a single recording uploaded by an artist (Artist 1:N Track). It is
+	[TRACK]: a single recording uploaded by an artist (Artist 1:N Track). It is
 	streamable once at least one model has scored it.
 	- artist_id is the artist the royalty is paid to. An artist who has tracks
 	  cannot be deleted (default ON DELETE), because the royalty ledger needs them.
@@ -164,7 +170,7 @@ CREATE TABLE IF NOT EXISTS crossfade.track (
 
 
 /*
-	STATION: a listener's standing description of a region of genre space. It
+	[STATION]: a listener's standing description of a region of genre space. It
 	stores a blend and an ambiguity window, not a fixed playlist, so its contents
 	grow with the catalogue (Listener 1:N Station, Scoring Model 1:N Station).
 	- model_id is the model version the station is evaluated against, so its
@@ -192,7 +198,7 @@ CREATE TABLE IF NOT EXISTS crossfade.station (
 
 
 /*
-	TRACK_SCORE (associative): the result one scoring model produced for one
+	[TRACK_SCORE] (associative): the result one scoring model produced for one
 	recording. It resolves Track M:N Scoring Model, so its primary key is the two
 	foreign keys (track_id, model_id): at most one result per recording and model.
 	- genre_id is the model's top genre (Genre 1:N Track Score). It stays outside
@@ -226,7 +232,7 @@ CREATE TABLE IF NOT EXISTS crossfade.track_score (
 
 
 /*
-	GENRE_PROBABILITY (associative): the probability one model assigned to one
+	[GENRE_PROBABILITY] (associative): the probability one model assigned to one
 	genre for one recording. It resolves Track Score M:N Genre and holds the full
 	ten-genre distribution that stations are matched against.
 	- Primary key: the two-part key of track_score followed by genre_id.
@@ -251,7 +257,7 @@ CREATE TABLE IF NOT EXISTS crossfade.genre_probability (
 
 
 /*
-	STATION_BLEND (associative): the weight one station gives to one genre. It
+	[STATION_BLEND] (associative): the weight one station gives to one genre. It
 	resolves Station M:N Genre, with one weight per row so each value is atomic.
 	- Primary key (station_id, genre_id): one weight per genre per station.
 	- A weight is greater than 0 and at most 1. The weights of one station sum to
@@ -274,7 +280,7 @@ CREATE TABLE IF NOT EXISTS crossfade.station_blend (
 
 
 /*
-	PLAY (associative): one occasion on which a listener streamed a recording. It
+	[PLAY] (associative): one occasion on which a listener streamed a recording. It
 	resolves Listener M:N Track and is both the taste signal and the billable
 	event the artist royalty is paid on.
 	- Primary key (listener_id, track_id, played_at): a listener streams the same
