@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance | CROSSFADE</title>
+<link rel="icon" href="../assets/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/splash.css?v=1dc662ca">
+<style>
+/* Provenance: dark panel on the splash tokens (assets/splash.css). Page-local styles only. */
+:root { --pv-gold: #f5d547; --pv-510: #8b3dff; --pv-698: #ff6a00; --pv-579: #00e5ff; --pv-card: rgba(4, 18, 28, .82); }
+.pv { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding: 0 44px 64px; }
+.pv a { color: var(--sp-cyan); text-decoration: none; }
+.pv a:hover { text-shadow: 0 0 10px rgba(0,229,255,.6); }
+.pv p, .pv li { font: 300 16px/1.65 var(--exo); color: #d3e9ef; max-width: 78ch; }
+.pv b { font-weight: 600; color: #fff; }
+.pv code { font: 14px var(--stm); color: #9fe8f7; background: rgba(0,229,255,.07); border: 1px solid rgba(0,229,255,.12); padding: 0 4px; border-radius: 3px; }
+
+/* hero */
+.pv-hero { position: relative; margin: 0 -44px 8px; padding: 44px 44px 36px; overflow: hidden; border-bottom: 1px solid var(--sp-border); }
+.pv-hero::before { content: ""; position: absolute; inset: 0; background: url("../assets/images/crossfade_wave.jpg") right center / cover no-repeat; opacity: .28; }
+.pv-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--sp-bg) 30%, rgba(2,12,20,.55) 70%, rgba(2,12,20,.2)); }
+.pv-hero > * { position: relative; z-index: 1; }
+.pv-kick { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font: 12px/1 var(--stm); letter-spacing: .3em; text-transform: uppercase; color: var(--pv-gold); }
+.pv-kick::before { content: ""; width: 9px; height: 9px; transform: rotate(45deg); background: var(--pv-gold); box-shadow: 0 0 12px var(--pv-gold); }
+.pv-hero h1 { margin: 0; font: 900 clamp(30px, 4vw, 48px)/1.05 var(--orb); letter-spacing: .16em; color: #fff; text-shadow: 0 0 22px rgba(245,213,71,.35); }
+.pv-hero .sub { margin: 12px 0 16px; font: 13px/1 var(--stm); letter-spacing: .3em; text-transform: uppercase; color: var(--sp-orange); }
+.pv-hero .lede { font: 300 18px/1.6 var(--exo); color: #dbeef3; max-width: 64ch; margin: 0; }
+.pv-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+.pv-toc a { padding: 6px 12px; font: 11.5px/1 var(--stm); letter-spacing: .16em; text-transform: uppercase; color: var(--sp-dim);
+  border: 1px solid var(--sp-border); border-radius: 14px; background: rgba(2,9,15,.6); transition: all .18s; }
+.pv-toc a:hover { color: #031018; background: var(--pv-gold); border-color: var(--pv-gold); text-shadow: none; box-shadow: 0 0 14px rgba(245,213,71,.5); }
+
+.pv h2 { display: flex; align-items: center; gap: 14px; margin: 46px 0 18px; scroll-margin-top: 16px;
+  font: 12.5px/1 var(--stm); letter-spacing: .34em; text-transform: uppercase; color: var(--sp-dim); }
+.pv h2::before { content: "//"; color: var(--pv-gold); letter-spacing: .1em; }
+.pv h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--sp-border), transparent); }
+.pv h3 { margin: 26px 0 10px; font: 700 13px/1.3 var(--orb); letter-spacing: .16em; text-transform: uppercase; color: var(--sp-text); }
+.pv .note { font: 13.5px/1.55 var(--stm); color: var(--sp-dim); max-width: 100ch; }
+
+/* lineage: three course cards with their emblems */
+.pv-chain { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr) 40px minmax(0, 1fr); align-items: stretch; }
+.pv-node { --c: var(--sp-cyan); position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; color: inherit;
+  background: var(--pv-card); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); border-top: 3px solid var(--c); border-radius: 10px;
+  transition: transform .2s, box-shadow .2s; }
+.pv a.pv-node:hover { transform: translateY(-3px); box-shadow: 0 10px 30px -10px var(--c), 0 0 0 1px var(--c); text-shadow: none; }
+.pv-node .art { height: 150px; display: grid; place-items: center; background: #05080d; border-bottom: 1px solid color-mix(in srgb, var(--c) 25%, transparent); }
+.pv-node .art img { display: block; width: auto; height: auto; max-width: 92%; max-height: 132px; object-fit: contain; }
+.pv-node .art img.round { border-radius: 50%; max-height: 124px; }
+.pv-node .bd { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+.pv-node .k { font: 11px/1 var(--stm); letter-spacing: .24em; text-transform: uppercase; color: var(--c); }
+.pv-node .t { font: 700 17px/1.2 var(--orb); letter-spacing: .1em; color: #fff; }
+.pv-node .d { font: 300 14.5px/1.5 var(--exo); color: #b9d4dc; }
+.pv-node.n510 { --c: var(--pv-510); } .pv-node.n698 { --c: var(--pv-698); } .pv-node.n579 { --c: var(--pv-579); }
+.pv-arrow { display: grid; place-items: center; color: var(--sp-faint); }
+.pv-arrow svg { width: 26px; height: 26px; filter: drop-shadow(0 0 6px rgba(0,229,255,.4)); }
+
+/* resource cards: the social cards from the Project 1 requirements analysis */
+.pv-res { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.pv-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; color: inherit;
+  background: var(--pv-card); border: 1px solid var(--sp-border); border-radius: 10px; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.pv a.pv-card:hover { transform: translateY(-3px); border-color: var(--sp-cyan); box-shadow: 0 10px 28px -12px rgba(0,229,255,.7); text-shadow: none; }
+.pv-card .img { aspect-ratio: 1.9; background: #05080d center / contain no-repeat; border-bottom: 1px solid var(--sp-border-dim); }
+.pv-card .bd { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 5px; }
+.pv-card .k { font: 10.5px/1 var(--stm); letter-spacing: .24em; text-transform: uppercase; color: var(--sp-faint); }
+.pv-card .t { font: 600 15.5px/1.3 var(--exo); color: #fff; }
+.pv-card .u { font: 12.5px/1.3 var(--stm); color: var(--sp-cyan); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-card.live { border-color: rgba(255,106,0,.5); }
+.pv-card.live .u { color: var(--sp-orange); }
+.pv-card.live .k::after { content: " · live site"; color: var(--sp-orange); }
+
+/* timeline */
+.pv-tl { position: relative; margin: 0; padding: 0 0 0 26px; list-style: none; }
+.pv-tl::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px;
+  background: linear-gradient(180deg, var(--pv-510), var(--pv-698) 34%, var(--pv-579) 62%, var(--sp-green)); opacity: .7; }
+.pv-tl li { --c: var(--pv-579); position: relative; display: grid; grid-template-columns: 118px minmax(0, 1fr) auto; gap: 4px 18px; align-items: baseline;
+  max-width: none; padding: 10px 14px; margin: 0 0 6px; background: rgba(4,18,28,.55); border: 1px solid var(--sp-border-dim); border-radius: 8px; }
+.pv-tl li::before { content: ""; position: absolute; left: -24px; top: 15px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--sp-bg); border: 2px solid var(--c); box-shadow: 0 0 10px var(--c); }
+.pv-tl li.e510 { --c: var(--pv-510); } .pv-tl li.e698 { --c: var(--pv-698); } .pv-tl li.e579 { --c: var(--pv-579); } .pv-tl li.due { --c: var(--sp-green); }
+.pv-tl li.due { border-style: dashed; background: transparent; }
+.pv-tl li.due::before { background: transparent; box-shadow: none; }
+.pv-tl .w { font: 13px/1.4 var(--stm); color: var(--c); white-space: nowrap; }
+.pv-tl .e { font: 300 15px/1.5 var(--exo); color: #d3e9ef; }
+.pv-tl .s { font: 11.5px/1.4 var(--stm); color: var(--sp-faint); white-space: nowrap; text-align: right; }
+.pv-tl .grp { display: block; margin: 18px 0 8px 0; padding: 0; background: none; border: 0; font: 11px/1 var(--stm); letter-spacing: .3em; text-transform: uppercase; color: var(--sp-dim); }
+.pv-tl .grp::before { display: none; }
+
+/* tables */
+.pv-tbl-wrap { overflow-x: auto; border: 1px solid var(--sp-border); border-radius: 10px; background: var(--pv-card); }
+table.pv-t { border-collapse: collapse; width: 100%; font: 300 14.5px/1.45 var(--exo); color: #d3e9ef; }
+table.pv-t th { font: 11px/1 var(--stm); letter-spacing: .2em; text-transform: uppercase; color: var(--sp-dim); text-align: left; padding: 12px 12px; border-bottom: 1px solid var(--sp-border); white-space: nowrap; background: rgba(0,229,255,.04); }
+table.pv-t td { padding: 10px 12px; border-bottom: 1px solid var(--sp-border-dim); vertical-align: top; }
+table.pv-t tr:last-child td { border-bottom: 0; }
+table.pv-t tr:hover td { background: rgba(0,229,255,.035); }
+table.pv-t td.m { font: 13.5px/1.45 var(--stm); color: #9fe8f7; white-space: nowrap; }
+table.pv-t td.n, table.pv-t th.n { text-align: right; font-family: var(--stm); white-space: nowrap; }
+.acc { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.acc i { display: block; width: 90px; height: 6px; border-radius: 3px; background: rgba(0,229,255,.1); overflow: hidden; }
+.acc i b { display: block; height: 100%; background: linear-gradient(90deg, #2f6bff, #36d399); box-shadow: 0 0 8px rgba(54,211,153,.6); }
+.fu { display: inline-block; padding: 0 8px; border-radius: 10px; font: 12px/20px var(--stm); border: 1px solid; }
+.fu.g { color: #c79bff; border-color: rgba(176,108,255,.45); background: rgba(176,108,255,.1); }
+.fu.c { color: #7fdcff; border-color: rgba(0,229,255,.4); background: rgba(0,229,255,.08); }
+
+/* data chain */
+.pv-pipe { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin: 4px 0 6px; counter-reset: st; }
+.pv-step { position: relative; padding: 14px 16px 14px 16px; margin-right: 14px; background: var(--pv-card); border: 1px solid var(--sp-border); border-radius: 10px; counter-increment: st; }
+.pv-step:last-child { margin-right: 0; }
+.pv-step:not(:last-child)::after { content: ""; position: absolute; right: -12px; top: 50%; width: 10px; height: 10px; margin-top: -5px;
+  border-top: 2px solid var(--sp-cyan); border-right: 2px solid var(--sp-cyan); transform: rotate(45deg); filter: drop-shadow(0 0 4px var(--sp-cyan)); }
+.pv-step::before { content: "0" counter(st); display: block; font: 900 20px/1 var(--orb); color: var(--sp-faint); margin-bottom: 8px; }
+.pv-step .t { display: block; font: 600 14.5px/1.3 var(--exo); color: #fff; margin-bottom: 6px; word-break: break-word; }
+.pv-step .d { display: block; font: 300 13.5px/1.5 var(--exo); color: #b9d4dc; }
+.pv-step.out { border-color: rgba(255,106,0,.45); } .pv-step.out::before { color: var(--sp-orange); }
+.tag { display: inline-block; margin: 0 4px 3px 0; padding: 0 8px; border-radius: 10px; font: 12px/20px var(--stm); border: 1px solid; white-space: nowrap; }
+.tag.real { color: #6cf59a; border-color: rgba(0,255,65,.35); background: rgba(0,255,65,.07); }
+.tag.made { color: #ffc27a; border-color: rgba(255,106,0,.4); background: rgba(255,106,0,.08); }
+.tag.calc { color: #7fdcff; border-color: rgba(0,229,255,.4); background: rgba(0,229,255,.08); }
+
+/* deliverable thumbnails */
+.pv-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 16px; }
+.pv-fig { display: block; margin: 0; overflow: hidden; background: var(--pv-card); border: 1px solid var(--sp-border); border-radius: 10px; color: inherit; }
+.pv a.pv-fig:hover { border-color: var(--sp-cyan); box-shadow: 0 10px 28px -12px rgba(0,229,255,.7); text-shadow: none; }
+.pv-fig .img { display: block; aspect-ratio: 1.75; background: #fff center / contain no-repeat; }
+.pv-fig .cap { display: flex; border-top: 1px solid var(--sp-border-dim); justify-content: space-between; gap: 10px; padding: 10px 14px; font: 12.5px/1.3 var(--stm); color: var(--sp-dim); }
+.pv-fig .cap b { font-weight: 400; color: #fff; }
+.st { display: inline-block; padding: 0 8px; border-radius: 10px; font: 11.5px/20px var(--stm); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; border: 1px solid; }
+.st.ok { color: var(--sp-green); border-color: rgba(0,255,65,.35); }
+.st.wip { color: var(--sp-orange); border-color: rgba(255,106,0,.4); }
+.st.idle { color: var(--sp-faint); border-color: var(--sp-border); }
+
+/* discrepancies */
+.pv-warn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pv-warn > div { padding: 16px 18px; border: 1px solid rgba(255,106,0,.45); border-left: 4px solid var(--sp-orange); border-radius: 8px; background: rgba(255,106,0,.06); }
+.pv-warn h4 { margin: 0 0 8px; font: 700 12.5px/1.3 var(--orb); letter-spacing: .14em; text-transform: uppercase; color: var(--sp-orange); }
+.pv-warn p { margin: 0; font-size: 15px; }
+
+.pv-src li { margin: 6px 0; }
+.pv-foot { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--sp-border-dim); font: 11px/1.5 var(--stm); letter-spacing: .14em; text-transform: uppercase; color: var(--sp-faint); }
+
+@media (max-width: 1100px) { .pv-pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } .pv-step { margin: 0; } .pv-step::after { display: none; } }
+@media (max-width: 900px) {
+  .pv { padding: 0 18px 40px; } .pv-hero { margin: 0 -18px 8px; padding: 28px 18px 26px; }
+  .pv-chain { grid-template-columns: minmax(0, 1fr); gap: 10px; } .pv-arrow { transform: rotate(90deg); height: 28px; }
+  .pv-figs, .pv-warn { grid-template-columns: minmax(0, 1fr); }
+  .pv-tl li { grid-template-columns: minmax(0, 1fr); } .pv-tl .s { text-align: left; }
+}
+@media (max-width: 560px) { .pv-pipe { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body class="sp-page">
+<div class="pv">
+
+  <header class="pv-hero">
+    <p class="pv-kick rise" style="--d:0">History &middot; all projects</p>
+    <h1 class="rise" style="--d:1">Provenance</h1>
+    <p class="sub rise" style="--d:2">INFO 510 &rarr; INFO 698 &rarr; INFO 579</p>
+    <p class="lede rise" style="--d:3">Where every part of CROSSFADE came from: the genre models behind the business, how the sample data was made
+      and what in it is real, each deliverable and its revisions, and the scripts that check the work.</p>
+    <nav class="pv-toc rise" style="--d:4" aria-label="On this page">
+      <a href="#origins">Origins</a><a href="#links">Links</a><a href="#timeline">Timeline</a><a href="#models">Models</a><a href="#data">Data</a>
+      <a href="#deliverables">Deliverables</a><a href="#checks">Checks</a><a href="#discrepancies">Discrepancies</a><a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+  <h2 id="origins">Origins of the business</h2>
+  <div class="pv-chain">
+    <a class="pv-node n510" href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">
+      <span class="art"><img class="round" src="../assets/images/og/og_beardown.png" width="400" height="400" alt="BEARDOWN emblem" loading="lazy"></span>
+      <span class="bd"><span class="k">Fall 2025 &middot; INFO 510</span><span class="t">BEARDOWN</span>
+        <span class="d">Final project: a Bayesian neural network that sorts GTZAN music clips into 10 genres from a spectrogram and 57 audio features.</span></span>
+    </a>
+    <span class="pv-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <a class="pv-node n698" href="https://forge-observatory.com/" target="_blank" rel="noopener">
+      <span class="art"><img src="../assets/images/og/og_forge_site.png" width="800" height="420" alt="FORGE, functional-posterior observatory" loading="lazy"></span>
+      <span class="bd"><span class="k">2026 &middot; INFO 698 capstone</span><span class="t">FORGE</span>
+        <span class="d">A Bayesian posterior observatory. BEARDOWN was rebuilt there with a leakage-safe pipeline and grown into three model generations.</span></span>
+    </a>
+    <span class="pv-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <a class="pv-node n579" href="../index.html#home">
+      <span class="art"><img src="../assets/images/og/og_crossfade.png" width="1280" height="640" alt="CROSSFADE, INFO 579" loading="lazy"></span>
+      <span class="bd"><span class="k">Fall 2026 &middot; INFO 579</span><span class="t">CROSSFADE</span>
+        <span class="d">A streaming business built on those models, whose catalogue is indexed by where a track sits <em>between</em> genres.</span></span>
+    </a>
+  </div>
+  <p>A genre classifier does not only name a genre: it gives a probability for each of the ten, and different versions of the model can disagree.
+    CROSSFADE treats that spread as the product. Every upload is scored by several BEARDOWN versions, and listeners build stations from a target
+    genre blend and an allowed range of ambiguity. The five model versions in the Project 1 data are the five bundles FORGE exported, described
+    with their real properties (<a href="#models">below</a>). The business entities (artists, tracks, listeners, stations, plays) and the revenue
+    model were designed new for INFO 579 in Project 1.</p>
+
+  <h2 id="links">Links</h2>
+  <div class="pv-res">
+    <a class="pv-card" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" target="_blank" rel="noopener">
+      <span class="img" style="background-image:url('../assets/images/og/og_crossfade.png')"></span>
+      <span class="bd"><span class="k">INFO 579 &middot; this project</span><span class="t">CROSSFADE repository</span><span class="u">github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE</span></span>
+    </a>
+    <a class="pv-card" href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">
+      <span class="img" style="background-image:url('../assets/images/og/og_beardown.png')"></span>
+      <span class="bd"><span class="k">INFO 510 &middot; Fall 2025</span><span class="t">BEARDOWN repository</span><span class="u">github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj</span></span>
+    </a>
+    <a class="pv-card" href="https://n-herling-mk1.github.io/INFO_698_documentation/" target="_blank" rel="noopener">
+      <span class="img" style="background-image:url('../assets/images/og/og_forge_docs.png')"></span>
+      <span class="bd"><span class="k">INFO 698 &middot; capstone</span><span class="t">FORGE documentation</span><span class="u">n-herling-mk1.github.io/INFO_698_documentation</span></span>
+    </a>
+    <a class="pv-card live" href="https://forge-observatory.com/" target="_blank" rel="noopener">
+      <span class="img" style="background-image:url('../assets/images/og/og_forge_site.png')"></span>
+      <span class="bd"><span class="k">INFO 698</span><span class="t">FORGE official website</span><span class="u">forge-observatory.com</span></span>
+    </a>
+  </div>
+  <p class="note">The same four links and social cards appear in the Project 1 requirements analysis (Overview). Every column is documented in the
+    <a href="../project1/#dictionary">data dictionary</a>.</p>
+
+  <h2 id="timeline">Timeline</h2>
+  <ol class="pv-tl">
+    <li class="grp">Before INFO 579</li>
+    <li class="e510"><span class="w">Fall 2025</span><span class="e">INFO 510 final project: BEARDOWN, spectrogram + tabular fusion with Bayesian head types (Flipout, Reparameterization, MC-Dropout, Deterministic); two random sweeps of 20 configurations, 3-fold cross-validation, 20% holdout.</span><span class="s">INFO 510 README</span></li>
+    <li class="e698"><span class="w">2026-06-19</span><span class="e">Leakage audit of the GTZAN 3-second table: a naive segment shuffle puts segments of 971 of 1,000 tracks (97.1%) on both sides of the split; the track-guarded split puts 0.</span><span class="s">after/leakage.json</span></li>
+    <li class="e698"><span class="w">2026-06-23</span><span class="e">Third model generation (mk3, <code>beardown_3sec</code>) swept and deployed; the family is complete at five exported bundles.</span><span class="s">STATUS_2026-06-23.md</span></li>
+    <li class="grp">Project 1 &middot; Database Design</li>
+    <li class="e579"><span class="w">2026-09-24</span><span class="e">First commit to this repository: requirements analysis, conceptual model, data.xlsx, documentation site and data dictionary (already at revision mk7).</span><span class="s">git 51ac646</span></li>
+    <li class="e579"><span class="w">2026-09-27</span><span class="e">Partner's conceptual data model added; parsimonious data types; physical data model finished in MySQL Workbench; submission zip built. Project 1 due.</span><span class="s">git 2e6dce2 &hellip; 522c0b1</span></li>
+    <li class="grp">Project 2 &middot; SQL Database</li>
+    <li class="e579"><span class="w">2026-10-26</span><span class="e">Project 2 plan written.</span><span class="s">git 3504b31</span></li>
+    <li class="e579"><span class="w">2026-11-04</span><span class="e">Project 2 started.</span><span class="s">git adbef02</span></li>
+    <li class="e579"><span class="w">2026-11-06</span><span class="e">Restarted on the course homework, feedback and lecture examples: site redesign, Project 1 data exports, <code>database_implementation.sql</code>, use cases, <code>single_table.sql</code> with its 66-test suite and an expected-failure query (UC-15).</span><span class="s">git 38f99cc &hellip; afb9d54</span></li>
+    <li class="e579"><span class="w">2026-11-07</span><span class="e">Section drum on the front panel; this provenance page.</span><span class="s">working copy</span></li>
+    <li class="due"><span class="w">2026-11-08</span><span class="e">Project 2 due, 11:59 PM.</span><span class="s">course schedule</span></li>
+    <li class="grp">Project 3 &middot; NoSQL Database</li>
+    <li class="due"><span class="w">2026-12-13</span><span class="e">Project 3 due.</span><span class="s">course schedule</span></li>
+  </ol>
+
+  <h2 id="models">The models</h2>
+  <p>Every BEARDOWN version has the same two branches: a small CNN (three convolution blocks, 32/64/128 filters) reads a greyscale mel spectrogram,
+    and an MLP reads 57 tabular audio features. The two are fused and passed to a classifier head over the 10 GTZAN genres. The versions differ in
+    how the branches are fused, how wide the shared embedding is, and whether a track is read as one 30-second clip or as ten 3-second segments.
+    They are not one architecture with tuned settings.</p>
+  <div class="pv-tbl-wrap">
+    <table class="pv-t">
+      <thead><tr><th>Bundle</th><th>Fusion</th><th class="n">Embedding</th><th class="n">Segment</th><th class="n">CV accuracy</th><th class="n">Validation</th><th class="n">Test</th><th>In data.xlsx</th></tr></thead>
+      <tbody>
+        <tr><td class="m">beardown</td><td><span class="fu g">gated</span></td><td class="n">512</td><td class="n">30 s</td><td class="n">0.686 &plusmn; 0.011</td><td class="n">0.747</td><td class="n"><span class="acc">0.700<i><b style="width:70%"></b></i></span></td><td>Model 1</td></tr>
+        <tr><td class="m">beardown_rrm_cfg12</td><td><span class="fu g">gated</span></td><td class="n">384</td><td class="n">30 s</td><td class="n">0.716 &plusmn; 0.007</td><td class="n">0.707</td><td class="n"><span class="acc">0.680<i><b style="width:68%"></b></i></span></td><td>Model 2 &middot; fusion recorded as concat (<a href="#discrepancies">see below</a>)</td></tr>
+        <tr><td class="m">beardown_rrm_cfg17</td><td><span class="fu c">concat</span></td><td class="n">768</td><td class="n">30 s</td><td class="n">0.769 &plusmn; 0.004</td><td class="n">0.793</td><td class="n"><span class="acc">0.760<i><b style="width:76%"></b></i></span></td><td>Model 3</td></tr>
+        <tr><td class="m">beardown_rrm</td><td><span class="fu c">concat</span></td><td class="n">768</td><td class="n">30 s</td><td class="n">0.769 &plusmn; 0.004</td><td class="n">0.793</td><td class="n"><span class="acc">0.760<i><b style="width:76%"></b></i></span></td><td>Model 4 &middot; the deployed copy of cfg17</td></tr>
+        <tr><td class="m">beardown_3sec</td><td><span class="fu c">concat</span></td><td class="n">384</td><td class="n">3 s</td><td class="n">0.777 &plusmn; 0.009</td><td class="n">0.776</td><td class="n"><span class="acc">0.789*<i><b style="width:78.9%"></b></i></span></td><td>Model 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Read from each bundle's <code>arch.json</code> and <code>metrics.json</code>. Accuracies are over 3 cross-validation folds, then a
+    held-out validation and test split (70/15/15, stratified by genre). *Per 3-second segment (1,500 segments, 150 tracks); a majority vote of each
+    track's segments gives 0.807 per track, the figure comparable with the 30-second models (<code>vote_eval.json</code>). The leakage audit is why
+    every split is made on whole tracks: in the 3-second table a track becomes about ten near-identical segments, and a segment shuffle lets a model
+    recognise the song rather than the genre.</p>
+
+  <h2 id="data">Provenance of the data</h2>
+  <div class="pv-pipe">
+    <div class="pv-step"><span class="t">gen_data.py &rarr; data.xlsx</span><span class="d">Fixed seed (579); every integrity rule re-checked before the workbook is saved. The file graded in Project 1.</span></div>
+    <div class="pv-step"><span class="t">export_p1_data.py</span><span class="d">Writes <code>data.csv</code> and one CSV per table, then compares every cell back against the workbook. No rounding.</span></div>
+    <div class="pv-step out"><span class="t">database_implementation.sql</span><span class="d">401 rows into 10 tables, one multi-row <code>INSERT</code> per table, parents first (the Unit 5 pattern).</span></div>
+    <div class="pv-step"><span class="t">check_implementation.py</span><span class="d">Runs the script twice, then compares every row and column in MySQL with the CSVs.</span></div>
+    <div class="pv-step"><span class="t">pytest suites</span><span class="d">Each expected answer is computed in Python from <code>data.csv</code>, independently of the SQL.</span></div>
+  </div>
+
+  <h3>What in the sample data is real</h3>
+  <div class="pv-tbl-wrap">
+    <table class="pv-t">
+      <thead><tr><th>Table</th><th>Origin</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="m">genre</td><td><span class="tag real">real</span></td><td>The 10 GTZAN genre labels with IDs 0&ndash;9, in the models' label order. The one-line descriptions were written for CROSSFADE.</td></tr>
+        <tr><td class="m">scoring_model</td><td><span class="tag real">real</span><span class="tag made">scenario</span></td><td>Version label, fusion type, embedding dimension, segment length, training corpus and holdout (test) accuracy come from the five exported bundles. <i>Deployed On</i> dates belong to the business scenario.</td></tr>
+        <tr><td class="m">artist &middot; track &middot; listener &middot; station &middot; play</td><td><span class="tag made">invented</span></td><td>Fictional artists, titles, listeners, stations and listening history, written for the scenario or drawn by the seeded generator.</td></tr>
+        <tr><td class="m">genre_probability</td><td><span class="tag made">generated</span></td><td>Each track has a hand-set genre blend (for example 58% jazz, 30% hip-hop). Each model's ten probabilities are drawn from a Dirichlet distribution centred on that blend, sharper for the stronger models. They are not outputs of the real models.</td></tr>
+        <tr><td class="m">track_score</td><td><span class="tag calc">computed</span></td><td>Top genre, top probability, posterior entropy and model divergence are calculated from the stored probability rows, so they always agree. One row (track 4817 &times; beardown_3sec) is pinned to the worked example in the requirements analysis.</td></tr>
+        <tr><td class="m">station_blend</td><td><span class="tag made">invented</span></td><td>Each station's target blend, one row per genre, written for the scenario.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="deliverables">Deliverables and their versions</h2>
+  <div class="pv-figs">
+    <a class="pv-fig" href="../project1/#conceptual">
+      <span class="img" style="background-image:url('../project1/deliverables/conceptual_data_model.png')"></span>
+      <span class="cap"><b>conceptual_data_model.png</b><span>P1 &middot; mk8 &middot; drawn by Nidhi Pabari</span></span>
+    </a>
+    <a class="pv-fig" href="../project1/#physical">
+      <span class="img" style="background-image:url('../project1/deliverables/physical_data_model.png')"></span>
+      <span class="cap"><b>physical_data_model.png</b><span>P1 &middot; mk15 &middot; MySQL Workbench</span></span>
+    </a>
+  </div>
+  <div class="pv-tbl-wrap">
+    <table class="pv-t">
+      <thead><tr><th>Project</th><th>File</th><th>Status</th><th>History</th></tr></thead>
+      <tbody>
+        <tr><td class="m">P1</td><td class="m">requirements_analysis.pdf</td><td><span class="st ok">submitted</span></td><td>Revised to mk16 (23 pages). After the instructor's feedback that associative-table keys must be built from the foreign keys, surrogate keys were removed for composite keys: Track Score = Track + Model; Play = Listener + Track + Played At; Station Blend = Station + Genre.</td></tr>
+        <tr><td class="m">P1</td><td class="m">conceptual_data_model.png</td><td><span class="st ok">submitted</span></td><td>Drawn by Nidhi Pabari (mk8); a script-drawn draft is kept in <code>project1/source/conceptual_model/</code>.</td></tr>
+        <tr><td class="m">P1</td><td class="m">data.xlsx</td><td><span class="st ok">submitted</span></td><td>mk6, from <code>gen_data.py</code>. Unchanged since; Project 2 loads it as handed in.</td></tr>
+        <tr><td class="m">P1</td><td class="m">physical_data_model.png</td><td><span class="st ok">submitted</span></td><td>mk15, reverse-engineered in Workbench from the generated schema; the earlier draft is kept as &ldquo;mk1 draft&rdquo; with what it missed.</td></tr>
+        <tr><td class="m">P2</td><td class="m">database_implementation.sql</td><td><span class="st ok">done</span></td><td>Schema with named constraints and the 401 sample rows; checked by <code>check_implementation.py</code>.</td></tr>
+        <tr><td class="m">P2</td><td class="m">single_table.sql</td><td><span class="st ok">done</span></td><td>Seven single-table queries tied to Project 1 use cases, plus one expected to fail (a duplicate upload, error 1062). 66 tests.</td></tr>
+        <tr><td class="m">P2</td><td class="m">multiple_table.sql</td><td><span class="st wip">in progress</span></td><td>Joins, a set operation, a subquery and a <code>WITH</code> query.</td></tr>
+        <tr><td class="m">P2</td><td class="m">routines.sql</td><td><span class="st wip">in progress</span></td><td>Stored procedures and functions, with an error handler for duplicate keys.</td></tr>
+        <tr><td class="m">P3</td><td class="m">&ndash;</td><td><span class="st idle">not started</span></td><td>NoSQL version of the same business, due Dec 13.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">The full Project 1 revision log (mk1 to mk16) is on the <a href="../project1/#changes">Project 1 change log</a>.</p>
+
+  <h2 id="checks">Tools and checks</h2>
+  <div class="pv-tbl-wrap">
+    <table class="pv-t">
+      <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td class="m">MySQL 8.4 &middot; Workbench 8.0</td><td>Run the deliverables; Workbench drew the physical model.</td></tr>
+        <tr><td class="m">project1/scripts/check_consistency.py</td><td>Cross-checks every column across the requirements analysis, data.xlsx and the data dictionary.</td></tr>
+        <tr><td class="m">tools/export_p1_data.py</td><td>Exports data.xlsx to CSV and verifies the export cell for cell.</td></tr>
+        <tr><td class="m">project2/scripts/check_implementation.py</td><td>Loads <code>database_implementation.sql</code> twice and compares all 10 tables with the exports.</td></tr>
+        <tr><td class="m">project2/scripts/build_usecases.py</td><td>Builds the use-case page; fails if a quoted requirement is not word for word in the requirements analysis, or a listed column is not in the schema.</td></tr>
+        <tr><td class="m">project2/tests/ (pytest)</td><td>Runs each query file against a fresh database and compares results with an independent Python oracle; checks that the expected-failure query fails with the right error and leaves the data unchanged.</td></tr>
+        <tr><td class="m">tools/stamp_assets.py</td><td>Stamps the shared CSS and JS links with a content hash so browsers do not show a stale page after a push.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Claude (Anthropic) helped write the site, the build scripts and the test scaffolding. Its output goes through the same checks as everything
+    else: the data comparisons and test suites above, and a local run of every deliverable in MySQL before submission.</p>
+
+  <h2 id="discrepancies">Known discrepancies</h2>
+  <div class="pv-warn">
+    <div><h4>Model 2 fusion type</h4><p>data.xlsx records <code>beardown_rrm_cfg12</code> as <i>concat</i>; its <code>arch.json</code> says <i>gated</i>.
+      The generator notes the value was assumed because it was not recorded at the time. data.xlsx is the graded file, so Project 2 loads it as
+      handed in; the correct value is <i>gated</i>.</p></div>
+    <div><h4>Model 5 holdout accuracy</h4><p>data.xlsx stores 0.7887 for <code>beardown_3sec</code>, which is accuracy per 3-second segment. Per
+      track it is 0.8067. The other four models are scored per track.</p></div>
+  </div>
+
+  <h2 id="sources">Sources</h2>
+  <ul class="pv-src">
+    <li><a href="https://github.com/N-Herling-Mk1/INFO_510_Fa25_Final_Proj" target="_blank" rel="noopener">INFO_510_Fa25_Final_Proj</a>: BEARDOWN repository (README: architecture, head types, sweep design).</li>
+    <li><a href="https://forge-observatory.com/" target="_blank" rel="noopener">forge-observatory.com</a> and the <a href="https://n-herling-mk1.github.io/INFO_698_documentation/" target="_blank" rel="noopener">FORGE documentation</a>.</li>
+    <li>FORGE genre archive: <code>models/&lt;bundle&gt;/arch.json</code>, <code>metrics.json</code>, <code>models/beardown_3sec/vote_eval.json</code>, <code>after/leakage.json</code>, <code>STATUS_2026-06-23.md</code>, <code>DATA_PIPELINE.md</code>.</li>
+    <li>This repository: <code>project1/source/data/gen_data.py</code>, <code>project1/CHANGES.md</code>, the requirements analysis, the git history and the scripts named above.</li>
+    <li>GTZAN: G. Tzanetakis and P. Cook, &ldquo;Musical genre classification of audio signals,&rdquo; <i>IEEE Transactions on Speech and Audio Processing</i>, 2002.</li>
+  </ul>
+
+  <p class="pv-foot">CROSSFADE &middot; INFO 579 Group 1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh</p>
+</div>
+</body>
+</html>

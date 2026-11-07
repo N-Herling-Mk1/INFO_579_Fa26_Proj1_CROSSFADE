@@ -21,15 +21,15 @@
 <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/site.css?v=cb25b6e1">
-<link rel="stylesheet" href="assets/shell.css?v=4d5478dd">
+<link rel="stylesheet" href="assets/shell.css?v=a3c3a24d">
 <script src="project1/data/site_data.js"></script>
 </head>
 <body class="shell-body" data-acc="home">
 <div class="sh-grid" aria-hidden="true"></div>
 <div class="sh-corner tl" aria-hidden="true"></div><div class="sh-corner tr" aria-hidden="true"></div><div class="sh-corner bl" aria-hidden="true"></div><div class="sh-corner br" aria-hidden="true"></div>
-<div class="app" id="app">
+<div class="app rail-hidden booting" id="app">
   <header class="topbar">
-    <button class="rail-toggle" id="rail-toggle" aria-label="Hide the menu" aria-expanded="true" title="Hide / show the menu">
+    <button class="rail-toggle" id="rail-toggle" aria-label="Show the menu" aria-expanded="false" title="Hide / show the menu">
       <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
     <a class="sh-brand" href="#home" aria-label="CROSSFADE home">
@@ -43,6 +43,9 @@
       <b id="tb-ctx">Home</b>
       <span class="sh-led" id="sh-led" aria-hidden="true"></span>
     </div>
+    <button class="tb-snd" id="tb-snd" type="button" aria-pressed="true" aria-label="Sound on" title="Interface sounds on / off">
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path class="w1" d="M13 7.2a4 4 0 0 1 0 5.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="w2" d="M15.2 5a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="x" d="M13 7.5l5 5M18 7.5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
     <a class="tb-repo" href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" aria-label="GitHub repository" title="GitHub repository">
       <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
     </a>
@@ -50,8 +53,9 @@
 
   <aside class="side" id="side">
     <a class="side-logo" href="#home" aria-label="CROSSFADE home">
-      <!-- CRT logo: three single-channel copies screen-blended back to full colour so each can shear;
+      <!-- CRT logo in a TV bezel (.tv, rounded screen, glass glare, power LED). Inside: three single-channel copies screen-blended back to full colour so each can shear;
            two full-colour slices tear during a burst; scanlines, a rolling band and a vignette on top. -->
+      <span class="tv">
       <span class="crt mini">
         <img class="ch ch-r" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="CROSSFADE">
         <img class="ch ch-g" src="assets/images/crossfade_hero.jpg" width="720" height="720" alt="" aria-hidden="true">
@@ -61,15 +65,30 @@
         <span class="crt-scan" aria-hidden="true"></span>
         <span class="crt-roll" aria-hidden="true"></span>
       </span>
+      <span class="tv-glass" aria-hidden="true"></span>
+      </span>
+      <span class="tv-led" aria-hidden="true"></span>
     </a>
     <div class="side-hub"><span>Nav hub</span><b id="side-hub">Home</b></div>
     <nav class="side-nav" id="side-nav" aria-label="Section pages"></nav>
-    <div class="side-foot">info579_group_1<br><kbd>Alt</kbd>+<kbd>1</kbd>&ndash;<kbd>5</kbd> sections</div>
+    <div class="side-foot">info579_group_1<br><kbd>Alt</kbd>+<kbd>1</kbd>&ndash;<kbd>6</kbd> sections</div>
   </aside>
 
   <main class="stage" id="stage">
     <iframe id="main" title="CROSSFADE panel"></iframe>
     <div class="veil" id="veil" aria-hidden="true"><div class="vbar"></div><div class="vtxt">Deploying panel</div></div>
+    <!-- Boot overlay: real load milestones (shell, data, fonts, deliverables, panel) paced over the 4 s intro.
+         At 100% it plays the three-tone ready chime; if the browser has not allowed sound yet, it waits for one click/key. -->
+    <div class="boot" id="boot" role="progressbar" aria-label="Loading CROSSFADE" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="bt-card">
+        <div class="bt-k"><span class="bt-led" aria-hidden="true"></span>System boot<span class="bt-sep">//</span><span id="bt-n">0/5</span></div>
+        <div class="bt-wm">CROSSFADE</div>
+        <div class="bt-bar"><i id="bt-fill"></i></div>
+        <div class="bt-row"><span id="bt-step">Starting shell</span><b id="bt-pct">0%</b></div>
+        <button class="bt-enter" id="bt-enter" type="button" hidden>Enter <span aria-hidden="true">&rsaquo;</span></button>
+        <div class="bt-hint" id="bt-hint" hidden>click or press any key &middot; sound on</div>
+      </div>
+    </div>
   </main>
 </div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -78,6 +97,7 @@
   <filter id="cf-b"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
 </svg>
 <script src="project2/data/deliverables.js"></script>
+<script src="assets/sfx.js?v=c0bf5be8"></script>
 <script>
 /* CROSSFADE site shell. One page: top bar (sections), side rail (that section's pages), one iframe (the page).
    Routes: #<section>/<page>[/<anchor...>], e.g. #p2/usecases, #p1/dictionary/artist, #home/data/tables.
@@ -111,23 +131,26 @@
     p3: { label: "Project 3", short: "P3", sub: "NoSQL Database", ctx: "Project 3 · NoSQL Database", groups: [
       ["", [["overview", "Overview", "project3/panel.html"]]]] },
     design: { label: "Design", sub: "All projects", ctx: "Top-level design", groups: [
-      ["", [["overview", "Top-level design", "design/panel.html"]]]] }
+      ["", [["overview", "Top-level design", "design/panel.html"]]]] },
+    history: { label: "History", sub: "Provenance", ctx: "Project history and provenance", groups: [
+      ["", [["overview", "Provenance", "history/panel.html"]]]] }
   };
-  var ORDER = ["home", "p1", "p2", "p3", "design"];
-  var FOLDER = { project1: "p1", project2: "p2", project3: "p3", design: "design" };
+  var ORDER = ["home", "p1", "p2", "p3", "design", "history"];
+  var FOLDER = { project1: "p1", project2: "p2", project3: "p3", design: "design", history: "history" };
   var LEGACY_HOME = { p1: 1, data: 1, brief: 1 };          // old front-page views: #p1, #data/..., #brief
 
   var app = document.getElementById("app"), frame = document.getElementById("main");
-  var tbNav = document.getElementById("tb-nav"), sideNav = document.getElementById("side-nav");
+  var sideNav = document.getElementById("side-nav");
   var stage = document.getElementById("stage"), veil = document.getElementById("veil"), led = document.getElementById("sh-led");
   var ctxEl = document.getElementById("tb-ctx"), hubEl = document.getElementById("side-hub");
-  var DARK = { "home/overview.html": 1 };                   // panels drawn dark; the rest are light reading surfaces
+  var DARK = { "home/overview.html": 1, "history/panel.html": 1 };                   // panels drawn dark; the rest are light reading surfaces
   var cur = { sec: null, page: null }, veilTimer = null;
 
   function pages(sec) { var out = []; SECTIONS[sec].groups.forEach(function (g) { out = out.concat(g[1]); }); return out; }
   function page(sec, id) { return pages(sec).filter(function (p) { return p[0] === id; })[0]; }
 
-  /* ---- top bar */
+  /* ---- top bar: one static button per section */
+  var tbNav = document.getElementById("tb-nav");
   tbNav.innerHTML = ORDER.map(function (k) {
     var s = SECTIONS[k];
     return '<a class="tb-btn" href="#' + k + '" data-sec="' + k + '" title="' + s.label + ' (Alt+' + (ORDER.indexOf(k) + 1) + ')">' +
@@ -180,6 +203,10 @@
   }
   function show() {
     var r = parse(location.hash), p = page(r.sec, r.page);
+    if (cur.sec !== null && window.SFX) {                 // a chime for a new section, a tap for a new page in it
+      if (r.sec !== cur.sec) window.SFX.select(ORDER.indexOf(r.sec));
+      else if (r.page !== cur.page) window.SFX.tap();
+    }
     if (r.sec !== cur.sec) {
       drawRail(r.sec);
       Array.prototype.forEach.call(tbNav.children, function (a) { a.toggleAttribute("aria-current", a.dataset.sec === r.sec); });
@@ -206,7 +233,7 @@
     if (url.origin !== location.origin || url.pathname.indexOf(root) !== 0) return null;
     var rel = url.pathname.slice(root.length), h = url.hash.replace(/^#/, "");
     if (rel === "" || rel === "index.html") return h || "home";
-    var m = rel.match(/^(project1|project2|project3|design)\/(index\.html)?$/);
+    var m = rel.match(/^(project1|project2|project3|design|history)\/(index\.html)?$/);
     return m ? FOLDER[m[1]] + (h ? "/" + h : "") : null;
   }
   function veilOn() {
@@ -234,18 +261,117 @@
     });
   });
 
-  /* ---- hide / show the rail (remembered in this browser) */
-  var tog = document.getElementById("rail-toggle");
+  /* ---- hide / show the rail. On load: the splash shows with the rail closed under the boot overlay
+     (bar + %), the menu button blinks for 4 s, the ready chime plays, then the rail opens and the top bar
+     settles to 80% of its height. */
+  var tog = document.getElementById("rail-toggle"), bootT = null;
   function setRail(open) {
     app.classList.toggle("rail-hidden", !open);
     tog.setAttribute("aria-expanded", open ? "true" : "false");
     tog.setAttribute("aria-label", open ? "Hide the menu" : "Show the menu");
-    try { localStorage.setItem("cf-rail", open ? "1" : "0"); } catch (e) {}
   }
-  tog.addEventListener("click", function () { setRail(app.classList.contains("rail-hidden")); });
-  try { if (localStorage.getItem("cf-rail") === "0") setRail(false); } catch (e) {}
+  function finishBoot() {
+    if (!app.classList.contains("booting")) return;
+    clearTimeout(bootT);
+    var bo = document.getElementById("boot");
+    if (bo) { bo.classList.add("out"); setTimeout(function () { bo.hidden = true; }, 600); }
+    tog.classList.remove("blink");
+    app.classList.remove("booting");
+    setRail(true);
+    document.body.classList.add("compact");
+  }
+  tog.addEventListener("click", function () {
+    if (app.classList.contains("booting")) { Boot.skip(); return; }
+    if (window.SFX) window.SFX.tap();
+    setRail(app.classList.contains("rail-hidden"));
+  });
+  var stillBoot = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var bootEl = document.getElementById("boot");
 
-  /* ---- Alt+1..5 jump to a section (also forwarded from inside same-origin panels) */
+  /* ---- boot overlay: loading bar + %, then the ready chime */
+  var Boot = (function () {
+    var BOOT_MS = 4000, t0 = performance.now(), shown = 0, raf = null, waiting = false;
+    var fill = document.getElementById("bt-fill"), pct = document.getElementById("bt-pct");
+    var stepEl = document.getElementById("bt-step"), nEl = document.getElementById("bt-n");
+    var enter = document.getElementById("bt-enter"), hint = document.getElementById("bt-hint");
+    /* real milestones, in order; each is marked done when it actually happens */
+    var M = [["Starting shell", true], ["Loading data", !!window.SITE], ["Loading fonts", false],
+             ["Checking deliverables", !window.P2], ["Deploying panel", false]];
+    function done(i) { M[i][1] = true; }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { done(2); }); else done(2);
+    if (window.P2) {
+      var seen = 0;
+      window.P2.present("project2/", function () { if (++seen === window.P2.files.length) done(3); });
+      setTimeout(function () { done(3); }, 6000);                 // never hang on a slow check
+    }
+    frame.addEventListener("load", function () { done(4); }, { once: true });
+    setTimeout(function () { M.forEach(function (m) { m[1] = true; }); }, 10000);   // hard ceiling
+
+    function frameTick() {
+      var nDone = M.filter(function (m) { return m[1]; }).length;
+      var timeF = Math.min(1, (performance.now() - t0) / BOOT_MS);
+      var realF = nDone / M.length;
+      var target = Math.min(timeF, realF) * 100;
+      shown += (target - shown) * 0.18;                            // ease toward it
+      if (target >= 100 && shown > 99.4) shown = 100;
+      var v = Math.floor(shown);
+      fill.style.width = shown.toFixed(1) + "%";
+      pct.textContent = v + "%";
+      bootEl.setAttribute("aria-valuenow", v);
+      /* the label walks the milestones with the bar: each owns a fifth of it, and the bar never passes a
+         milestone that has not happened, so the step shown is always the one being finished */
+      var k = Math.min(M.length - 1, Math.floor(shown / (100 / M.length)));
+      nEl.textContent = Math.min(nDone, k) + "/" + M.length;
+      stepEl.textContent = v >= 100 ? "Ready" : M[k][0];
+      if (v >= 100) nEl.textContent = M.length + "/" + M.length;
+      if (v >= 100) { complete(); return; }
+      raf = requestAnimationFrame(frameTick);
+    }
+    function soundAllowed() { var u = navigator.userActivation; return !u || u.hasBeenActive; }
+    function go() {
+      if (window.SFX) window.SFX.ready();
+      window.removeEventListener("pointerdown", go, true);
+      window.removeEventListener("keydown", go, true);
+      finishBoot();
+    }
+    function complete() {
+      bootEl.classList.add("full");
+      if (!window.SFX || !window.SFX.enabled()) { setTimeout(finishBoot, 250); return; }
+      if (soundAllowed()) { setTimeout(go, 250); return; }
+      /* the browser will not play sound until the user interacts: wait for one click or key */
+      waiting = true;
+      enter.hidden = false; hint.hidden = false; bootEl.classList.add("wait");
+      setTimeout(function () { try { enter.focus({ preventScroll: true }); } catch (e) {} }, 50);
+      window.addEventListener("pointerdown", go, true);
+      window.addEventListener("keydown", go, true);
+    }
+    return {
+      start: function () { raf = requestAnimationFrame(frameTick); },
+      /* the menu button pressed during the load: skip ahead (that click also allows sound) */
+      skip: function () { cancelAnimationFrame(raf); if (waiting) return; fill.style.width = "100%"; pct.textContent = "100%"; go(); }
+    };
+  })();
+
+  if (stillBoot) finishBoot();
+  else { tog.classList.add("blink"); Boot.start(); }
+
+  /* ---- sound on / off (assets/sfx.js) */
+  var snd = document.getElementById("tb-snd");
+  function drawSnd() {
+    var on = window.SFX && window.SFX.enabled();
+    snd.setAttribute("aria-pressed", on ? "true" : "false");
+    snd.setAttribute("aria-label", on ? "Sound on" : "Sound off");
+  }
+  snd.addEventListener("click", function () {
+    if (!window.SFX) return;
+    var on = !window.SFX.enabled();
+    if (!on) window.SFX.toggle(false);                  // say goodbye before going quiet
+    window.SFX.setEnabled(on); drawSnd();
+    if (on) window.SFX.toggle(true);
+  });
+  drawSnd();
+
+  /* ---- Alt+1..6 jump to a section (also forwarded from inside same-origin panels) */
   function keys(e) {
     if (!e.altKey || e.ctrlKey || e.metaKey) return;
     var i = parseInt(e.key, 10);

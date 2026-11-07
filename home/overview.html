@@ -6,10 +6,11 @@
 <title>CROSSFADE</title>
 <link rel="icon" href="../assets/images/favicon.ico" sizes="any">
 <link rel="stylesheet" href="../assets/site.css?v=cb25b6e1">
-<link rel="stylesheet" href="../assets/splash.css?v=0bff86bf">
+<link rel="stylesheet" href="../assets/splash.css?v=1dc662ca">
 <script src="../project1/data/site_data.js"></script>
 <script src="../project2/data/deliverables.js"></script>
 <script src="../project2/data/single_table_results.js"></script>
+<script src="../assets/sfx.js?v=c0bf5be8"></script>
 </head>
 <body class="sp-page">
 <div class="sp">
@@ -34,6 +35,36 @@
   </section>
 
   <section class="sp-body">
+    <h2 class="sp-h">Sections</h2>
+    <!-- Section drum: every section on the faces of a rotating cylinder (each twice, so the barrel is wide).
+         FRONT steps it round on its own; the arrows turn it by hand (and switch FRONT off). The face that comes
+         flush lights up and is projected into the holo panel with live stats. Click a face or the panel to go. -->
+    <div class="deck rise" style="--d:3" id="deck" tabindex="-1">
+      <button class="dk-turn" id="dk-prev" type="button" aria-label="Turn the drum left" title="Turn left (&larr;)">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="dk-mid">
+        <nav class="drum" aria-label="Sections"><div class="drum-rot" id="drum-rot"></div></nav>
+        <div class="dk-ctl">
+          <button class="dk-front" id="dk-front" type="button" aria-pressed="true" title="FRONT: turn the drum on its own and project each section as it comes round">
+            <span class="df-dot" aria-hidden="true"></span><span class="df-l">Front</span><span class="df-m" id="dk-mode">auto</span>
+          </button>
+          <span class="dk-hint">&larr; &rarr; turn by hand &middot; click a face to open</span>
+        </div>
+      </div>
+      <button class="dk-turn" id="dk-next" type="button" aria-label="Turn the drum right" title="Turn right (&rarr;)">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M7.5 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <a class="holo" id="holo" href="../index.html#home" title="Go to this section">
+        <span class="h-beam" aria-hidden="true"></span>
+        <span class="h-top"><span class="h-t" id="holo-t">Home</span><span class="h-ix" id="holo-ix" aria-hidden="true">01/06</span></span>
+        <span class="h-a" id="holo-a"></span>
+        <span class="h-s" id="holo-s"></span>
+        <span class="h-l" id="holo-l"></span>
+        <span class="h-go" aria-hidden="true">Open &rsaquo;</span>
+      </a>
+    </div>
+
     <h2 class="sp-h">Projects</h2>
     <div class="sp-cards">
       <a class="pc p1 rise" style="--d:4" href="../project1/" data-due="2026-09-27">
@@ -70,19 +101,13 @@
       </a>
     </div>
 
-    <h2 class="sp-h">Quick access</h2>
-    <div class="sp-quick">
-      <a class="qa rise" style="--d:6" href="../index.html#home/p1"><span class="n">01</span><span><span class="l">Project 1</span><span class="s">Instructions and the completed submission</span></span><span class="go" aria-hidden="true">&rsaquo;</span></a>
-      <a class="qa rise" style="--d:7" href="../index.html#home/data"><span class="n">02</span><span><span class="l">Project 1 data</span><span class="s">The bulk data.csv, or one CSV per table</span></span><span class="go" aria-hidden="true">&rsaquo;</span></a>
-      <a class="qa rise" style="--d:8" href="../index.html#home/brief"><span class="n">03</span><span><span class="l">Project 2 brief</span><span class="s">Assignment instructions (PDF)</span></span><span class="go" aria-hidden="true">&rsaquo;</span></a>
-    </div>
-
-    <p class="sp-foot"><span>CROSSFADE &middot; INFO 579 Group 1</span><a href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" target="_blank" rel="noopener">GitHub repository &rsaquo;</a><span>Alt+1&ndash;5 &middot; jump between sections</span></p>
+    <p class="sp-foot"><span>CROSSFADE &middot; INFO 579 Group 1</span><a href="https://github.com/N-Herling-Mk1/INFO_579_Fa26_Proj1_CROSSFADE" target="_blank" rel="noopener">GitHub repository &rsaquo;</a><span>Alt+1&ndash;6 &middot; jump between sections</span></p>
   </section>
 </div>
 <script>
 (function () {
   function $(id) { return document.getElementById(id); }
+  var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   function bar(id, frac) { var b = $(id); if (b) requestAnimationFrame(function () { setTimeout(function () { b.style.width = Math.round(frac * 100) + "%"; }, 350); }); }
 
   /* Project 1 deliverables + data size */
@@ -137,9 +162,141 @@
     next.c.classList.add("live");
   }
 
+  /* ---- section drum + holo */
+  (function () {
+    var rot = $("drum-rot"); if (!rot) return;
+    var SEC = [["home", "Home", "Home"], ["p1", "Project 1", "P1"], ["p2", "Project 2", "P2"], ["p3", "Project 3", "P3"],
+               ["design", "Design", "Design"], ["history", "History", "History"]];
+    var COLOR = { home: "#00e5ff", p1: "#3d8bff", p2: "#ff6a00", p3: "#00ff41", design: "#b06cff", history: "#f5d547" };
+    var N = SEC.length, FACES = SEC.concat(SEC), NF = FACES.length, STEP = 360 / NF;
+    var deck = $("deck"), holo = $("holo"), btn = $("dk-front");
+    var angle = 0, front = 0, timer = null, landT = null, hold = false, mode = !still;
+    try { var m = localStorage.getItem("cf-front"); if (m !== null && !still) mode = m === "1"; } catch (e) {}
+
+    rot.innerHTML = FACES.map(function (f, i) {
+      return '<a class="dface" href="../index.html#' + f[0] + '" data-sec="' + f[0] + '" title="' + f[1] + " (Alt+" + (i % N + 1) + ')"' +
+        (i >= N ? ' aria-hidden="true" tabindex="-1"' : "") + '><span class="gl" aria-hidden="true"></span><span class="l">' + f[1] +
+        '</span><span class="ls">' + f[2] + "</span></a>";
+    }).join("");
+    var faces = Array.prototype.slice.call(rot.children);
+    function faceW() { return faces[0].offsetWidth || 150; }
+    function radius() { return Math.round(faceW() / 2 / Math.tan(Math.PI / NF)) + 8; }
+    function place() {
+      var R = radius();
+      faces.forEach(function (f, i) { f.style.transform = "rotateY(" + (i * STEP) + "deg) translateZ(" + R + "px)"; });
+      rot.style.transition = "none";
+      rot.style.transform = "translateZ(" + (-R) + "px) rotateY(" + angle + "deg)";
+      void rot.offsetWidth; rot.style.transition = "";
+    }
+    function mark() {
+      faces.forEach(function (f, i) {
+        var d = (i - front + NF) % NF, e = Math.min(d, NF - d);
+        f.classList.toggle("f0", e === 0); f.classList.toggle("f1", e === 1); f.classList.toggle("f1b", e === 2); f.classList.toggle("f2", e > 2);
+        f.classList.remove("flush");
+      });
+    }
+    function turnTo(i, instant) {
+      var diff = ((-i * STEP - angle) % 360 + 540) % 360 - 180;       // the shortest way round
+      angle += diff; front = (i + NF) % NF; mark();
+      if (instant) rot.style.transition = "none";
+      rot.style.transform = "translateZ(" + (-radius()) + "px) rotateY(" + angle + "deg)";
+      if (instant) { void rot.offsetWidth; rot.style.transition = ""; }
+      clearTimeout(landT);
+      landT = setTimeout(function () { faces[front].classList.add("flush"); project(FACES[front][0]); }, instant || still ? 0 : 720);
+    }
+
+    /* holo: live stats for the face that came flush */
+    var p2files = null;
+    if (window.P2) {
+      var have = 0, seen = 0;
+      window.P2.present("../project2/", function (f, ok) { seen++; if (ok) have++; if (seen === window.P2.files.length) { p2files = have; project(FACES[front][0]); } });
+    }
+    function dueIn(iso) {
+      var now = new Date(), t = new Date(now.getFullYear(), now.getMonth(), now.getDate()), d = new Date(iso + "T00:00:00");
+      var n = Math.round((d - t) / 864e5);
+      return n < 0 ? "closed " + iso.slice(5).replace("-", "/") : n === 0 ? "due today, 11:59 PM" : n === 1 ? "due tomorrow, 11:59 PM" : "due in " + n + " days";
+    }
+    function stats(sec) {
+      var S = window.SITE || {}, R = window.P2_SINGLE, P = window.P2;
+      var rows = S.tables ? S.tables.reduce(function (n, t) { return n + t.rows.length; }, 0) : 401;
+      var tables = S.tables ? S.tables.length : 10;
+      var st = S.status || {}, ks = Object.keys(st), done = ks.filter(function (k) { return st[k]; }).length;
+      var tests = R ? R.passed + "/" + (R.passed + R.failed) + " tests pass" : "tests not run";
+      var nf = P ? P.files.length : 4;
+      switch (sec) {
+        case "home": return ["One business, three databases", tables + " tables · " + rows + " sample rows", "next: Project 2, " + dueIn("2026-11-08")];
+        case "p1": return ["Database Design", (ks.length ? done + "/" + ks.length : "4/4") + " deliverables · graded", "due 09/27 · submitted"];
+        case "p2": return ["SQL Database", (p2files === null ? "–" : p2files) + "/" + nf + " files · " + tests, dueIn("2026-11-08")];
+        case "p3": return ["NoSQL Database", "not started", dueIn("2026-12-13")];
+        case "design": return ["Top-level design", tables + " entities · 59 columns", "feeds P1 → P2 → P3"];
+        case "history": return ["Provenance", "INFO 510 → INFO 698 → INFO 579", "sources · data chain · checks"];
+      }
+      return ["", "", ""];
+    }
+    function project(sec) {
+      var st = stats(sec), i = 0, label = sec;
+      SEC.forEach(function (f, k) { if (f[0] === sec) { i = k; label = f[1]; } });
+      holo.style.setProperty("--hc", COLOR[sec] || "#00e5ff");
+      holo.setAttribute("href", "../index.html#" + sec);
+      holo.setAttribute("aria-label", "Open " + label + ": " + st.join(", "));
+      $("holo-t").textContent = label;
+      $("holo-a").textContent = st[0];
+      $("holo-s").textContent = st[1];
+      $("holo-l").textContent = st[2];
+      $("holo-ix").textContent = String(i + 1).padStart(2, "0") + "/" + String(N).padStart(2, "0");
+      holo.classList.remove("in"); void holo.offsetWidth; holo.classList.add("in");
+    }
+
+    /* FRONT (auto) and the hand controls */
+    function setMode(on) {
+      mode = on; btn.setAttribute("aria-pressed", on ? "true" : "false");
+      $("dk-mode").textContent = on ? "auto" : "manual";
+      clearInterval(timer); timer = null;
+      if (on) timer = setInterval(function () { if (!hold && !document.hidden) turnTo(front + 1); }, 3600);
+      try { localStorage.setItem("cf-front", on ? "1" : "0"); } catch (e) {}
+    }
+    function step(d) { if (mode) setMode(false); if (SFX) SFX.tick(d); turnTo(front + d); }
+    /* sounds (assets/sfx.js): inside the shell use its SFX, so there is one audio context and one mute switch */
+    var SFX = (function () { try { if (parent !== window && parent.SFX) return parent.SFX; } catch (e) {} return window.SFX || null; })();
+    btn.addEventListener("click", function () { setMode(!mode); if (SFX) SFX.toggle(mode); if (mode) turnTo(front + 1); });
+    $("dk-prev").addEventListener("click", function () { step(-1); });
+    $("dk-next").addEventListener("click", function () { step(1); });
+    deck.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+    });
+    [rot.parentNode, holo].forEach(function (el) {
+      el.addEventListener("mouseenter", function () { hold = true; });
+      el.addEventListener("mouseleave", function () { hold = false; });
+      el.addEventListener("focusin", function () { hold = true; });
+      el.addEventListener("focusout", function () { hold = false; });
+    });
+    window.addEventListener("resize", place);
+    place(); turnTo(0, true);
+    setMode(mode);
+  })();
+
+  /* hero: full size on the first load of the session, then it settles smaller once the shell's boot overlay is done;
+     later visits open at the settled size */
+  (function () {
+    var hero = document.querySelector(".sp-hero"), seen = false;
+    try { seen = sessionStorage.getItem("cf-hero-settled") === "1"; sessionStorage.setItem("cf-hero-settled", "1"); } catch (e) {}
+    if (seen || still) { hero.style.transition = "none"; hero.classList.add("settled"); void hero.offsetWidth; hero.style.transition = ""; }
+    else {
+      /* inside the shell: settle when its boot overlay finishes; on its own: after 4 s */
+      var t0 = Date.now();
+      (function wait() {
+        var booting = false;
+        try { var a = parent !== window && parent.document.getElementById("app"); booting = !!(a && a.classList.contains("booting")); } catch (e) {}
+        if (parent === window && Date.now() - t0 < 4000) booting = true;
+        if (booting && Date.now() - t0 < 60000) { setTimeout(wait, 150); return; }
+        setTimeout(function () { hero.classList.add("settled"); }, 250);
+      })();
+    }
+  })();
+
   /* hero: two families of strands fading into each other (the crossfade) */
   var cv = $("wave"), cx = cv.getContext("2d"), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   function size() { W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); }
   var STR = 14;
   function frame(t) {
@@ -168,6 +325,7 @@
     if (!still) requestAnimationFrame(frame);
   }
   size(); window.addEventListener("resize", size);
+  if (window.ResizeObserver) new ResizeObserver(size).observe(cv);   // the hero settles smaller after load
   requestAnimationFrame(frame);
 })();
 </script>

@@ -2,7 +2,7 @@
 
 GitHub Pages lets browsers reuse a cached file for up to 10 minutes, so after a push
 a page can load new HTML with an old site.css. This rewrites each reference to
-assets/site.css and assets/panel.js as, e.g., site.css?v=3f9a1c2b, where the tag is
+assets/site.css, shell.css, splash.css, panel.js and sfx.js as, e.g., site.css?v=3f9a1c2b, where the tag is
 a hash of the file's contents: when a file changes its links change, and browsers
 fetch it fresh. Run from the repository root after editing either file:
     python tools/stamp_assets.py
@@ -10,7 +10,7 @@ fetch it fresh. Run from the repository root after editing either file:
 import glob, hashlib, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASSETS = ["site.css", "shell.css", "splash.css", "panel.js"]
+ASSETS = ["site.css", "shell.css", "splash.css", "panel.js", "sfx.js"]
 tags = {}
 for name in ASSETS:
     with open(os.path.join(ROOT, "assets", name), "rb") as f:
