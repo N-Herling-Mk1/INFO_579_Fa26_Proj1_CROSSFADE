@@ -1,15 +1,26 @@
 {
  "mutants": [
   {
-   "mutant": "s1-hold-reasons-swapped",
+   "mutant": "s1-country-check-masked",
    "query": "S1",
-   "mistake": "the two HOLD reasons tested in the other order (an artist failing both gets the wrong reason)",
+   "mistake": "the country check only runs for verified artists (an artist failing both shows one hold)",
    "caught": true,
-   "failed": 3,
+   "failed": 4,
    "first_failures": [
     "test_result_matches_oracle[S1]",
-    "test_s1_verified_artist_without_country_is_held",
+    "test_s1_verified_artist_without_country_is_held_for_country_alone",
+    "test_s1_held_artist_never_outranks_a_ready_one",
     "test_s1_equal_rates_break_ties_on_artist_id"
+   ]
+  },
+  {
+   "mutant": "s1-ready-ignores-country",
+   "query": "S1",
+   "mistake": "run_status says ready for a verified artist with no country",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_s1_verified_artist_without_country_is_held_for_country_alone"
    ]
   },
   {
@@ -23,14 +34,15 @@
    ]
   },
   {
-   "mutant": "s1-payable-first-dropped",
+   "mutant": "s1-ready-first-dropped",
    "query": "S1",
-   "mistake": "payable artists no longer listed first",
+   "mistake": "ready artists no longer listed first",
    "caught": true,
-   "failed": 3,
+   "failed": 4,
    "first_failures": [
     "test_result_matches_oracle[S1]",
-    "test_s1_verified_artist_without_country_is_held",
+    "test_s1_verified_artist_without_country_is_held_for_country_alone",
+    "test_s1_held_artist_never_outranks_a_ready_one",
     "test_s1_equal_rates_break_ties_on_artist_id"
    ]
   },
@@ -39,10 +51,11 @@
    "query": "S1",
    "mistake": "a different report date (2026-10-01) in days under licence",
    "caught": true,
-   "failed": 3,
+   "failed": 4,
    "first_failures": [
     "test_result_matches_oracle[S1]",
-    "test_s1_verified_artist_without_country_is_held",
+    "test_s1_verified_artist_without_country_is_held_for_country_alone",
+    "test_s1_held_artist_never_outranks_a_ready_one",
     "test_s1_equal_rates_break_ties_on_artist_id"
    ]
   },
@@ -96,14 +109,37 @@
    ]
   },
   {
-   "mutant": "s3-if-inverted",
+   "mutant": "s3-width-hard-coded",
    "query": "S3",
-   "mistake": "the composer status reversed (READY when the description is missing)",
+   "mistake": "the label column width hard-coded to 9 instead of found from the data",
    "caught": true,
    "failed": 2,
    "first_failures": [
+    "test_requirements_match_declared[S3]",
+    "test_s3_label_width_follows_the_data_and_ties_share_it"
+   ]
+  },
+  {
+   "mutant": "s3-bytes-not-characters",
+   "query": "S3",
+   "mistake": "description length counted in bytes (LENGTH) instead of characters",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_s3_description_length_counts_characters_not_bytes"
+   ]
+  },
+  {
+   "mutant": "s3-line-budget-wrong",
+   "query": "S3",
+   "mistake": "room left measured against 79 characters instead of the RA's 80",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
     "test_result_matches_oracle[S3]",
-    "test_s3_genre_without_description_is_hidden"
+    "test_s3_genre_without_description_has_no_line_figures",
+    "test_s3_label_width_follows_the_data_and_ties_share_it",
+    "test_s3_description_length_counts_characters_not_bytes"
    ]
   },
   {
@@ -111,11 +147,12 @@
    "query": "S3",
    "mistake": "SELECT * instead of the named columns",
    "caught": true,
-   "failed": 3,
+   "failed": 5,
    "first_failures": [
     "test_read_only_select[S3]",
     "test_result_matches_oracle[S3]",
-    "test_s3_genre_without_description_is_hidden"
+    "test_s3_genre_without_description_has_no_line_figures",
+    "test_s3_label_width_follows_the_data_and_ties_share_it"
    ]
   },
   {
@@ -245,19 +282,19 @@
    ]
   },
   {
-   "mutant": "e1-moved-first",
+   "mutant": "e1-enabled",
    "query": "E1",
-   "mistake": "the expected-to-fail statement placed before the queries",
+   "mistake": "the disabled expected-to-fail statement switched back on (the file no longer runs clean)",
    "caught": true,
    "failed": 1,
    "first_failures": [
-    "test_tags_are_unique_and_in_order"
+    "test_error_statement_is_disabled[E1]"
    ]
   }
  ],
- "caught": 23,
- "total": 23,
+ "caught": 26,
+ "total": 26,
  "not_applicable": [],
- "real_file": "========================= 1 failed, 66 passed in 0.19s =========================",
+ "real_file": "========================= 1 failed, 70 passed in 0.34s =========================",
  "already_failing": []
-}
+}

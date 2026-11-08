@@ -908,7 +908,7 @@ window.UC = {
   {
    "id": "UC-02",
    "title": "Route payments by country; pay only verified artists",
-   "question": "Who is payable in this royalty run, who is on hold, and why?",
+   "question": "Is each artist ready for this royalty run, and if not, which check is outstanding?",
    "evidence": [
     {
      "block": "attr:artist.country",
@@ -1028,7 +1028,7 @@ window.UC = {
   {
    "id": "UC-05",
    "title": "Show the genre legend while listeners compose a blend",
-   "question": "Is every genre ready to show in the blend composer, in model class order?",
+   "question": "How wide must the composer's label column be, which genre sets that width, and how much of its one 80-character line does each description use?",
    "evidence": [
     {
      "block": "ent:genre",
@@ -1041,6 +1041,10 @@ window.UC = {
     {
      "block": "attr:genre.name",
      "phrase": "The label by which the genre is known to listeners"
+    },
+    {
+     "block": "attr:genre.name",
+     "phrase": "the longest, classical, has nine characters"
     },
     {
      "block": "attr:genre.description",
@@ -1259,7 +1263,7 @@ window.UC = {
      "ingest_status"
     ]
    },
-   "rest": "Needs track_score and scoring_model together: [M6] in multiple_table.sql lists the released recordings whose newest result predates the deployment of the model version now in service."
+   "rest": "Needs track_score and scoring_model together: [M6] in multiple_table.sql lists the released recordings whose newest result predates the deployment of the newest model version."
   },
   {
    "id": "UC-10",
@@ -1718,7 +1722,7 @@ window.UC = {
      "artist_id"
     ]
    },
-   "rest": "An error case: [E1], the last statement in single_table.sql, marked EXPECTED TO FAIL (MySQL must refuse it with 1062). upload_track [P2] in routines.sql is the business answering it: its DECLARE EXIT HANDLER FOR 1062 catches the duplicate and tells the uploader which recording is already in the catalogue, instead of stopping."
+   "rest": "An error case: [E1], the last statement in single_table.sql, kept disabled inside its own comment so the file runs clean; the tests run it on its own and MySQL must refuse it with 1062. upload_track [P2] in routines.sql is the business answering it: its DECLARE EXIT HANDLER FOR 1062 catches the duplicate and tells the uploader which recording is already in the catalogue, instead of stopping."
   }
  ],
  "schema": {
@@ -2764,6 +2768,21 @@ window.UC = {
     }
    },
    "hits": {
+    "artist.artist_id": [
+     "UC-01",
+     "UC-02",
+     "UC-14",
+     "UC-15"
+    ],
+    "artist.payout_rate": [
+     "UC-01",
+     "UC-14"
+    ],
+    "artist.stage_name": [
+     "UC-01",
+     "UC-02",
+     "UC-14"
+    ],
     "track.artist_id": [
      "UC-01",
      "UC-14",
@@ -2792,21 +2811,6 @@ window.UC = {
     "play.track_id": [
      "UC-01",
      "UC-13",
-     "UC-14"
-    ],
-    "artist.artist_id": [
-     "UC-01",
-     "UC-02",
-     "UC-14",
-     "UC-15"
-    ],
-    "artist.payout_rate": [
-     "UC-01",
-     "UC-14"
-    ],
-    "artist.stage_name": [
-     "UC-01",
-     "UC-02",
      "UC-14"
     ],
     "artist.country": [
@@ -2873,6 +2877,10 @@ window.UC = {
     "listener.signup_date": [
      "UC-06"
     ],
+    "listener.display_name": [
+     "UC-07",
+     "UC-13"
+    ],
     "play.listener_id": [
      "UC-07",
      "UC-13",
@@ -2891,15 +2899,6 @@ window.UC = {
     ],
     "station.station_id": [
      "UC-07",
-     "UC-08",
-     "UC-10",
-     "UC-12"
-    ],
-    "listener.display_name": [
-     "UC-07",
-     "UC-13"
-    ],
-    "station.model_id": [
      "UC-08",
      "UC-10",
      "UC-12"
@@ -2931,6 +2930,11 @@ window.UC = {
      "UC-08",
      "UC-09"
     ],
+    "station.model_id": [
+     "UC-08",
+     "UC-10",
+     "UC-12"
+    ],
     "track_score.model_id": [
      "UC-09",
      "UC-11",
@@ -2944,17 +2948,6 @@ window.UC = {
      "UC-11",
      "UC-12"
     ],
-    "station.created_on": [
-     "UC-10"
-    ],
-    "station.maximum_ambiguity": [
-     "UC-10",
-     "UC-12"
-    ],
-    "station.minimum_ambiguity": [
-     "UC-10",
-     "UC-12"
-    ],
     "station_blend.genre_id": [
      "UC-10",
      "UC-12"
@@ -2964,6 +2957,17 @@ window.UC = {
      "UC-12"
     ],
     "station_blend.weight": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station.created_on": [
+     "UC-10"
+    ],
+    "station.maximum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station.minimum_ambiguity": [
      "UC-10",
      "UC-12"
     ],

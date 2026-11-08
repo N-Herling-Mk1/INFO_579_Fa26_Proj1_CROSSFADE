@@ -41,18 +41,20 @@ def days_to_report(s):
     return D((REPORT_DATE - day(s)).days)
 
 
-# ----------------------------------------------------------------------------- S1 artist
+# ----------------------------------------------------------------------------- S1 artist: royalty run readiness
 def s1(t):
-    cols = ["artist_id", "payee", "usd_per_1000_streams", "days_under_licence", "payment_status"]
+    """Each check is judged on its own (no first-failure-wins), so an artist failing both shows both holds."""
+    cols = ["artist_id", "stage_name", "usd_per_1000_streams", "days_under_licence", "licence_check",
+            "payment_country", "run_status"]
     out = []
     for a in t["artist"]["rows"]:
         verified, country, rate = int(a["verified"]), a["country"], D(a["payout_rate"])
-        status = ("HOLD: identity not verified" if verified == 0 else
-                  "HOLD: no payment country" if country is None else "PAYABLE")
-        payable = 0 if verified == 1 and country is not None else 1
-        row = (D(a["artist_id"]), f"{a['stage_name']} ({country if country is not None else '--'})",
-               rnd(rate * 1000, 2), days_to_report(a["joined_date"]), status)
-        out.append(((payable, -rate, int(a["artist_id"])), row))
+        ready = verified == 1 and country is not None
+        row = (D(a["artist_id"]), a["stage_name"], rnd(rate * 1000, 2), days_to_report(a["joined_date"]),
+               "confirmed" if verified == 1 else "HOLD: not confirmed",
+               "HOLD: no country" if country is None else country,
+               "ready" if ready else "held")
+        out.append(((0 if ready else 1, -rate, int(a["artist_id"])), row))   # ready first, rate high to low, id
     return cols, [r for _, r in sorted(out, key=lambda x: x[0])]
 
 
@@ -69,14 +71,22 @@ def s2(t):
     return cols, out
 
 
-# ----------------------------------------------------------------------------- S3 genre: composer legend
+# ----------------------------------------------------------------------------- S3 genre: composer legend layout
+LINE = 80                                                       # RA: a description is kept to one line of 80 characters
+
+
 def s3(t):
-    cols = ["model_class_index", "label", "legend_line", "composer_status"]
+    """Lengths are counted in characters (CHAR_LENGTH, Python len), not bytes; a NULL description gives NULL lengths.
+    The label column width is the longest name in the table; every genre at that length sets it (ties included)."""
+    cols = ["model_class_index", "label", "label_chars", "label_column", "description_chars", "chars_left_on_line"]
+    widest = max(len(g["name"]) for g in t["genre"]["rows"])
     out = []
     for g in sorted(t["genre"]["rows"], key=lambda g: int(g["genre_id"])):
         desc = g["description"]
-        out.append((D(g["genre_id"]), g["name"], g["name"] + ": " + (desc if desc is not None else "(no description)"),
-                    "HIDE: no description for the composer" if desc is None else "READY"))
+        out.append((D(g["genre_id"]), g["name"], D(len(g["name"])),
+                    "sets the column width" if len(g["name"]) == widest else "fits",
+                    None if desc is None else D(len(desc)),
+                    None if desc is None else D(LINE - len(desc))))
     return cols, out
 
 

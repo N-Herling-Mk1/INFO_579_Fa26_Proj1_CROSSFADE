@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CROSSFADE</title>
 <link rel="icon" href="../assets/images/favicon.ico" sizes="any">
-<link rel="stylesheet" href="../assets/site.css?v=cb25b6e1">
+<link rel="stylesheet" href="../assets/site.css?v=3f1e8bb3">
 <link rel="stylesheet" href="../assets/splash.css?v=024a3452">
 <script src="../project1/data/site_data.js"></script>
 <script src="../project2/data/deliverables.js"></script>
@@ -274,7 +274,7 @@
       mode = on; btn.setAttribute("aria-pressed", on ? "true" : "false");
       $("dk-mode").textContent = on ? "auto" : "manual";
       clearInterval(timer); timer = null; demoStop();
-      if (on) timer = setInterval(demoStep, 3600);
+      if (on) timer = setInterval(demoStep, 7200);                     // one turn every 7.2 s
       if (save) try { sessionStorage.setItem("cf-front", on ? "1" : "0"); } catch (e) {}
     }
     function step(d) { if (mode) setMode(false, true); if (SFX) SFX.tick(d); turnTo(front + d); }

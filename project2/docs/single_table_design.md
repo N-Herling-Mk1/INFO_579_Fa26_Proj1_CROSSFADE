@@ -2,6 +2,18 @@
 
 CROSSFADE, info579_group_1. Draft of Nov 6, 2026. Nothing here is final until we sign off on the decisions at the end.
 
+> **Revision, Nov 8, 2026.** This draft is kept as the design record; `project2/deliverables/single_table.sql` is the
+> final word. Three changes since it was written:
+> - **S1** now reports each payment check in its own column (`licence_check`, `payment_country`) and a `run_status`
+>   (ready/held), so an artist failing both checks shows both; the single first-failure CASE below hid Saltmarsh
+>   Tapes' missing country. The hold rule is labelled business policy: the RA defines Verified and Country but does
+>   not say they gate payment.
+> - **S3** no longer flags a missing description (that IF never fired). It reports the composer layout the RA sizes:
+>   which genre sets the label column width (longest name, from the data) and how much of each description's
+>   80-character line is used, counted in characters.
+> - **E1** is kept DISABLED (inside its own block comment) so the file runs clean; the tests still run it on its own.
+> Edge cases S1-E1 and S3-E1 in §T5 below were replaced accordingly (see `project2/tests/test_single_table.py`).
+
 ## 1. What the brief asks for
 
 > Write queries to retrieve data from each non-associative table individually.

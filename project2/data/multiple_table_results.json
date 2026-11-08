@@ -1,6 +1,6 @@
 {
  "file": "multiple_table.sql",
- "generated": "2026-11-07T23:20:08",
+ "generated": "2026-11-08T13:24:10",
  "passed": 80,
  "failed": 0,
  "queries": {
@@ -671,7 +671,7 @@
     "UC-10"
    ],
    "question": "For each station, which recordings qualify under its model, window and blend, in what order, and how long would the station run?",
-   "need": "a station stores a genre blend and an ambiguity window, not a fixed list, and the service \"returns recordings that genuinely occupy that region\" (RA: Overview; Station). Which recordings belong on a station has to be worked out from the business plan's own rules, so the query applies each of them in turn: 1. only scored recordings can be streamed (RA: Track: Ingest Status); 2. a station is evaluated against its one nominated model version, \"so that a station's contents do not change meaning when a different version scores the catalogue\" (RA: Scoring Model 1:N Station); 3. the recording's posterior entropy must lie inside the station's window: the minimum excludes recordings \"that sit squarely inside a single genre\", the maximum those \"the models cannot place with any confidence\" (RA: Minimum and Maximum Ambiguity); 4. its top genre must be one of the station's blend genres (RA: Station Blend). The RA stores the top genre and the entropy on the scoring result \"so that stations can filter without reading ten rows per score\" (RA: Track Score), so the filter reads track_score, not the ten genre_probability rows. The RA does not rank qualifying recordings, so the query orders them by the station's own preference: the blend weight of their top genre, highest first (RA: Weight, \"the share of the station's blend given to this genre\"), then the higher posterior entropy, the recording further between genres, which is the service's selling point; track_id breaks ties.",
+   "need": "a station stores a genre blend and an ambiguity window, not a fixed list, and the service \"returns recordings that genuinely occupy that region\" (RA: Overview; Station). Which recordings belong on a station has to be worked out from the business plan's own rules, so the query applies each of them in turn: 1. only scored recordings can be streamed (RA: Track); 2. a station is evaluated against its one nominated model version, \"so that a station's contents do not change meaning when a different version scores the catalogue\" (RA: Scoring Model 1:N Station); 3. the recording's posterior entropy must lie inside the station's window: the minimum excludes recordings \"that sit squarely inside a single genre\", the maximum those \"the models cannot place with any confidence\" (RA: Minimum and Maximum Ambiguity); 4. its top genre must be one of the station's blend genres (RA: Station Blend). The RA stores the top genre and the entropy on the scoring result \"so that stations can filter without reading ten rows per score\" (RA: Track Score), so the filter reads track_score, not the ten genre_probability rows. The RA does not rank qualifying recordings, so the query orders them by the station's own preference: the blend weight of their top genre, highest first (RA: Weight, \"the share of the station's blend given to this genre\"), then the higher posterior entropy, the recording further between genres, which is the service's selling point; track_id breaks ties.",
    "requirement": "3.5",
    "requirement_text": "a derived table defined with WITH",
    "grain": [
@@ -698,18 +698,18 @@
      "title",
      "track_id"
     ],
+    "track_score": [
+     "genre_id",
+     "model_id",
+     "posterior_entropy",
+     "track_id"
+    ],
     "station": [
      "maximum_ambiguity",
      "minimum_ambiguity",
      "model_id",
      "name",
      "station_id"
-    ],
-    "track_score": [
-     "genre_id",
-     "model_id",
-     "posterior_entropy",
-     "track_id"
     ],
     "genre": [
      "genre_id",
@@ -1200,8 +1200,8 @@
    "use_cases": [
     "UC-09"
    ],
-   "question": "Which released recordings have no scoring result from the model version now in service, and how far out of date is their newest result?",
-   "need": "every recording is scored by the model version in service at ingest, and newer versions are deployed over time (RA: Scoring Model: the date a version \"was placed in service and began scoring incoming uploads\"). Scored On is kept for exactly one purpose: \"to establish which results predate a model redeployment and must be recomputed\" (RA: Track Score: Scored On).",
+   "question": "Which released recordings have not been scored since the newest model version was deployed, and how far out of date is their newest result?",
+   "need": "several model versions are in service at once, and newer versions are deployed over time (RA: Scoring Model: the date a version \"was placed in service and began scoring incoming uploads\"). The RA gives Scored On one use: \"to establish which results predate a model redeployment and must be recomputed\" (RA: Track Score: Scored On).",
    "requirement": "3.1",
    "requirement_text": "an associative table and the two tables it relates, joined with INNER JOIN",
    "grain": [
@@ -1223,15 +1223,15 @@
      "title",
      "track_id"
     ],
-    "scoring_model": [
-     "deployed_on",
-     "model_id",
-     "version_label"
-    ],
     "track_score": [
      "model_id",
      "scored_on",
      "track_id"
+    ],
+    "scoring_model": [
+     "deployed_on",
+     "model_id",
+     "version_label"
     ]
    },
    "columns_out": [
@@ -1434,16 +1434,6 @@
    "sql": "WITH second_place AS (\n    SELECT gp.track_id,\n           gp.model_id,\n           MAX(gp.probability) AS probability\n    FROM crossfade.genre_probability AS gp\n    INNER JOIN crossfade.track_score AS s ON s.track_id = gp.track_id\n                                         AND s.model_id = gp.model_id\n    WHERE gp.genre_id <> s.genre_id\n    GROUP BY gp.track_id, gp.model_id\n),\nrunner_up AS (\n    SELECT gp.track_id,\n           gp.model_id,\n           MIN(gp.genre_id) AS genre_id,\n           sp.probability\n    FROM crossfade.genre_probability AS gp\n    INNER JOIN second_place AS sp ON sp.track_id = gp.track_id\n                                 AND sp.model_id = gp.model_id\n                                 AND sp.probability = gp.probability\n    INNER JOIN crossfade.track_score AS s ON s.track_id = gp.track_id\n                                         AND s.model_id = gp.model_id\n    WHERE gp.genre_id <> s.genre_id\n    GROUP BY gp.track_id, gp.model_id, sp.probability\n)\nSELECT t.track_id,\n       t.title,\n       s.model_id,\n       g1.name AS top_genre,\n       s.top_probability,\n       g2.name AS runner_up_genre,\n       r.probability AS runner_up_probability,\n       s.top_probability - r.probability AS margin,\n       s.segment_variance\nFROM crossfade.track_score AS s\nINNER JOIN crossfade.track AS t ON t.track_id = s.track_id\nINNER JOIN runner_up AS r ON r.track_id = s.track_id\n                         AND r.model_id = s.model_id\nINNER JOIN crossfade.genre AS g1 ON g1.genre_id = s.genre_id\nINNER JOIN crossfade.genre AS g2 ON g2.genre_id = r.genre_id\nORDER BY margin,\n         t.track_id,\n         s.model_id",
    "detected": "WITH",
    "columns": {
-    "track": [
-     "title",
-     "track_id"
-    ],
-    "genre_probability": [
-     "genre_id",
-     "model_id",
-     "probability",
-     "track_id"
-    ],
     "track_score": [
      "genre_id",
      "model_id",
@@ -1454,6 +1444,16 @@
     "genre": [
      "genre_id",
      "name"
+    ],
+    "track": [
+     "title",
+     "track_id"
+    ],
+    "genre_probability": [
+     "genre_id",
+     "model_id",
+     "probability",
+     "track_id"
     ]
    },
    "columns_out": [
@@ -5456,7 +5456,7 @@
      "14"
     ]
    ],
-   "doc": "A recording scored by the version now in service no longer needs recomputing, whatever its older results.\nWhy: only the newest result matters; the sample's oldest stale recording (4819) is rescored here.\nExpect: beardown_3sec (model 5) scores 4819 on 2026-07-01: 4819 leaves the list, which keeps the other 8.",
+   "doc": "A recording scored since the newest version was deployed no longer needs recomputing, whatever its older results.\nWhy: only the newest result matters; the sample's oldest stale recording (4819) is rescored here.\nExpect: beardown_3sec (model 5) scores 4819 on 2026-07-01: 4819 leaves the list, which keeps the other 8.",
    "test": "test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date",
    "outcome": "passed"
   },

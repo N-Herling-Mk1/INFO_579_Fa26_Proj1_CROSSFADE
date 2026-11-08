@@ -290,6 +290,7 @@ class Query:
         self.output = [c.strip() for c in m.group(1).split(",") if c.strip()] if m else []
         m = re.search(r"Business need:\s*(.+?)(?:\n\s*Business question:|$)", comment, re.S)
         self.need = re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
+        self.disabled = False           # True for an [E#] statement kept inside a block comment (see disabled_statements)
 
     @property
     def is_error(self):
@@ -300,8 +301,54 @@ class Query:
         return self.tag or self.sql[:30]
 
 
+def comment_blocks(text):
+    """The top-level /* */ blocks of a script as (start, end, body), skipping string literals and -- lines."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text.startswith("/*", i):
+            j = text.index("*/", i + 2) + 2
+            out.append((i, j, text[i + 2:j - 2])); i = j
+        elif text.startswith("--", i) and (i + 2 >= n or text[i + 2] in " \t\r\n"):
+            j = text.find("\n", i); i = n if j < 0 else j
+        elif text[i] in "'\"`":
+            q, j = text[i], i + 1
+            while j < n:
+                if text[j] == "\\": j += 2; continue
+                if text[j] == q:
+                    if j + 1 < n and text[j + 1] == q: j += 2; continue
+                    break
+                j += 1
+            i = j + 1
+        else:
+            i += 1
+    return out
+
+
+def disabled_statements(text):
+    """[E#] statements kept in the file but switched off, so a script run never executes them: a purpose comment
+    that starts with an [E#] tag and says DISABLED, followed directly (only whitespace between) by a second block
+    comment holding the statement, ending in ;. split_sql cannot see them (to it they are two comments); the tests
+    still run them, inside a transaction that is rolled back. Returns [(comment, statement)]."""
+    blocks, out = comment_blocks(text), []
+    for (_, end1, c1), (start2, _, c2) in zip(blocks, blocks[1:]):
+        if text[end1:start2].strip() or not re.match(r"\s*\[E\d+\]", c1) or not re.search(r"\bDISABLED\b", c1):
+            continue
+        st = c2.strip()
+        if st.endswith(";"):
+            out.append((c1.strip(), st[:-1].strip()))
+    return out
+
+
 def parse_queries(path):
-    return [Query(c, s) for c, s in split_sql(path.read_text(encoding="utf-8"))]
+    """The statements of a query file, in file order, then any disabled [E#] statements (which never run as part
+    of the script, so where they sit cannot stop a run)."""
+    text = path.read_text(encoding="utf-8")
+    qs = [Query(c, s) for c, s in split_sql(text)]
+    for c, s in disabled_statements(text):
+        q = Query(c, s)
+        q.disabled = True
+        qs.append(q)
+    return qs
 
 
 # ----------------------------------------------------------------------------- collection: one test per query

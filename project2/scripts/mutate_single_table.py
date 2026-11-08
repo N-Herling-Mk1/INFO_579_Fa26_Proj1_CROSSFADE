@@ -20,12 +20,13 @@ src = SQL.read_text(encoding="utf-8").replace("\r\n", "\n")
 
 # (name, query, what the mistake is, old text, new text)
 EDITS = [
-    ("s1-hold-reasons-swapped", "S1", "the two HOLD reasons tested in the other order (an artist failing both gets the wrong reason)",
-     "           WHEN verified = 0 THEN 'HOLD: identity not verified'\n           WHEN country IS NULL THEN 'HOLD: no payment country'",
-     "           WHEN country IS NULL THEN 'HOLD: no payment country'\n           WHEN verified = 0 THEN 'HOLD: identity not verified'"),
+    ("s1-country-check-masked", "S1", "the country check only runs for verified artists (an artist failing both shows one hold)",
+     "IF(country IS NULL, 'HOLD: no country', country)", "IF(country IS NULL AND verified = 1, 'HOLD: no country', country)"),
+    ("s1-ready-ignores-country", "S1", "run_status says ready for a verified artist with no country",
+     "WHEN verified = 1 AND country IS NOT NULL THEN 'ready'", "WHEN verified = 1 THEN 'ready'"),
     ("s1-tie-break-dropped", "S1", "the artist_id tie-break left out of ORDER BY", "         payout_rate DESC,\n         artist_id;", "         payout_rate DESC;"),
-    ("s1-payable-first-dropped", "S1", "payable artists no longer listed first",
-     "ORDER BY CASE WHEN verified = 1 AND country IS NOT NULL THEN 0 ELSE 1 END,\n         payout_rate DESC,", "ORDER BY payout_rate DESC,"),
+    ("s1-ready-first-dropped", "S1", "ready artists no longer listed first",
+     "ORDER BY run_status DESC,\n         payout_rate DESC,", "ORDER BY payout_rate DESC,"),
     ("s1-report-date-moved", "S1", "a different report date (2026-10-01) in days under licence",
      "DATEDIFF('2026-09-30', joined_date)", "DATEDIFF('2026-10-01', joined_date)"),
     ("s2-scored-filter-dropped", "S2", "unscored and rejected recordings allowed on the shelf", "WHERE ingest_status = 'scored'\n", ""),
@@ -34,8 +35,12 @@ EDITS = [
      "LPAD(MOD(duration, 60), 2, '0')", "MOD(duration, 60)"),
     ("s2-tie-break-dropped", "S2", "the track_id tie-break left out of ORDER BY", "ORDER BY release_date DESC,\n         track_id\nLIMIT 5;",
      "ORDER BY release_date DESC\nLIMIT 5;"),
-    ("s3-if-inverted", "S3", "the composer status reversed (READY when the description is missing)",
-     "IF(description IS NULL, 'HIDE: no description for the composer', 'READY')", "IF(description IS NOT NULL, 'HIDE: no description for the composer', 'READY')"),
+    ("s3-width-hard-coded", "S3", "the label column width hard-coded to 9 instead of found from the data",
+     "(SELECT MAX(CHAR_LENGTH(name)) FROM crossfade.genre)", "9"),
+    ("s3-bytes-not-characters", "S3", "description length counted in bytes (LENGTH) instead of characters",
+     "CHAR_LENGTH(description) AS description_chars", "LENGTH(description) AS description_chars"),
+    ("s3-line-budget-wrong", "S3", "room left measured against 79 characters instead of the RA's 80",
+     "80 - CHAR_LENGTH(description)", "79 - CHAR_LENGTH(description)"),
     ("s3-select-star", "S3", "SELECT * instead of the named columns",
      "SELECT genre_id AS model_class_index,\n       name AS label,", "SELECT *, genre_id AS model_class_index,\n       name AS label,"),
     ("s4-tiers-ascending", "S4", "plan tiers listed cheapest first", "ORDER BY plan_tier DESC;", "ORDER BY plan_tier;"),
@@ -61,16 +66,18 @@ EDITS = [
 ]
 
 
-def e1_first(s):
-    """Move the [E1] statement (and its comment) before [S1]: in Workbench it would stop the run before any query."""
+def e1_enabled(s):
+    """Take the [E1] statement out of its block comment: a script run would then end on error 1062."""
     i = s.index("/*\n\t[E1]")
-    e1 = s[i:].rstrip() + "\n\n\n"
-    rest = s[:i].rstrip() + "\n"
-    j = rest.index("/*\n\t[S1]")
-    return rest[:j] + e1 + rest[j:]
+    head, tail = s[:i], s[i:]
+    j = tail.index("*/\n/*\n") + len("*/\n")          # end of the [E1] comment, start of the statement's block
+    stmt = tail[j:]
+    stmt = stmt.replace("/*\n", "", 1)
+    k = stmt.rindex("*/")
+    return head + tail[:j] + stmt[:k] + stmt[k + 2:]
 
 
-FUNCS = [("e1-moved-first", "E1", "the expected-to-fail statement placed before the queries", e1_first)]
+FUNCS = [("e1-enabled", "E1", "the disabled expected-to-fail statement switched back on (the file no longer runs clean)", e1_enabled)]
 
 
 def run(path, fresh=False):

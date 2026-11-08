@@ -44,9 +44,15 @@
 	Every join names its type (INNER JOIN, LEFT OUTER JOIN), as the course
 	requires; there are no bare JOINs and no comma joins. Tables carry short
 	aliases (AS p, AS t) so every column says which table it comes from.
-	IFNULL (M2) is a NULL-handling function in the Unit 8 slides. GROUP_CONCAT
-	(M6) is MySQL's aggregate that joins a group's values into one string, and
-	DATEDIFF (M6) counts the days between two dates.
+	Course material: INNER JOIN and LEFT OUTER JOIN from Unit 7; UNION,
+	subqueries with IN, scalar subqueries, WITH and CASE from Unit 8; DATEDIFF
+	(M6, the days between two dates) from Unit 6. IFNULL (M2) is a NULL-handling
+	function in the Unit 8 slides.
+	Beyond the slides: GROUP_CONCAT (M6), MySQL's aggregate that joins a group's
+	values into one string; it only formats the list of versions, so dropping it
+	would not affect requirement 3.1.
+	Branches: every CASE branch fires on the sample data (M1, M2, M3), and IFNULL in M2
+	fires for Kestrel Ave, the artist with no uploads.
 */
 
 
@@ -220,7 +226,7 @@ ORDER BY highest_divergence DESC,
 	  region" (RA: Overview; Station). Which recordings belong on a station has to
 	  be worked out from the business plan's own rules, so the query applies each
 	  of them in turn:
-	  1. only scored recordings can be streamed (RA: Track: Ingest Status);
+	  1. only scored recordings can be streamed (RA: Track);
 	  2. a station is evaluated against its one nominated model version, "so that
 	     a station's contents do not change meaning when a different version
 	     scores the catalogue" (RA: Scoring Model 1:N Station);
@@ -294,24 +300,24 @@ ORDER BY e.station_id,
 /*
 	[M6] results to recompute
 	Use cases: UC-09
-	Business need: every recording is scored by the model version in service at
-	  ingest, and newer versions are deployed over time (RA: Scoring Model: the
-	  date a version "was placed in service and began scoring incoming
-	  uploads"). Scored On is kept for exactly one purpose: "to establish which
-	  results predate a model redeployment and must be recomputed" (RA: Track
-	  Score: Scored On).
-	Business question: Which released recordings have no scoring result from the
-	model version now in service, and how far out of date is their newest
+	Business need: several model versions are in service at once, and newer
+	  versions are deployed over time (RA: Scoring Model: the date a version
+	  "was placed in service and began scoring incoming uploads"). The RA gives
+	  Scored On one use: "to establish which results predate a model
+	  redeployment and must be recomputed" (RA: Track Score: Scored On).
+	Business question: Which released recordings have not been scored since the
+	newest model version was deployed, and how far out of date is their newest
 	result?
 	- Track Score is the associative entity that resolves Track M:N Scoring
 	  Model. It is joined to both: track, for the title and the release status
 	  (a rejected recording is never rescored), and scoring_model, to name the
 	  versions that did score the recording.
-	- The version now in service is the one deployed last. A recording needs
-	  rescoring when its newest result was scored before that deployment; a
-	  recording already scored by the version in service is up to date, so its
-	  older results do not count. A scalar subquery finds the latest deployment
-	  date; HAVING compares the newest result with it.
+	- Several versions are in service at once (RA: Scoring Model), so "out of
+	  date" is measured against the newest one, the version deployed last. A
+	  recording needs rescoring when its newest result was scored before that
+	  deployment; a recording scored at or after it is up to date, whichever
+	  version scored it, so its older results do not count. A scalar subquery
+	  finds the latest deployment date; HAVING compares the newest result with it.
 	- GROUP_CONCAT lists the versions that scored the recording, oldest first.
 	  DATEDIFF gives how many days the newest result predates the deployment.
 	- Most out of date first; track_id breaks ties.

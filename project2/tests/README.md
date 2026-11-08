@@ -3,7 +3,7 @@
 Unit tests for the Project 2 SQL files. Today:
 
 - `database_implementation.sql`: `test_implementation.py`, 228 tests (below).
-- `single_table.sql`: `test_single_table.py`, 67 tests, including the expected-error case [E1] (UC-15).
+- `single_table.sql`: `test_single_table.py`, 71 tests, including the expected-error case [E1] (UC-15), kept disabled in the file.
 - `multiple_table.sql`: `test_multiple_table.py`, 80 tests (below).
 
 `routines.sql` gets its own test file when it is written. Each file has a page on the site:
@@ -42,7 +42,7 @@ What it covers and what it could miss: `project2/docs/test_implementation_guide.
 | contract | query | purpose comment with `[S#]` tag, table, use cases and business question; one read-only `SELECT`, no `SELECT *`; exactly one table in MySQL's own plan (`EXPLAIN FORMAT=JSON`); the brief requirements (a)–(e) it declares are exactly the ones it uses (course function lists; selection control = `CASE`, `IF`); it reads only columns its use cases declare in `use_cases.json` |
 | correctness | query | result equals an independent Python answer from `data.csv` (`oracle.py`): same columns, rows, order, exact decimals; two runs agree |
 | behaviour | case | logic the sample data never reaches, checked by adding or changing rows inside a transaction that is rolled back (nothing in your database changes) |
-| expected error | case | the `[E#]` statements at the end of `single_table.sql`, marked EXPECTED TO FAIL: writes the database must refuse. E1 re-uploads an existing audio file; MySQL must refuse it with error 1062 on `uq_track_audio_checksum` and leave `track` unchanged (run in a rolled-back transaction) |
+| expected error | case | the `[E#]` statements at the end of `single_table.sql`: writes the database must refuse, kept DISABLED (commented out) so the file runs clean. Each must stay disabled (`test_error_statement_is_disabled`); the test runs it on its own anyway. E1 re-uploads an existing audio file; MySQL must refuse it with error 1062 on `uq_track_audio_checksum` and leave `track` unchanged (run in a rolled-back transaction) |
 | coverage | file | every non-associative table queried; each requirement met at least twice; every single-table use case answered; tags `S1`… unique and in order |
 
 ## Set up once
@@ -100,9 +100,12 @@ tests fail.
 | row order and values | the oracle's rows; every `ORDER BY` must include a unique key of the table (or all the `GROUP BY` columns), so no two rows can tie | `test_result_matches_oracle`, `test_result_is_deterministic` |
 | table names in `FROM crossfade.<table>` | the database (`database_implementation.sql`) and the table names in `data.csv`, snake_case | `test_read_only_select`, oracle |
 
-An `[E1] TABLE:` statement (EXPECTED TO FAIL) follows the same comment shape plus `Expects: 1062 uq_track_audio_checksum`,
+An `[E1] TABLE:` statement follows the same comment shape plus `Expects: 1062 uq_track_audio_checksum`,
 which must equal `expectsError.code` and `expectsError.constraint` of its use case in `use_cases.json`; the constraint name must be the
-one `database_implementation.sql` creates. `[E#]` statements come after every `[S#]` query: an error stops a script run.
+one `database_implementation.sql` creates. It is DISABLED: the comment starts with the `[E#]` tag and contains the word DISABLED, and
+the statement sits in its own `/* ... */` block directly after it (nothing but whitespace between), ending in `;`. A script run skips it;
+`conftest.disabled_statements` finds it so the tests can still run it. The comment text must never contain the two characters
+`*` `/` together: that would close the comment early.
 
 The behaviour tests (`test_s2_…`) refer to a query by its tag (`q["S2"]`) and to result columns by position, so renumbering a query or
 reordering its output columns means updating them too.

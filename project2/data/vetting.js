@@ -63,7 +63,7 @@ window.P2_VET = {
    "file": "crossfade_impl_tests.zip",
    "role": "the tests, both input files and the guide, in one folder that runs as-is",
    "href": "../tests/crossfade_impl_tests.zip",
-   "bytes": 47019,
+   "bytes": 48725,
    "contents": [
     "test_implementation.py",
     "conftest.py",
@@ -1239,7 +1239,7 @@ window.P2_VET = {
    "caught": 19,
    "total": 19,
    "not_applicable": [],
-   "real_script": "============================= 228 passed in 0.76s =============================="
+   "real_script": "============================= 228 passed in 0.62s =============================="
   }
  },
  "single": {
@@ -1320,7 +1320,7 @@ window.P2_VET = {
    "file": "crossfade_single_tests.zip",
    "role": "the tests, the oracle, every input file and both guides, in one folder that runs as-is",
    "href": "../tests/crossfade_single_tests.zip",
-   "bytes": 166805,
+   "bytes": 175262,
    "contents": [
     "test_single_table.py",
     "oracle.py",
@@ -1373,15 +1373,15 @@ window.P2_VET = {
    },
    {
     "group": "behaviour",
-    "tests": 13,
-    "passed": 13,
+    "tests": 16,
+    "passed": 16,
     "text": "Logic the sample data never reaches: a row is added or changed inside a transaction that is rolled back, and the query must still agree with the oracle on the changed data. Each case targets one branch, boundary or tie."
    },
    {
     "group": "expected error",
-    "tests": 1,
-    "passed": 1,
-    "text": "The [E1] statement at the end of the file, marked EXPECTED TO FAIL, must be refused by MySQL with exactly error 1062 on uq_track_audio_checksum, and track must be unchanged afterwards."
+    "tests": 2,
+    "passed": 2,
+    "text": "The [E1] statement at the end of the file is kept DISABLED (commented out), so a script run never stops on it. Run on its own, it must be refused by MySQL with exactly error 1062 on uq_track_audio_checksum, and track must be unchanged afterwards."
    },
    {
     "group": "coverage",
@@ -1527,8 +1527,8 @@ window.P2_VET = {
       1
      ],
      "cases": [
-      2,
-      2
+      3,
+      3
      ],
      "error": [
       0,
@@ -1643,8 +1643,8 @@ window.P2_VET = {
       1
      ],
      "cases": [
-      1,
-      1
+      3,
+      3
      ],
      "error": [
       0,
@@ -1655,8 +1655,8 @@ window.P2_VET = {
       1
      ],
      "req_b": [
-      0,
-      0
+      1,
+      1
      ],
      "req_c": [
       1,
@@ -2063,7 +2063,7 @@ window.P2_VET = {
    {
     "title": "Read the result",
     "text": "One line per test, then a summary. A correctness failure prints the first row where MySQL and the oracle differ; a contract failure names the comment field, table or column. Each query's result as the tests saw it is on the single_table page (Project 2 → Files).",
-    "code": "collected 67 items\ntest_single_table.py::test_comment_contract[S1] PASSED   [  1%]\n...\n========== 67 passed in 0.3s =========="
+    "code": "collected 71 items\ntest_single_table.py::test_comment_contract[S1] PASSED   [  1%]\n...\n========== 71 passed in 0.3s =========="
    },
    {
     "title": "Write the queries yourself",
@@ -2074,15 +2074,26 @@ window.P2_VET = {
   "mutants": {
    "mutants": [
     {
-     "mutant": "s1-hold-reasons-swapped",
+     "mutant": "s1-country-check-masked",
      "query": "S1",
-     "mistake": "the two HOLD reasons tested in the other order (an artist failing both gets the wrong reason)",
+     "mistake": "the country check only runs for verified artists (an artist failing both shows one hold)",
      "caught": true,
-     "failed": 3,
+     "failed": 4,
      "first_failures": [
       "test_result_matches_oracle[S1]",
-      "test_s1_verified_artist_without_country_is_held",
+      "test_s1_verified_artist_without_country_is_held_for_country_alone",
+      "test_s1_held_artist_never_outranks_a_ready_one",
       "test_s1_equal_rates_break_ties_on_artist_id"
+     ]
+    },
+    {
+     "mutant": "s1-ready-ignores-country",
+     "query": "S1",
+     "mistake": "run_status says ready for a verified artist with no country",
+     "caught": true,
+     "failed": 1,
+     "first_failures": [
+      "test_s1_verified_artist_without_country_is_held_for_country_alone"
      ]
     },
     {
@@ -2096,14 +2107,15 @@ window.P2_VET = {
      ]
     },
     {
-     "mutant": "s1-payable-first-dropped",
+     "mutant": "s1-ready-first-dropped",
      "query": "S1",
-     "mistake": "payable artists no longer listed first",
+     "mistake": "ready artists no longer listed first",
      "caught": true,
-     "failed": 3,
+     "failed": 4,
      "first_failures": [
       "test_result_matches_oracle[S1]",
-      "test_s1_verified_artist_without_country_is_held",
+      "test_s1_verified_artist_without_country_is_held_for_country_alone",
+      "test_s1_held_artist_never_outranks_a_ready_one",
       "test_s1_equal_rates_break_ties_on_artist_id"
      ]
     },
@@ -2112,10 +2124,11 @@ window.P2_VET = {
      "query": "S1",
      "mistake": "a different report date (2026-10-01) in days under licence",
      "caught": true,
-     "failed": 3,
+     "failed": 4,
      "first_failures": [
       "test_result_matches_oracle[S1]",
-      "test_s1_verified_artist_without_country_is_held",
+      "test_s1_verified_artist_without_country_is_held_for_country_alone",
+      "test_s1_held_artist_never_outranks_a_ready_one",
       "test_s1_equal_rates_break_ties_on_artist_id"
      ]
     },
@@ -2169,14 +2182,37 @@ window.P2_VET = {
      ]
     },
     {
-     "mutant": "s3-if-inverted",
+     "mutant": "s3-width-hard-coded",
      "query": "S3",
-     "mistake": "the composer status reversed (READY when the description is missing)",
+     "mistake": "the label column width hard-coded to 9 instead of found from the data",
      "caught": true,
      "failed": 2,
      "first_failures": [
+      "test_requirements_match_declared[S3]",
+      "test_s3_label_width_follows_the_data_and_ties_share_it"
+     ]
+    },
+    {
+     "mutant": "s3-bytes-not-characters",
+     "query": "S3",
+     "mistake": "description length counted in bytes (LENGTH) instead of characters",
+     "caught": true,
+     "failed": 1,
+     "first_failures": [
+      "test_s3_description_length_counts_characters_not_bytes"
+     ]
+    },
+    {
+     "mutant": "s3-line-budget-wrong",
+     "query": "S3",
+     "mistake": "room left measured against 79 characters instead of the RA's 80",
+     "caught": true,
+     "failed": 4,
+     "first_failures": [
       "test_result_matches_oracle[S3]",
-      "test_s3_genre_without_description_is_hidden"
+      "test_s3_genre_without_description_has_no_line_figures",
+      "test_s3_label_width_follows_the_data_and_ties_share_it",
+      "test_s3_description_length_counts_characters_not_bytes"
      ]
     },
     {
@@ -2184,11 +2220,12 @@ window.P2_VET = {
      "query": "S3",
      "mistake": "SELECT * instead of the named columns",
      "caught": true,
-     "failed": 3,
+     "failed": 5,
      "first_failures": [
       "test_read_only_select[S3]",
       "test_result_matches_oracle[S3]",
-      "test_s3_genre_without_description_is_hidden"
+      "test_s3_genre_without_description_has_no_line_figures",
+      "test_s3_label_width_follows_the_data_and_ties_share_it"
      ]
     },
     {
@@ -2318,20 +2355,20 @@ window.P2_VET = {
      ]
     },
     {
-     "mutant": "e1-moved-first",
+     "mutant": "e1-enabled",
      "query": "E1",
-     "mistake": "the expected-to-fail statement placed before the queries",
+     "mistake": "the disabled expected-to-fail statement switched back on (the file no longer runs clean)",
      "caught": true,
      "failed": 1,
      "first_failures": [
-      "test_tags_are_unique_and_in_order"
+      "test_error_statement_is_disabled[E1]"
      ]
     }
    ],
-   "caught": 23,
-   "total": 23,
+   "caught": 26,
+   "total": 26,
    "not_applicable": [],
-   "real_file": "========================= 1 failed, 66 passed in 0.19s =========================",
+   "real_file": "========================= 1 failed, 70 passed in 0.34s =========================",
    "already_failing": []
   }
  },
@@ -2413,7 +2450,7 @@ window.P2_VET = {
    "file": "crossfade_multiple_tests.zip",
    "role": "the tests, the oracle, every input file and the guide, in one folder that runs as-is",
    "href": "../tests/crossfade_multiple_tests.zip",
-   "bytes": 66698,
+   "bytes": 69001,
    "contents": [
     "test_multiple_table.py",
     "oracle_multiple.py",
@@ -3023,8 +3060,8 @@ window.P2_VET = {
     "cover": "The 20 behaviour cases, and the deliberate-mistake run below."
    },
    {
-    "title": "Which version is 'in service'",
-    "what": "M6 reads 'a model redeployment' (RA: Scored On) as a newer version going into service: the one deployed last. If the business meant redeploying the same version (its deployed_on moving later), the same comparison applies to that version's own results, and M6 would need a second condition.",
+    "title": "Which version counts as newest",
+    "what": "M6 reads 'a model redeployment' (RA: Scored On) as a newer version going into service. Several versions stay in service at once (RA: Scoring Model), so 'out of date' is measured against the one deployed last. If the business meant redeploying the same version (its deployed_on moving later), the same comparison applies to that version's own results, and M6 would need a second condition.",
     "cover": "The reading is stated in M6's comment; a behaviour case deploys a new version and checks every recording becomes due."
    },
    {
@@ -3449,7 +3486,7 @@ window.P2_VET = {
     {
      "mutant": "m6-days-from-first-deployment",
      "query": "M6",
-     "mistake": "days counted from the first deployment instead of the one in service",
+     "mistake": "days counted from the first deployment instead of the newest one",
      "caught": true,
      "failed": 5,
      "first_failures": [
@@ -3542,7 +3579,7 @@ window.P2_VET = {
    "caught": 39,
    "total": 39,
    "not_applicable": [],
-   "real_file": "========================= 1 failed, 79 passed in 0.39s =========================",
+   "real_file": "========================= 1 failed, 79 passed in 0.38s =========================",
    "already_failing": []
   }
  },
@@ -3619,7 +3656,7 @@ window.P2_VET = {
    "file": "crossfade_routines_tests.zip",
    "role": "the tests, the oracle, every input file and the guide, in one folder that runs as-is",
    "href": "../tests/crossfade_routines_tests.zip",
-   "bytes": 60627,
+   "bytes": 62758,
    "contents": [
     "test_routines.py",
     "oracle_routines.py",
@@ -4225,7 +4262,7 @@ window.P2_VET = {
    "caught": 20,
    "total": 20,
    "not_applicable": [],
-   "real_file": "========================= 1 failed, 49 passed in 0.92s =========================",
+   "real_file": "========================= 1 failed, 49 passed in 0.83s =========================",
    "already_failing": []
   }
  }

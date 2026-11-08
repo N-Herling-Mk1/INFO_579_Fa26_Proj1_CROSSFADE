@@ -23,31 +23,59 @@
 		track_score, genre_probability,
 		station_blend, play                         (associative tables)
 	Data: located and stored at bottom of file, reproduced from the Project1 data file.
+	Comments: each statement is preceded by a comment with the same fields:
+	  [B#] / [T#] / [D#] tag (B = database, T = table definition, D = data load)
+	                    and the database or table it builds
+	  Use cases:        the use cases (UC-xx) that read the table, from
+	                    project2/data/use_cases.json
+	  Business need:    what the business plan (the Project 1 requirements
+	                    analysis, RA) needs the table or rows for, citing the RA
+	  - bullets:        the design decisions, and why
+	  Requirements:     the part of Task 1 it meets
+	  Rows:             (D# only) the rows loaded, and where they come from
+	project2/tests/test_implementation.py runs this script twice and compares the
+	database it leaves with the physical model, the RA's value rules and the
+	Project 1 data, and makes every key and rule refuse a bad write.
 
 	***** Re: Class notes and syntax *****
+	Course material: data types from Unit 4; CREATE TABLE, named constraints,
+	CHECK, UNIQUE INDEX, ON DELETE CASCADE / SET NULL and INSERT from Unit 5.
+	Beyond the slides: DEFAULT CHARACTER SET utf8mb4 (the slides show only a
+	utf8mb3 table in passing) and hexadecimal literals (0x...) for the BINARY(32)
+	audio checksums.
 	Conventions, following the course examples:
 	- Every constraint is named: pk_<table>, fk_<child>_<parent>, uq_<table>_<column>,
 	  ck_<table>_<rule>. MySQL names the index behind each foreign key after the
 	  constraint, which reproduces the index names shown on the physical model.
-	- Each associative table's primary key is formed from its foreign keys.
+	- Each associative table's primary key is formed from its foreign keys; Play's
+	  also includes Played At, as the RA specifies.
 	- Fixed-length values use CHAR/BINARY, variable-length values VARCHAR, and each
 	  numeric column the smallest type that holds its range (Project 1 data dictionary).
 	- ON DELETE is left at the default (reject) wherever a child row is a business
 	  record in its own right; CASCADE or SET NULL is used only where the comment
 	  on that table says why.
+	Branches: none; this file has no CASE or IF.
 */
 
 
 /*
-	Remove any earlier copy of the CROSSFADE database so that the script always
-	starts from an empty database and loads exactly the Project 1 sample data.
+	[B1] DATABASE: start from an empty database
+	Use cases: all (every use case reads this database)
+	Business need: Remove any earlier copy of the CROSSFADE database so that the
+	  script always starts from an empty database and loads exactly the Project 1
+	  sample data.
+	Requirements: Task 1
 */
 DROP DATABASE IF EXISTS crossfade;
 
 
 /*
-	Create the CROSSFADE database. utf8mb4 stores any artist name, track title or
-	listener display name, including accented letters and non-Latin scripts.
+	[B2] DATABASE: create the crossfade database
+	Use cases: all (every use case reads this database)
+	Business need: Create the CROSSFADE database. utf8mb4 stores any artist name,
+	  track title or listener display name, including accented letters and non-Latin
+	  scripts.
+	Requirements: Task 1
 */
 CREATE DATABASE IF NOT EXISTS crossfade DEFAULT CHARACTER SET utf8mb4;
 
@@ -57,14 +85,17 @@ CREATE DATABASE IF NOT EXISTS crossfade DEFAULT CHARACTER SET utf8mb4;
 /* ======================================================================== */
 
 /*
-	[GENRE]: the fixed set of ten musical categories every scoring model produces a
-	probability for. It is the coordinate system listeners use to describe the
-	blend a station should play, so every model output and every station blend
-	refers to a row here instead of free text.
+	[T1] GENRE (entity)
+	Use cases: UC-05, UC-11, UC-12
+	Business need: The fixed set of ten musical categories every scoring model
+	  produces a probability for. It is the coordinate system listeners use to
+	  describe the blend a station should play, so every model output and every
+	  station blend refers to a row here instead of free text. (RA: Genre)
 	- genre_id equals the class index the models output (0 to 9), so a prediction
 	  is stored without translation; the CHECK keeps it inside the fixed set.
 	- name is unique: two genres cannot share a label. VARCHAR(9) fits the longest
 	  label, "classical".
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.genre (
 	genre_id TINYINT UNSIGNED NOT NULL,
@@ -77,14 +108,17 @@ CREATE TABLE IF NOT EXISTS crossfade.genre (
 
 
 /*
-	[ARTIST]: an independent musician or group registered to upload recordings under
-	a direct streaming licence and paid a per-stream royalty. An artist can exist
-	before their first upload.
+	[T2] ARTIST (entity)
+	Use cases: UC-01, UC-02, UC-14, UC-15
+	Business need: An independent musician or group registered to upload recordings
+	  under a direct streaming licence and paid a per-stream royalty. An artist can
+	  exist before their first upload. (RA: Artist)
 	- stage_name is unique because it is how listeners find the artist.
 	- country is CHAR(2): every value is a two-letter ISO 3166-1 code. It is
 	  optional because an artist may not have declared one yet.
 	- payout_rate is in US dollars per qualifying stream, always below one dollar,
 	  so DECIMAL(5,5) holds it exactly; it must be positive.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.artist (
 	artist_id MEDIUMINT UNSIGNED NOT NULL,
@@ -100,11 +134,15 @@ CREATE TABLE IF NOT EXISTS crossfade.artist (
 
 
 /*
-	[LISTENER]: a registered subscriber who streams recordings and creates the
-	stations through which they discover new material.
-	- email is the sign-in address, so it is unique, and the CHECK rejects a value
-	  with no @. VARCHAR(254) is the longest address the email standard allows.
+	[T3] LISTENER (entity)
+	Use cases: UC-06, UC-07, UC-13
+	Business need: A registered subscriber who streams recordings and creates the
+	  stations through which they discover new material. (RA: Listener)
+	- email is the sign-in address, so it is unique (RA: Email). The CHECK rejects
+	  a value with no @ (the Unit 5 slide example; a design check, not an RA rule). VARCHAR(254) is the
+	  longest address the email standard allows.
 	- plan_tier is one of three fixed subscription levels, so it is an ENUM.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.listener (
 	listener_id INT UNSIGNED NOT NULL,
@@ -119,13 +157,16 @@ CREATE TABLE IF NOT EXISTS crossfade.listener (
 
 
 /*
-	[SCORING_MODEL]: one trained and deployed version of the genre classifier.
-	Several versions run at once because they disagree, and that disagreement is
-	itself a signal CROSSFADE uses. The five rows are the real BEARDOWN/FORGE
-	model versions.
+	[T4] SCORING_MODEL (entity)
+	Use cases: UC-08, UC-09
+	Business need: One trained and deployed version of the genre classifier. Several
+	  versions run at once because they disagree, and that disagreement is itself a
+	  signal CROSSFADE uses. The five rows are the real BEARDOWN/FORGE model versions.
+	  (RA: Scoring Model)
 	- version_label is unique: it names the version in reports.
 	- holdout_accuracy is a proportion (0 to 1); embedding_dimension and
 	  segment_length (seconds) must be positive.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.scoring_model (
 	model_id TINYINT UNSIGNED NOT NULL,
@@ -145,13 +186,16 @@ CREATE TABLE IF NOT EXISTS crossfade.scoring_model (
 
 
 /*
-	[TRACK]: a single recording uploaded by an artist (Artist 1:N Track). It is
-	streamable once at least one model has scored it.
+	[T5] TRACK (entity)
+	Use cases: UC-01, UC-03, UC-04, UC-09, UC-11, UC-12, UC-13, UC-14, UC-15
+	Business need: A single recording uploaded by an artist (Artist 1:N Track). It is
+	  streamable once at least one model has scored it. (RA: Track)
 	- artist_id is the artist the royalty is paid to. An artist who has tracks
 	  cannot be deleted (default ON DELETE), because the royalty ledger needs them.
 	- audio_checksum is the 32-byte SHA-256 digest of the audio file, so it is
 	  BINARY(32), and it is unique to reject duplicate uploads.
 	- duration is in whole seconds and must be positive.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.track (
 	track_id INT UNSIGNED NOT NULL,
@@ -170,13 +214,17 @@ CREATE TABLE IF NOT EXISTS crossfade.track (
 
 
 /*
-	[STATION]: a listener's standing description of a region of genre space. It
-	stores a blend and an ambiguity window, not a fixed playlist, so its contents
-	grow with the catalogue (Listener 1:N Station, Scoring Model 1:N Station).
+	[T6] STATION (entity)
+	Use cases: UC-07, UC-08, UC-10, UC-12
+	Business need: A listener's standing description of a region of genre space. It
+	  stores a blend and an ambiguity window, not a fixed playlist, so its contents
+	  grow with the catalogue (Listener 1:N Station, Scoring Model 1:N Station). (RA:
+	  Station)
 	- model_id is the model version the station is evaluated against, so its
 	  contents do not change meaning when another version scores the catalogue.
 	- The ambiguity bounds are on the 0 to 1 posterior-entropy scale, and the
 	  minimum may not exceed the maximum (integrity rule I4).
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.station (
 	station_id INT UNSIGNED NOT NULL,
@@ -198,15 +246,19 @@ CREATE TABLE IF NOT EXISTS crossfade.station (
 
 
 /*
-	[TRACK_SCORE] (associative): the result one scoring model produced for one
-	recording. It resolves Track M:N Scoring Model, so its primary key is the two
-	foreign keys (track_id, model_id): at most one result per recording and model.
+	[T7] TRACK_SCORE (associative)
+	Use cases: UC-04, UC-09, UC-11, UC-12
+	Business need: The result one scoring model produced for one recording. It
+	  resolves Track M:N Scoring Model, so its primary key is the two foreign keys
+	  (track_id, model_id): at most one result per recording and model. (RA: Track
+	  Score)
 	- genre_id is the model's top genre (Genre 1:N Track Score). It stays outside
 	  the key, because one recording and model pair has exactly one top genre.
 	- genre_id, top_probability, posterior_entropy and model_divergence are
 	  derived from the genre_probability rows (integrity rule I3).
 	- model_divergence is NULL while only one model has scored the recording.
 	  segment_variance is a variance of probabilities, so it never exceeds 0.25.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.track_score (
 	track_id INT UNSIGNED NOT NULL,
@@ -232,14 +284,17 @@ CREATE TABLE IF NOT EXISTS crossfade.track_score (
 
 
 /*
-	[GENRE_PROBABILITY] (associative): the probability one model assigned to one
-	genre for one recording. It resolves Track Score M:N Genre and holds the full
-	ten-genre distribution that stations are matched against.
+	[T8] GENRE_PROBABILITY (associative)
+	Use cases: UC-11, UC-12
+	Business need: The probability one model assigned to one genre for one recording.
+	  It resolves Track Score M:N Genre and holds the full ten-genre distribution that
+	  stations are matched against. (RA: Genre Probability)
 	- Primary key: the two-part key of track_score followed by genre_id.
 	- (track_id, model_id) is one composite foreign key to track_score, so a
 	  probability can only exist for a recording and model that have a result.
 	- ON DELETE CASCADE on that key: the ten probabilities are the parts of one
 	  scoring result, so deleting the result deletes them with it.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.genre_probability (
 	track_id INT UNSIGNED NOT NULL,
@@ -257,13 +312,16 @@ CREATE TABLE IF NOT EXISTS crossfade.genre_probability (
 
 
 /*
-	[STATION_BLEND] (associative): the weight one station gives to one genre. It
-	resolves Station M:N Genre, with one weight per row so each value is atomic.
+	[T9] STATION_BLEND (associative)
+	Use cases: UC-10, UC-12
+	Business need: The weight one station gives to one genre. It resolves Station M:N
+	  Genre, with one weight per row so each value is atomic. (RA: Station Blend)
 	- Primary key (station_id, genre_id): one weight per genre per station.
 	- A weight is greater than 0 and at most 1. The weights of one station sum to
 	  1.00 (integrity rule I1), a rule across rows that a CHECK cannot express.
 	- ON DELETE CASCADE on station: a blend is part of its station's definition
 	  and means nothing without it.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.station_blend (
 	station_id INT UNSIGNED NOT NULL,
@@ -280,9 +338,11 @@ CREATE TABLE IF NOT EXISTS crossfade.station_blend (
 
 
 /*
-	[PLAY] (associative): one occasion on which a listener streamed a recording. It
-	resolves Listener M:N Track and is both the taste signal and the billable
-	event the artist royalty is paid on.
+	[T10] PLAY (associative)
+	Use cases: UC-01, UC-07, UC-13, UC-14
+	Business need: One occasion on which a listener streamed a recording. It resolves
+	  Listener M:N Track and is both the taste signal and the billable event the
+	  artist royalty is paid on. (RA: Play; Overview)
 	- Primary key (listener_id, track_id, played_at): a listener streams the same
 	  recording many times, so the UTC start time completes the key, and a
 	  repeated report of the same play is rejected instead of being paid twice.
@@ -294,6 +354,7 @@ CREATE TABLE IF NOT EXISTS crossfade.station_blend (
 	  is the artist's payout_rate at play time for a play of 30 seconds or more,
 	  otherwise 0. Both depend on other tables, so they are set when the play is
 	  recorded, not by a CHECK here.
+	Requirements: Task 1, create the tables
 */
 CREATE TABLE IF NOT EXISTS crossfade.play (
 	listener_id INT UNSIGNED NOT NULL,
@@ -321,9 +382,13 @@ CREATE TABLE IF NOT EXISTS crossfade.play (
 /* ======================================================================== */
 
 /*
-	Load the ten genres. IDs 0 to 9 match the scoring models' output classes
-	(the GTZAN genres); the descriptions are shown to listeners while they
-	compose a station blend.
+	[D1] GENRE: load the sample data
+	Use cases: UC-05, UC-11, UC-12
+	Business need: Load the ten genres. IDs 0 to 9 match the scoring models' output
+	  classes (the GTZAN genres); the descriptions are shown to listeners while they
+	  compose a station blend.
+	Requirements: Task 1, insert the sample data
+	Rows: 10 (Project 1 data.xlsx, sheet 'table records', block 'Genre')
 */
 INSERT INTO crossfade.genre
 	(genre_id, name, description)
@@ -340,8 +405,13 @@ VALUES
 	(9, 'rock',      'Guitar-led songs with a driving backbeat');
 
 /*
-	Load the eight registered artists: the people royalties are paid to. Three are
-	not yet verified, and Saltmarsh Tapes has not declared a country (NULL).
+	[D2] ARTIST: load the sample data
+	Use cases: UC-01, UC-02, UC-14, UC-15
+	Business need: Load the eight registered artists: the people royalties are paid
+	  to. Three are not yet verified, and Saltmarsh Tapes has not declared a country
+	  (NULL).
+	Requirements: Task 1, insert the sample data
+	Rows: 8 (Project 1 data.xlsx, sheet 'table records', block 'Artist')
 */
 INSERT INTO crossfade.artist
 	(artist_id, stage_name, country, joined_date, payout_rate, verified)
@@ -356,8 +426,12 @@ VALUES
 	(1049, 'Kestrel Ave',     'JM', '2026-08-28', 0.0034, 0);
 
 /*
-	Load the eight listeners, covering all three plan tiers, so stations and play
-	history can be tied to subscribers.
+	[D3] LISTENER: load the sample data
+	Use cases: UC-06, UC-07, UC-13
+	Business need: Load the eight listeners, covering all three plan tiers, so
+	  stations and play history can be tied to subscribers.
+	Requirements: Task 1, insert the sample data
+	Rows: 8 (Project 1 data.xlsx, sheet 'table records', block 'Listener')
 */
 INSERT INTO crossfade.listener
 	(listener_id, email, display_name, plan_tier, signup_date)
@@ -372,8 +446,12 @@ VALUES
 	(20938, 'h.ito@example.com',       'hito',    'free',     '2026-08-15');
 
 /*
-	Load the five deployed scoring model versions (the BEARDOWN/FORGE models),
-	which differ in fusion type, embedding width and audio segment length.
+	[D4] SCORING_MODEL: load the sample data
+	Use cases: UC-08, UC-09
+	Business need: Load the five deployed scoring model versions (the BEARDOWN/FORGE
+	  models), which differ in fusion type, embedding width and audio segment length.
+	Requirements: Task 1, insert the sample data
+	Rows: 5 (Project 1 data.xlsx, sheet 'table records', block 'Scoring Model')
 */
 INSERT INTO crossfade.scoring_model
 	(model_id, version_label, fusion_type, embedding_dimension, segment_length, training_corpus, holdout_accuracy, deployed_on)
@@ -385,10 +463,14 @@ VALUES
 	(5, 'beardown_3sec',      'concat', 384, 3,  'GTZAN', 0.7887, '2026-06-23');
 
 /*
-	Load the fifteen recordings in the catalogue. Thirteen are scored; one is
-	awaiting scoring and one was rejected, so the catalogue shows every stage of
-	the upload pipeline. Checksums are written as hexadecimal literals, which
-	MySQL stores as the 32 raw bytes of each SHA-256 digest.
+	[D5] TRACK: load the sample data
+	Use cases: UC-01, UC-03, UC-04, UC-09, UC-11, UC-12, UC-13, UC-14, UC-15
+	Business need: Load the fifteen recordings in the catalogue. Thirteen are scored;
+	  one is awaiting scoring and one was rejected, so the catalogue shows every stage
+	  of the upload pipeline. Checksums are written as hexadecimal literals, which
+	  MySQL stores as the 32 raw bytes of each SHA-256 digest.
+	Requirements: Task 1, insert the sample data
+	Rows: 15 (Project 1 data.xlsx, sheet 'table records', block 'Track')
 */
 INSERT INTO crossfade.track
 	(track_id, artist_id, title, duration, release_date, audio_checksum, ingest_status)
@@ -410,8 +492,12 @@ VALUES
 	(4831, 1048, 'Untitled Loop 7',        48,  '2026-09-22', 0x9261DDFAF151557C46D8A3DFB862D09D196E0BC6A34CFCEA97B5041AAE9D96F7, 'rejected');
 
 /*
-	Load the eight stations: each listener's saved region of genre space, with
-	the model version it is evaluated against and its ambiguity window.
+	[D6] STATION: load the sample data
+	Use cases: UC-07, UC-08, UC-10, UC-12
+	Business need: Load the eight stations: each listener's saved region of genre
+	  space, with the model version it is evaluated against and its ambiguity window.
+	Requirements: Task 1, insert the sample data
+	Rows: 8 (Project 1 data.xlsx, sheet 'table records', block 'Station')
 */
 INSERT INTO crossfade.station
 	(station_id, listener_id, model_id, name, minimum_ambiguity, maximum_ambiguity, created_on)
@@ -426,8 +512,13 @@ VALUES
 	(7717, 20937, 2, 'Blue Hour',         0.2,  0.8,  '2026-08-05');
 
 /*
-	Load the 27 scoring results: one row per recording and model that scored it.
-	Model divergence is NULL where only one model has scored the recording.
+	[D7] TRACK_SCORE: load the sample data
+	Use cases: UC-04, UC-09, UC-11, UC-12
+	Business need: Load the 27 scoring results: one row per recording and model that
+	  scored it. Model divergence is NULL where only one model has scored the
+	  recording.
+	Requirements: Task 1, insert the sample data
+	Rows: 27 (Project 1 data.xlsx, sheet 'table records', block 'Track Score')
 */
 INSERT INTO crossfade.track_score
 	(track_id, model_id, genre_id, top_probability, posterior_entropy, model_divergence, segment_variance, scored_on)
@@ -461,9 +552,13 @@ VALUES
 	(4829, 4, 0, 0.5363, 0.4989, 0.0258, 0.0036, '2026-06-09 19:02:52');
 
 /*
-	Load the 270 genre probabilities: ten per scoring result, one for each genre,
-	summing to one within rounding (integrity rule I2). These are the full
-	distributions that place each recording between genres.
+	[D8] GENRE_PROBABILITY: load the sample data
+	Use cases: UC-11, UC-12
+	Business need: Load the 270 genre probabilities: ten per scoring result, one for
+	  each genre, summing to one within rounding (integrity rule I2). These are the
+	  full distributions that place each recording between genres.
+	Requirements: Task 1, insert the sample data
+	Rows: 270 (Project 1 data.xlsx, sheet 'table records', block 'Genre Probability')
 */
 INSERT INTO crossfade.genre_probability
 	(track_id, model_id, genre_id, probability)
@@ -740,8 +835,12 @@ VALUES
 	(4829, 4, 9, 0.3526);
 
 /*
-	Load the 19 station blend weights. The weights of each station sum to 1.00
-	(integrity rule I1).
+	[D9] STATION_BLEND: load the sample data
+	Use cases: UC-10, UC-12
+	Business need: Load the 19 station blend weights. The weights of each station sum
+	  to 1.00 (integrity rule I1).
+	Requirements: Task 1, insert the sample data
+	Rows: 19 (Project 1 data.xlsx, sheet 'table records', block 'Station Blend')
 */
 INSERT INTO crossfade.station_blend
 	(station_id, genre_id, weight)
@@ -767,9 +866,14 @@ VALUES
 	(7717, 0, 1);
 
 /*
-	Load the 31 plays: the listening history and royalty ledger. Station is NULL
-	where the listener chose the recording directly; reaction is NULL where no
-	explicit save or skip was given; royalty is 0 for plays under 30 seconds.
+	[D10] PLAY: load the sample data
+	Use cases: UC-01, UC-07, UC-13, UC-14
+	Business need: Load the 31 plays: the listening history and royalty ledger.
+	  Station is NULL where the listener chose the recording directly; reaction is
+	  NULL where no explicit save or skip was given; royalty is 0 for plays under 30
+	  seconds.
+	Requirements: Task 1, insert the sample data
+	Rows: 31 (Project 1 data.xlsx, sheet 'table records', block 'Play')
 */
 INSERT INTO crossfade.play
 	(listener_id, track_id, played_at, station_id, seconds_played, completed, reaction, royalty_amount)

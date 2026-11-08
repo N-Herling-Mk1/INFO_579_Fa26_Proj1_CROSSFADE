@@ -86,7 +86,7 @@ EDITS = [
      "HAVING MAX(s.scored_on)", "HAVING MIN(s.scored_on)"),
     ("m6-rejected-included", "M6", "rejected recordings queued for rescoring (release status not checked)",
      "WHERE t.ingest_status = 'scored'\nGROUP BY t.track_id, t.title", "GROUP BY t.track_id, t.title"),
-    ("m6-days-from-first-deployment", "M6", "days counted from the first deployment instead of the one in service",
+    ("m6-days-from-first-deployment", "M6", "days counted from the first deployment instead of the newest one",
      "DATEDIFF((SELECT MAX(n.deployed_on)", "DATEDIFF((SELECT MIN(n.deployed_on)"),
     ("m6-versions-alphabetical", "M6", "the versions listed alphabetically instead of oldest first",
      "ORDER BY m.deployed_on, m.model_id SEPARATOR", "ORDER BY m.version_label SEPARATOR"),

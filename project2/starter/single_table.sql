@@ -39,41 +39,56 @@
 	  Output:           its result columns, in order
 	project2/tests/test_single_table.py reads these fields and checks each query
 	against an independent answer computed from the Project 1 data.
-	EXPECTED TO FAIL: the last statement, [E1], is a write the database must
-	refuse (UC-15, duplicate upload). Running this file ends with that error, by
-	design; every query above it has already run. See the [E1] comment.
+	DISABLED CHECK: the last statement, [E1], is a write the database must refuse
+	(UC-15, duplicate upload). It is commented out, so this file runs without
+	error; it is not a brief requirement. The [E1] comment says how to run it.
 
 	***** Re: Class notes and syntax *****
 	Brief requirements (Task 2), and where each is met:
 	  (a) single-row functions ........ S1 S2 S3 S4 S5 S6 S7
-	  (b) aggregate functions ......... S4 S6 S7
+	  (b) aggregate functions ......... S3 S4 S6 S7
 	  (c) sorting ..................... S1 S2 S3 S4 S5 S6 S7
 	  (d) first N results ............. S2 S5
 	  (e) selection control (CASE, IF)  S1 S3 S6 S7
-	"Selection control" follows the Unit 8 slides: CASE and IF. IFNULL is used too,
-	but the slides class it as a NULL-handling function, so it is listed apart
-	([IFNULL: NULL handling]) and never counted as (a) or (e). Arithmetic uses the
+	"Selection control" follows the Unit 8 slides: CASE and IF. Arithmetic uses the
 	Unit 6 operators (DIV, MOD).
+	Course material: CONCAT, LPAD, ROUND, DATEDIFF and the aggregates from Unit 6;
+	CASE, IF and scalar subqueries from Unit 8.
+	Beyond the slides: CHAR_LENGTH (S3). Unit 6 shows LENGTH, which counts bytes;
+	an accented letter takes two bytes in utf8mb4, and the RA's one-line limit
+	for a description is 80 characters, so S3 counts characters.
+	Branches: every CASE/IF branch fires on the sample data except one: S7's "on time"
+	branch, the healthy state for an unscored upload, which the sample data does
+	not contain (its one unscored upload is already late).
 */
 
 
 /*
-	[S1] ARTIST: royalty payment run
+	[S1] ARTIST: royalty run readiness
 	Use cases: UC-02, UC-01
-	Business need: CROSSFADE pays independent artists a per-stream royalty, and pays
-	  only verified artists through a channel chosen by their country (RA: Overview;
-	  Artist: Payout Rate, Country, Verified).
-	Business question: Who can be paid in this royalty run, who is on hold and why,
-	and what does each artist earn per 1,000 qualifying streams?
-	- Payments go out through a channel chosen by the artist's country, and only to
-	  artists whose identity and licence rights are verified (RA: Country, Verified).
-	  An artist failing either check is held; the CASE names the reason.
+	Business need: CROSSFADE pays every artist a per-stream royalty (RA: Overview;
+	  Artist). Two artist fields bear on whether a payment can go out: Verified,
+	  "whether the service has confirmed the artist's identity and their right to
+	  licence the material they upload", and Country, used "to determine which
+	  royalty payment channels and tax treatments apply" (RA: Artist).
+	Business question: Is each artist ready for this royalty run, and if not,
+	which check is outstanding?
+	- Hold rule (business policy, not stated in the RA): a payment needs a
+	  confirmed licence right and a country to route it through, so an artist
+	  missing either is held. The RA defines the two fields; using them to gate
+	  payment is the policy built on them.
+	- Each check has its own column and its own IF, so an artist failing both
+	  shows both. A single CASE with ordered WHENs would report only the first
+	  failure: Saltmarsh Tapes is unverified and has no country, so its missing
+	  country would never be shown.
+	- run_status (CASE) is 'ready' only when both checks pass.
 	- Payout is quoted per 1,000 streams, the figure artists compare, from the
 	  per-stream payout_rate. Days under licence counts from joined_date, the day
 	  the artist's licence took effect (RA: Joined Date).
-	- Payable artists first, then by rate, highest first; artist_id breaks ties.
-	Requirements: (a) CONCAT, ROUND, DATEDIFF  (c) ORDER BY  (e) CASE  [IFNULL: NULL handling]
-	Output: artist_id, payee, usd_per_1000_streams, days_under_licence, payment_status
+	- Ready artists first ('ready' sorts after 'held', so DESC), then by rate,
+	  highest first; artist_id breaks ties.
+	Requirements: (a) ROUND, DATEDIFF  (c) ORDER BY  (e) IF, CASE
+	Output: artist_id, stage_name, usd_per_1000_streams, days_under_licence, licence_check, payment_country, run_status
 */
 -- [S1] write one SELECT that reads crossfade.artist only, with the Output columns in order; end it with ;
 
@@ -98,23 +113,26 @@
 
 
 /*
-	[S3] GENRE: the blend-composer legend
+	[S3] GENRE: blend-composer legend layout
 	Use cases: UC-05
 	Business need: listeners compose station blends from the genre legend, which
-	  shows them each genre's description (RA: Genre).
-	Business question: Is every genre ready to show in the blend composer, listed in
-	the order the scoring models output them?
-	- Listeners compose a station blend from this legend, and the RA says each
-	  genre's description is shown to them while they do; description is the one
-	  optional column, so a genre without one must be flagged before it reaches
-	  the composer.
-	- The legend line is the label followed by its description, as the composer
-	  shows a genre; labels keep the form listeners know them by (RA: Name, e.g.
-	  "jazz, metal or reggae").
+	  shows each genre's label and its description (RA: Genre). The RA sizes both
+	  for that display: the ten labels are fixed and "the longest, classical, has
+	  nine characters" (RA: Name), and a description is "kept to one line of 80
+	  characters" (RA: Description).
+	Business question: How wide must the composer's label column be, which genre
+	sets that width, and how much of its one 80-character line does each
+	description use?
+	- The label column must fit the longest label. The scalar subquery finds the
+	  longest name in the table and IF marks the genre that sets the width, so the
+	  width comes from the data rather than being hard-coded to classical.
+	- chars_left_on_line = 80 minus the description's length: the room left on its
+	  one line (RA: Description). A genre with no description (the column is
+	  optional) shows NULL in both description columns.
 	- genre_id is the models' output class index (RA: Genre ID), so ordering by it
 	  lists the genres exactly as every probability vector does.
-	Requirements: (a) CONCAT  (c) ORDER BY  (e) IF  [IFNULL: NULL handling]
-	Output: model_class_index, label, legend_line, composer_status
+	Requirements: (a) CHAR_LENGTH  (b) MAX  (c) ORDER BY  (e) IF
+	Output: model_class_index, label, label_chars, label_column, description_chars, chars_left_on_line
 */
 -- [S3] write one SELECT that reads crossfade.genre only, with the Output columns in order; end it with ;
 
@@ -182,8 +200,9 @@
 /*
 	[S7] TRACK: the upload pipeline
 	Use cases: UC-04
-	Business need: every upload is scored before it can be streamed (RA: Track:
-	  Ingest Status), so a backlog in the upload pipeline must be visible.
+	Business need: every upload is scored before it can be streamed (RA: Track;
+	  its stages: Ingest Status), so a backlog in the upload pipeline must be
+	  visible.
 	Business question: How many recordings sit at each stage of the upload pipeline,
 	and is scoring keeping up with their release dates?
 	- Every upload moves through awaiting scoring -> scored or rejected (RA: Ingest
@@ -203,13 +222,16 @@
 
 
 /*
-	[E1] TRACK: a duplicate upload is refused -- EXPECTED TO FAIL
-	EXPECTED RESULT: MySQL refuses this statement with
+	[E1] TRACK: a duplicate upload is refused -- DISABLED (commented out)
+	STATUS: the INSERT below sits inside its own block comment, so running this
+	file does not execute it and the file finishes without error. It is kept
+	because it shows the database itself enforcing a business rule; it is not a
+	brief requirement and counts toward none of (a)-(e).
+	TO RUN IT: delete the comment-marker lines directly above and below the
+	INSERT, then run that statement on its own.
+	EXPECTED RESULT: MySQL refuses the statement with
 	  Error Code: 1062. Duplicate entry '...' for key 'track.uq_track_audio_checksum'
-	and crossfade.track keeps its 15 rows. That error is the correct answer. This
-	is the last statement in the file because an error stops a script run; every
-	query above has already run. Not a retrieval query, so it counts toward none
-	of (a)-(e); it shows the database itself enforcing a business rule.
+	and crossfade.track keeps its 15 rows. That error is the correct answer.
 	Use cases: UC-15
 	Business need: a re-upload of the same audio file must never become a second
 	  catalogue entry earning a second royalty stream; the RA keeps the audio
@@ -221,8 +243,10 @@
 	  the refusal comes from the database, not from application code.
 	- The statement re-uploads Low Tide Signal (track 4817) under a new track_id by
 	  copying its checksum, exactly what an upload of the same file computes.
-	- Error handling (catching 1062 and answering the uploader) belongs to
-	  routines.sql: see the plan in project2/README.md.
+	- Error handling (catching 1062 and answering the uploader) is done by
+	  upload_track (P2) in routines.sql.
 	Expects: 1062 uq_track_audio_checksum
 */
--- [E1] write the statement on crossfade.track that MySQL must refuse (see Expects); end it with ;
+/*
+-- [E1] write the statement on crossfade.track that MySQL must refuse (see Expects) here, inside this block comment, ending it with a semicolon; keep both comment markers
+*/

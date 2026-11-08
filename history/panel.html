@@ -297,9 +297,9 @@ table.pv-t td.n, table.pv-t th.n { text-align: right; font-family: var(--stm); w
         <tr><td class="m">P1</td><td class="m">data.xlsx</td><td><span class="st ok">submitted</span></td><td>mk6, from <code>gen_data.py</code>. Unchanged since; Project 2 loads it as handed in.</td></tr>
         <tr><td class="m">P1</td><td class="m">physical_data_model.png</td><td><span class="st ok">submitted</span></td><td>mk15, reverse-engineered in Workbench from the generated schema; the earlier draft is kept as &ldquo;mk1 draft&rdquo; with what it missed.</td></tr>
         <tr><td class="m">P2</td><td class="m">database_implementation.sql</td><td><span class="st ok">done</span></td><td>Schema with named constraints and the 401 sample rows; checked by <code>check_implementation.py</code>.</td></tr>
-        <tr><td class="m">P2</td><td class="m">single_table.sql</td><td><span class="st ok">done</span></td><td>Seven single-table queries tied to Project 1 use cases, plus one expected to fail (a duplicate upload, error 1062). 67 tests.</td></tr>
-        <tr><td class="m">P2</td><td class="m">multiple_table.sql</td><td><span class="st wip">in progress</span></td><td>Joins, a set operation, a subquery and a <code>WITH</code> query.</td></tr>
-        <tr><td class="m">P2</td><td class="m">routines.sql</td><td><span class="st wip">in progress</span></td><td>Stored procedures and functions, with an error handler for duplicate keys.</td></tr>
+        <tr><td class="m">P2</td><td class="m">single_table.sql</td><td><span class="st ok">done</span></td><td>Seven single-table queries tied to Project 1 use cases, plus one expected to fail (a duplicate upload, error 1062), kept disabled so the file runs clean. 71 tests.</td></tr>
+        <tr><td class="m">P2</td><td class="m">multiple_table.sql</td><td><span class="st ok">done</span></td><td>Seven queries: joins through associative tables, a <code>LEFT OUTER JOIN</code>, a <code>UNION</code>, an <code>IN</code> subquery and two <code>WITH</code> queries. 80 tests.</td></tr>
+        <tr><td class="m">P2</td><td class="m">routines.sql</td><td><span class="st ok">done</span></td><td>One function and two procedures: the royalty of a play, recording a play (with <code>SIGNAL</code>), and uploading a recording with a handler for duplicate uploads (error 1062). 50 tests.</td></tr>
         <tr><td class="m">P3</td><td class="m">&ndash;</td><td><span class="st idle">not started</span></td><td>NoSQL version of the same business, due Dec 13.</td></tr>
       </tbody>
     </table>

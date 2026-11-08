@@ -6,7 +6,7 @@
 <title>Deliverable</title>
 <link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
-<link rel="stylesheet" href="../../assets/site.css?v=cb25b6e1">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
 <script src="../data/deliverables.js"></script>
 </head>
 <body>
@@ -107,7 +107,7 @@
           '<p class="res-question">' + esc(q.question || "") + "</p>" +
           '<p class="note">expects <code>' + esc(q.expects) + "</code> &middot; MySQL said <code>" + esc(got) + "</code></p>" +
           '<div class="prose"><pre><code>' + esc(q.sql) + "</code></pre></div>" +
-          '<p class="note">Run inside a transaction that is rolled back; the test also checks <code>' + esc(q.table) + "</code> is unchanged. Source: the end of <code>single_table.sql</code>, marked EXPECTED TO FAIL.</p></div>";
+          '<p class="note">Run inside a transaction that is rolled back; the test also checks <code>' + esc(q.table) + "</code> is unchanged. Source: the end of <code>single_table.sql</code>, kept DISABLED (commented out) so the file runs clean; the test runs it on its own.</p></div>";
         return;
       }
       h += '<div class="res-q"><div class="res-head"><b>[' + tag + "] " + esc(q.table || q.title || "") + "</b> " +

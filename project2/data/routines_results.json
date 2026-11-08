@@ -1,6 +1,6 @@
 {
  "file": "routines.sql",
- "generated": "2026-11-07T23:20:08",
+ "generated": "2026-11-08T13:24:10",
  "passed": 50,
  "failed": 0,
  "queries": {
@@ -192,7 +192,7 @@
     "UC-15",
     "UC-04"
    ],
-   "need": "Artists upload recordings \"under a direct streaming licence\" (RA: Artist), and the audio checksum is \"used to detect duplicate uploads\" (RA: Track.audio_checksum). A duplicate upload is an everyday event, not a failure: the artist should be told which recording is already in the catalogue, and a batch of uploads should carry on. [E1] in single_table.sql shows the raw refusal (error 1062); this procedure is the business answering it.",
+   "need": "Artists upload recordings \"under a direct streaming licence\" (RA: Artist), and the audio checksum is \"used to detect duplicate uploads\" (RA: Track.audio_checksum). A duplicate upload is an everyday event, not a failure: the artist should be told which recording is already in the catalogue, and a batch of uploads should carry on. [E1] in single_table.sql (kept disabled there) shows the raw refusal (error 1062); this procedure is the business answering it.",
    "does": [
     "Refuses, with SIGNAL SQLSTATE '45000', an upload from an artist who is not registered.",
     "Gives the recording the next track ID and inserts it with ingest status 'awaiting scoring', the first stage of the upload pipeline (RA: a recording has no score \"while it is awaiting scoring\"); scoring moves it on (rule I5). The release date may be later than the upload (RA: Track.release_date).",
@@ -1497,16 +1497,16 @@
    ],
    "expected": [
     [
-     "2026-11-08 06:20:07",
+     "2026-11-08 20:24:09",
      "between",
-     "2026-11-08 06:20:07"
+     "2026-11-08 20:24:09"
     ]
    ],
    "got": [
     [
-     "2026-11-08 06:20:07",
-     "2026-11-08 06:20:07",
-     "2026-11-08 06:20:07"
+     "2026-11-08 20:24:09",
+     "2026-11-08 20:24:09",
+     "2026-11-08 20:24:09"
     ]
    ],
    "doc": "With no start time given, the play is recorded at the current UTC time, whatever the session's time zone.\nWhy: \"Played At is recorded in UTC\" (RA), so a daylight-saving change can never repeat a key. The session is\nput in Arizona time (UTC-7) first, so local time and UTC differ by seven hours.\nExpect: played_at falls between UTC_TIMESTAMP() just before and just after the call.",

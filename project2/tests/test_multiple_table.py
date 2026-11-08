@@ -522,7 +522,7 @@ def dist(track, model, probs):
 
 
 def test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date(tx, q, data):
-    """A recording scored by the version now in service no longer needs recomputing, whatever its older results.
+    """A recording scored since the newest version was deployed no longer needs recomputing, whatever its older results.
     Why: only the newest result matters; the sample's oldest stale recording (4819) is rescored here.
     Expect: beardown_3sec (model 5) scores 4819 on 2026-07-01: 4819 leaves the list, which keeps the other 8."""
     t = copy.deepcopy(data)

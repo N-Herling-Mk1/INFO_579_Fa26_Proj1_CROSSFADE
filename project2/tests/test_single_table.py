@@ -10,8 +10,9 @@ Four layers:
   behaviour    logic the sample data never exercises: a row is added or changed inside a
                transaction, the query is checked, and everything is rolled back.
   errors       use cases whose right answer is a refusal: the [E#] statements at the end of
-               single_table.sql, marked EXPECTED TO FAIL. MySQL must raise exactly the expected error and
-               leave the data unchanged.
+               single_table.sql, kept DISABLED (commented out) so the file runs clean. Each must stay
+               disabled; run on its own, MySQL must raise exactly the expected error and leave the data
+               unchanged.
   coverage     the file as a whole: every non-associative table queried, every requirement (a)-(e)
                met at least twice, every single-table use case answered (by a query or an expected
                error), tags unique and in order.
@@ -283,17 +284,31 @@ def check(cur, query, tables):
     return got
 
 
-def test_s1_verified_artist_without_country_is_held(tx, q, data):
-    """A verified artist with no payment country is held, not paid.
-    Why: the sample data never reaches this CASE branch (its one artist with no country is also unverified,
-    and the first WHEN wins).
-    Expect: artist 9001 reads 'HOLD: no payment country', payee 'Zero Country (--)'."""
+def test_s1_verified_artist_without_country_is_held_for_country_alone(tx, q, data):
+    """A verified artist with no payment country is held, and the country is the only reason shown.
+    Why: the sample's one artist with no country (Saltmarsh Tapes) is also unverified, so the data never shows a
+    licence that passes while the country fails. A run_status that ignored country would pass the sample data.
+    Expect: artist 9001 reads licence 'confirmed', payment_country 'HOLD: no country', run_status 'held'."""
     t = copy.deepcopy(data)
     add(tx, t, "artist", {"artist_id": 9001, "stage_name": "Zero Country", "country": None,
                           "joined_date": "2026-09-01", "payout_rate": "0.0020", "verified": 1})
     rows = check(tx, q["S1"], t)
     row = [r for r in rows if r[0] == 9001][0]
-    assert row[4] == "HOLD: no payment country" and row[1] == "Zero Country (--)"
+    assert row[4:] == ("confirmed", "HOLD: no country", "held")
+
+
+def test_s1_held_artist_never_outranks_a_ready_one(tx, q, data):
+    """A held artist with the highest rate in the catalogue is still listed after every ready artist.
+    Why: ready-first must decide the order before rate does; in the sample data no held artist out-earns them all.
+    Expect: artist 9002 (unverified, 0.0090 per stream, the top rate) comes after all five ready artists, first
+    among the held."""
+    t = copy.deepcopy(data)
+    add(tx, t, "artist", {"artist_id": 9002, "stage_name": "Top Rate Unverified", "country": "US",
+                          "joined_date": "2026-09-01", "payout_rate": "0.0090", "verified": 0})
+    rows = check(tx, q["S1"], t)
+    status = [r[6] for r in rows]
+    assert status == sorted(status, key=lambda s: s != "ready")          # every 'ready' before every 'held'
+    assert rows[status.index("held")][0] == 9002
 
 
 def test_s1_equal_rates_break_ties_on_artist_id(tx, q, data):
@@ -341,15 +356,40 @@ def test_s2_shelf_never_holds_more_than_five(tx, q, data):
     assert len(rows) == 5 and rows[0][0] == 9202
 
 
-def test_s3_genre_without_description_is_hidden(tx, q, data):
-    """A genre with no description is flagged to be hidden from the blend composer.
-    Why: every genre in the sample data has a description, so the HIDE branch is never reached.
-    Expect: genre 9 (rock) shows 'rock: (no description)' and 'HIDE: no description for the composer'."""
+def test_s3_genre_without_description_has_no_line_figures(tx, q, data):
+    """A genre with no description shows NULL for its description length and room left, and keeps its label row.
+    Why: description is the one optional genre column, and every genre in the sample data has one.
+    Expect: genre 9 (rock) reads label_chars 4, 'fits', then NULL, NULL."""
     t = copy.deepcopy(data)
     change(tx, "UPDATE genre SET description = NULL WHERE genre_id = 9")
     [g for g in t["genre"]["rows"] if g["genre_id"] == "9"][0]["description"] = None
     rows = check(tx, q["S3"], t)
-    assert rows[9][2:] == ("rock: (no description)", "HIDE: no description for the composer")
+    assert rows[9][1:] == ("rock", 4, "fits", None, None)
+
+
+def test_s3_label_width_follows_the_data_and_ties_share_it(tx, q, data):
+    """The genre that sets the label column width is found from the data, and genres tied on length all set it.
+    Why: in the sample data classical (9) is the one longest label, so a width hard-coded to 9, or a query that
+    marks only one row, would pass.
+    Expect: with classical renamed 'classic' (7), the widest label is 7 and both classic and country set the width."""
+    t = copy.deepcopy(data)
+    change(tx, "UPDATE genre SET name = 'classic' WHERE genre_id = 1")
+    [g for g in t["genre"]["rows"] if g["genre_id"] == "1"][0]["name"] = "classic"
+    rows = check(tx, q["S3"], t)
+    assert [r[1] for r in rows if r[3] == "sets the column width"] == ["classic", "country"]
+
+
+def test_s3_description_length_counts_characters_not_bytes(tx, q, data):
+    """Description length is counted in characters, the unit of the RA's 80-character line, not in bytes.
+    Why: every sample description is plain ASCII, where characters and bytes agree; utf8mb4 stores an accented
+    letter in two bytes, so LENGTH() would over-count.
+    Expect: a jazz description with three accented letters reads 54 characters (57 bytes), 26 left on the line."""
+    t = copy.deepcopy(data)
+    text = "Bossa nova, samba-can\u00e7\u00e3o and m\u00fasica popular brasileira"
+    change(tx, f"UPDATE genre SET description = '{text}' WHERE genre_id = 5")
+    [g for g in t["genre"]["rows"] if g["genre_id"] == "5"][0]["description"] = text
+    rows = check(tx, q["S3"], t)
+    assert rows[5][4:] == (54, 26)
 
 
 def test_s4_tier_with_no_listeners_is_absent(tx, q, data):
@@ -440,9 +480,23 @@ def test_s7_release_due_on_the_report_date_is_late(tx, q, data):
 
 
 # ============================================================================ expected errors
+def test_error_statement_is_disabled(error_case, pytestconfig):
+    """An [E#] statement is kept commented out (DISABLED), so running single_table.sql never stops on it.
+    Why: the file is a deliverable that must run clean from top to bottom; the refusal is still tested below, by
+    running the statement on its own inside a rolled-back transaction.
+    Checks: the statement was found as a disabled one, and the script splitter (what a run executes) does not see it."""
+    from conftest import split_sql, find_file
+    e = error_case
+    assert e.disabled, (f"[{e.tag}] is active: a script run would end on its error. Put the statement in its own "
+                        f"/* */ block right after its comment and say DISABLED in the comment")
+    executed = [s for _, s in split_sql(find_file(pytestconfig, "sql").read_text(encoding="utf-8"))]
+    assert e.sql not in executed, f"[{e.tag}] would still execute in a script run"
+
+
 def test_expected_error_is_raised(error_case, db, data, use_cases):
     """The database refuses the write with exactly the expected error, and nothing changes.
-    The [E#] statements sit at the end of single_table.sql; each answers a use case marked expectsError."""
+    The [E#] statements sit, disabled, at the end of single_table.sql; each answers a use case marked expectsError.
+    The test runs the statement on its own, exactly as it would run if uncommented."""
     import pymysql
     e = error_case
     assert e.tag and e.tag.startswith("E"), "error statements are tagged [E#]"
@@ -468,7 +522,7 @@ def test_expected_error_is_raised(error_case, db, data, use_cases):
     db.rollback()
     from conftest import record
     record(e.tag, table=table, use_cases=e.use_cases, question=e.question, need=e.need, sql=e.sql, kind="expected_error",
-           expects=f"{code_} {constraint}", got=(f"{got.args[0]} {got.args[1]}" if got else "no error"))
+           disabled=e.disabled, expects=f"{code_} {constraint}", got=(f"{got.args[0]} {got.args[1]}" if got else "no error"))
     assert got is not None, "the statement succeeded; it must be refused"
     assert got.args[0] == code_, f"error {got.args[0]} ({got.args[1]}), expected {code_}"
     assert constraint in str(got.args[1]), f"error names {got.args[1]!r}, expected {constraint}"
@@ -506,8 +560,8 @@ def test_every_single_table_use_case_is_answered(all_statements, use_cases):
 
 
 def test_tags_are_unique_and_in_order(all_statements):
-    """Queries S1, S2, ... in order, then the EXPECTED TO FAIL statements E1, E2, ... last: an error stops a
-    script run, so nothing may come after one."""
+    """Queries S1, S2, ... in order, then the disabled error statements E1, E2, ... last (parse_queries lists them
+    after every statement a run executes)."""
     tags = [x.tag for x in all_statements]
     s = [t for t in tags if t and t[0] == "S"]
     e = [t for t in tags if t and t[0] == "E"]

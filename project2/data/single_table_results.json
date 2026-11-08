@@ -1,7 +1,7 @@
 {
  "file": "single_table.sql",
- "generated": "2026-11-07T23:20:08",
- "passed": 67,
+ "generated": "2026-11-08T13:24:10",
+ "passed": 71,
  "failed": 0,
  "queries": {
   "S1": {
@@ -10,8 +10,8 @@
     "UC-02",
     "UC-01"
    ],
-   "question": "Who can be paid in this royalty run, who is on hold and why, and what does each artist earn per 1,000 qualifying streams?",
-   "need": "CROSSFADE pays independent artists a per-stream royalty, and pays only verified artists through a channel chosen by their country (RA: Overview; Artist: Payout Rate, Country, Verified).",
+   "question": "Is each artist ready for this royalty run, and if not, which check is outstanding?",
+   "need": "CROSSFADE pays every artist a per-stream royalty (RA: Overview; Artist). Two artist fields bear on whether a payment can go out: Verified, \"whether the service has confirmed the artist's identity and their right to licence the material they upload\", and Country, used \"to determine which royalty payment channels and tax treatments apply\" (RA: Artist).",
    "declared": [
     "a",
     "c",
@@ -19,12 +19,14 @@
    ],
    "output": [
     "artist_id",
-    "payee",
+    "stage_name",
     "usd_per_1000_streams",
     "days_under_licence",
-    "payment_status"
+    "licence_check",
+    "payment_country",
+    "run_status"
    ],
-   "sql": "SELECT artist_id,\n       CONCAT(stage_name, ' (', IFNULL(country, '--'), ')') AS payee,\n       ROUND(payout_rate * 1000, 2) AS usd_per_1000_streams,\n       DATEDIFF('2026-09-30', joined_date) AS days_under_licence,\n       CASE\n           WHEN verified = 0 THEN 'HOLD: identity not verified'\n           WHEN country IS NULL THEN 'HOLD: no payment country'\n           ELSE 'PAYABLE'\n       END AS payment_status\nFROM crossfade.artist\nORDER BY CASE WHEN verified = 1 AND country IS NOT NULL THEN 0 ELSE 1 END,\n         payout_rate DESC,\n         artist_id",
+   "sql": "SELECT artist_id,\n       stage_name,\n       ROUND(payout_rate * 1000, 2) AS usd_per_1000_streams,\n       DATEDIFF('2026-09-30', joined_date) AS days_under_licence,\n       IF(verified = 1, 'confirmed', 'HOLD: not confirmed') AS licence_check,\n       IF(country IS NULL, 'HOLD: no country', country) AS payment_country,\n       CASE\n           WHEN verified = 1 AND country IS NOT NULL THEN 'ready'\n           ELSE 'held'\n       END AS run_status\nFROM crossfade.artist\nORDER BY run_status DESC,\n         payout_rate DESC,\n         artist_id",
    "detected": [
     "a",
     "c",
@@ -40,133 +42,169 @@
    ],
    "columns_out": [
     "artist_id",
-    "payee",
+    "stage_name",
     "usd_per_1000_streams",
     "days_under_licence",
-    "payment_status"
+    "licence_check",
+    "payment_country",
+    "run_status"
    ],
    "rows": [
     [
      "1042",
-     "Velvet Static (US)",
+     "Velvet Static",
      "4.00",
      "200",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1044",
-     "Low Orbit Choir (CA)",
+     "Low Orbit Choir",
      "3.80",
      "239",
-     "PAYABLE"
+     "confirmed",
+     "CA",
+     "ready"
     ],
     [
      "1046",
-     "Ochre Parade (MX)",
+     "Ochre Parade",
      "3.60",
      "172",
-     "PAYABLE"
+     "confirmed",
+     "MX",
+     "ready"
     ],
     [
      "1043",
-     "Mara Quell (GB)",
+     "Mara Quell",
      "3.50",
      "253",
-     "PAYABLE"
+     "confirmed",
+     "GB",
+     "ready"
     ],
     [
      "1047",
-     "Juno Fleet (DE)",
+     "Juno Fleet",
      "3.00",
      "151",
-     "PAYABLE"
+     "confirmed",
+     "DE",
+     "ready"
     ],
     [
      "1049",
-     "Kestrel Ave (JM)",
+     "Kestrel Ave",
      "3.40",
      "33",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "JM",
+     "held"
     ],
     [
      "1045",
-     "Tin Harbour (AU)",
+     "Tin Harbour",
      "3.20",
      "215",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "AU",
+     "held"
     ],
     [
      "1048",
-     "Saltmarsh Tapes (--)",
+     "Saltmarsh Tapes",
      "3.00",
      "134",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
     ]
    ],
    "expected": {
     "columns": [
      "artist_id",
-     "payee",
+     "stage_name",
      "usd_per_1000_streams",
      "days_under_licence",
-     "payment_status"
+     "licence_check",
+     "payment_country",
+     "run_status"
     ],
     "rows": [
      [
       "1042",
-      "Velvet Static (US)",
+      "Velvet Static",
       "4.00",
       "200",
-      "PAYABLE"
+      "confirmed",
+      "US",
+      "ready"
      ],
      [
       "1044",
-      "Low Orbit Choir (CA)",
+      "Low Orbit Choir",
       "3.80",
       "239",
-      "PAYABLE"
+      "confirmed",
+      "CA",
+      "ready"
      ],
      [
       "1046",
-      "Ochre Parade (MX)",
+      "Ochre Parade",
       "3.60",
       "172",
-      "PAYABLE"
+      "confirmed",
+      "MX",
+      "ready"
      ],
      [
       "1043",
-      "Mara Quell (GB)",
+      "Mara Quell",
       "3.50",
       "253",
-      "PAYABLE"
+      "confirmed",
+      "GB",
+      "ready"
      ],
      [
       "1047",
-      "Juno Fleet (DE)",
+      "Juno Fleet",
       "3.00",
       "151",
-      "PAYABLE"
+      "confirmed",
+      "DE",
+      "ready"
      ],
      [
       "1049",
-      "Kestrel Ave (JM)",
+      "Kestrel Ave",
       "3.40",
       "33",
-      "HOLD: identity not verified"
+      "HOLD: not confirmed",
+      "JM",
+      "held"
      ],
      [
       "1045",
-      "Tin Harbour (AU)",
+      "Tin Harbour",
       "3.20",
       "215",
-      "HOLD: identity not verified"
+      "HOLD: not confirmed",
+      "AU",
+      "held"
      ],
      [
       "1048",
-      "Saltmarsh Tapes (--)",
+      "Saltmarsh Tapes",
       "3.00",
       "134",
-      "HOLD: identity not verified"
+      "HOLD: not confirmed",
+      "HOLD: no country",
+      "held"
      ]
     ]
    }
@@ -299,22 +337,26 @@
    "use_cases": [
     "UC-05"
    ],
-   "question": "Is every genre ready to show in the blend composer, listed in the order the scoring models output them?",
-   "need": "listeners compose station blends from the genre legend, which shows them each genre's description (RA: Genre).",
+   "question": "How wide must the composer's label column be, which genre sets that width, and how much of its one 80-character line does each description use?",
+   "need": "listeners compose station blends from the genre legend, which shows each genre's label and its description (RA: Genre). The RA sizes both for that display: the ten labels are fixed and \"the longest, classical, has nine characters\" (RA: Name), and a description is \"kept to one line of 80 characters\" (RA: Description).",
    "declared": [
     "a",
+    "b",
     "c",
     "e"
    ],
    "output": [
     "model_class_index",
     "label",
-    "legend_line",
-    "composer_status"
+    "label_chars",
+    "label_column",
+    "description_chars",
+    "chars_left_on_line"
    ],
-   "sql": "SELECT genre_id AS model_class_index,\n       name AS label,\n       CONCAT(name, ': ', IFNULL(description, '(no description)')) AS legend_line,\n       IF(description IS NULL, 'HIDE: no description for the composer', 'READY') AS composer_status\nFROM crossfade.genre\nORDER BY genre_id",
+   "sql": "SELECT genre_id AS model_class_index,\n       name AS label,\n       CHAR_LENGTH(name) AS label_chars,\n       IF(CHAR_LENGTH(name) = (SELECT MAX(CHAR_LENGTH(name)) FROM crossfade.genre),\n          'sets the column width', 'fits') AS label_column,\n       CHAR_LENGTH(description) AS description_chars,\n       80 - CHAR_LENGTH(description) AS chars_left_on_line\nFROM crossfade.genre\nORDER BY genre_id",
    "detected": [
     "a",
+    "b",
     "c",
     "e"
    ],
@@ -326,138 +368,182 @@
    "columns_out": [
     "model_class_index",
     "label",
-    "legend_line",
-    "composer_status"
+    "label_chars",
+    "label_column",
+    "description_chars",
+    "chars_left_on_line"
    ],
    "rows": [
     [
      "0",
      "blues",
-     "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
-     "READY"
+     "5",
+     "fits",
+     "59",
+     "21"
     ],
     [
      "1",
      "classical",
-     "classical: Orchestral and chamber writing in the Western art-music tradition",
-     "READY"
+     "9",
+     "sets the column width",
+     "65",
+     "15"
     ],
     [
      "2",
      "country",
-     "country: Narrative songwriting with steel guitar, fiddle and twang",
-     "READY"
+     "7",
+     "fits",
+     "57",
+     "23"
     ],
     [
      "3",
      "disco",
-     "disco: Four-on-the-floor dance grooves with lush strings and bass",
-     "READY"
+     "5",
+     "fits",
+     "58",
+     "22"
     ],
     [
      "4",
      "hiphop",
-     "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
-     "READY"
+     "6",
+     "fits",
+     "56",
+     "24"
     ],
     [
      "5",
      "jazz",
-     "jazz: Swing, improvisation and extended harmony",
-     "READY"
+     "4",
+     "fits",
+     "41",
+     "39"
     ],
     [
      "6",
      "metal",
-     "metal: Distorted guitars, heavy drums and aggressive dynamics",
-     "READY"
+     "5",
+     "fits",
+     "54",
+     "26"
     ],
     [
      "7",
      "pop",
-     "pop: Hook-driven songs built for broad appeal",
-     "READY"
+     "3",
+     "fits",
+     "40",
+     "40"
     ],
     [
      "8",
      "reggae",
-     "reggae: Offbeat skank rhythm and prominent bass lines",
-     "READY"
+     "6",
+     "fits",
+     "45",
+     "35"
     ],
     [
      "9",
      "rock",
-     "rock: Guitar-led songs with a driving backbeat",
-     "READY"
+     "4",
+     "fits",
+     "40",
+     "40"
     ]
    ],
    "expected": {
     "columns": [
      "model_class_index",
      "label",
-     "legend_line",
-     "composer_status"
+     "label_chars",
+     "label_column",
+     "description_chars",
+     "chars_left_on_line"
     ],
     "rows": [
      [
       "0",
       "blues",
-      "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
-      "READY"
+      "5",
+      "fits",
+      "59",
+      "21"
      ],
      [
       "1",
       "classical",
-      "classical: Orchestral and chamber writing in the Western art-music tradition",
-      "READY"
+      "9",
+      "sets the column width",
+      "65",
+      "15"
      ],
      [
       "2",
       "country",
-      "country: Narrative songwriting with steel guitar, fiddle and twang",
-      "READY"
+      "7",
+      "fits",
+      "57",
+      "23"
      ],
      [
       "3",
       "disco",
-      "disco: Four-on-the-floor dance grooves with lush strings and bass",
-      "READY"
+      "5",
+      "fits",
+      "58",
+      "22"
      ],
      [
       "4",
       "hiphop",
-      "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
-      "READY"
+      "6",
+      "fits",
+      "56",
+      "24"
      ],
      [
       "5",
       "jazz",
-      "jazz: Swing, improvisation and extended harmony",
-      "READY"
+      "4",
+      "fits",
+      "41",
+      "39"
      ],
      [
       "6",
       "metal",
-      "metal: Distorted guitars, heavy drums and aggressive dynamics",
-      "READY"
+      "5",
+      "fits",
+      "54",
+      "26"
      ],
      [
       "7",
       "pop",
-      "pop: Hook-driven songs built for broad appeal",
-      "READY"
+      "3",
+      "fits",
+      "40",
+      "40"
      ],
      [
       "8",
       "reggae",
-      "reggae: Offbeat skank rhythm and prominent bass lines",
-      "READY"
+      "6",
+      "fits",
+      "45",
+      "35"
      ],
      [
       "9",
       "rock",
-      "rock: Guitar-led songs with a driving backbeat",
-      "READY"
+      "4",
+      "fits",
+      "40",
+      "40"
      ]
     ]
    }
@@ -736,7 +822,7 @@
     "UC-04"
    ],
    "question": "How many recordings sit at each stage of the upload pipeline, and is scoring keeping up with their release dates?",
-   "need": "every upload is scored before it can be streamed (RA: Track: Ingest Status), so a backlog in the upload pipeline must be visible.",
+   "need": "every upload is scored before it can be streamed (RA: Track; its stages: Ingest Status), so a backlog in the upload pipeline must be visible.",
    "declared": [
     "a",
     "b",
@@ -833,6 +919,7 @@
    "need": "a re-upload of the same audio file must never become a second catalogue entry earning a second royalty stream; the RA keeps the audio checksum (SHA-256 of the file) to \"detect duplicate uploads\" (RA: Track: Audio Checksum).",
    "sql": "INSERT INTO crossfade.track (track_id, artist_id, title, duration, release_date, audio_checksum, ingest_status)\nSELECT 9999, artist_id, CONCAT(title, ' (re-upload)'), duration, '2026-09-30', audio_checksum, 'awaiting scoring'\nFROM crossfade.track\nWHERE track_id = 4817",
    "kind": "expected_error",
+   "disabled": true,
    "expects": "1062 uq_track_audio_checksum",
    "got": "1062 Duplicate entry '\\xBDg]H6=\\xAA\\xFD\\xCE\\xF5%R\\xAB\\xD9\\x8D#\\x02\\xAE4\\xC5\\x8Aj\\xEB\\x' for key 'track.uq_track_audio_checksum'"
   }
@@ -1050,7 +1137,11 @@
   ],
   "file": [
    {
-    "test": "test_s1_verified_artist_without_country_is_held",
+    "test": "test_s1_verified_artist_without_country_is_held_for_country_alone",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_s1_held_artist_never_outranks_a_ready_one",
     "outcome": "passed"
    },
    {
@@ -1070,7 +1161,15 @@
     "outcome": "passed"
    },
    {
-    "test": "test_s3_genre_without_description_is_hidden",
+    "test": "test_s3_genre_without_description_has_no_line_figures",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_s3_label_width_follows_the_data_and_ties_share_it",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_s3_description_length_counts_characters_not_bytes",
     "outcome": "passed"
    },
    {
@@ -1120,6 +1219,10 @@
   ],
   "E1": [
    {
+    "test": "test_error_statement_is_disabled[E1]",
+    "outcome": "passed"
+   },
+   {
     "test": "test_expected_error_is_raised[E1]",
     "outcome": "passed"
    }
@@ -1144,143 +1247,376 @@
    ],
    "columns": [
     "artist_id",
-    "payee",
+    "stage_name",
     "usd_per_1000_streams",
     "days_under_licence",
-    "payment_status"
+    "licence_check",
+    "payment_country",
+    "run_status"
    ],
    "expected": [
     [
      "1042",
-     "Velvet Static (US)",
+     "Velvet Static",
      "4.00",
      "200",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1044",
-     "Low Orbit Choir (CA)",
+     "Low Orbit Choir",
      "3.80",
      "239",
-     "PAYABLE"
+     "confirmed",
+     "CA",
+     "ready"
     ],
     [
      "1046",
-     "Ochre Parade (MX)",
+     "Ochre Parade",
      "3.60",
      "172",
-     "PAYABLE"
+     "confirmed",
+     "MX",
+     "ready"
     ],
     [
      "1043",
-     "Mara Quell (GB)",
+     "Mara Quell",
      "3.50",
      "253",
-     "PAYABLE"
+     "confirmed",
+     "GB",
+     "ready"
     ],
     [
      "1047",
-     "Juno Fleet (DE)",
+     "Juno Fleet",
      "3.00",
      "151",
-     "PAYABLE"
+     "confirmed",
+     "DE",
+     "ready"
     ],
     [
      "1049",
-     "Kestrel Ave (JM)",
+     "Kestrel Ave",
      "3.40",
      "33",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "JM",
+     "held"
     ],
     [
      "1045",
-     "Tin Harbour (AU)",
+     "Tin Harbour",
      "3.20",
      "215",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "AU",
+     "held"
     ],
     [
      "1048",
-     "Saltmarsh Tapes (--)",
+     "Saltmarsh Tapes",
      "3.00",
      "134",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
     ],
     [
      "9001",
-     "Zero Country (--)",
+     "Zero Country",
      "2.00",
      "29",
-     "HOLD: no payment country"
+     "confirmed",
+     "HOLD: no country",
+     "held"
     ]
    ],
    "got": [
     [
      "1042",
-     "Velvet Static (US)",
+     "Velvet Static",
      "4.00",
      "200",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1044",
-     "Low Orbit Choir (CA)",
+     "Low Orbit Choir",
      "3.80",
      "239",
-     "PAYABLE"
+     "confirmed",
+     "CA",
+     "ready"
     ],
     [
      "1046",
-     "Ochre Parade (MX)",
+     "Ochre Parade",
      "3.60",
      "172",
-     "PAYABLE"
+     "confirmed",
+     "MX",
+     "ready"
     ],
     [
      "1043",
-     "Mara Quell (GB)",
+     "Mara Quell",
      "3.50",
      "253",
-     "PAYABLE"
+     "confirmed",
+     "GB",
+     "ready"
     ],
     [
      "1047",
-     "Juno Fleet (DE)",
+     "Juno Fleet",
      "3.00",
      "151",
-     "PAYABLE"
+     "confirmed",
+     "DE",
+     "ready"
     ],
     [
      "1049",
-     "Kestrel Ave (JM)",
+     "Kestrel Ave",
      "3.40",
      "33",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "JM",
+     "held"
     ],
     [
      "1045",
-     "Tin Harbour (AU)",
+     "Tin Harbour",
      "3.20",
      "215",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "AU",
+     "held"
     ],
     [
      "1048",
-     "Saltmarsh Tapes (--)",
+     "Saltmarsh Tapes",
      "3.00",
      "134",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
     ],
     [
      "9001",
-     "Zero Country (--)",
+     "Zero Country",
      "2.00",
      "29",
-     "HOLD: no payment country"
+     "confirmed",
+     "HOLD: no country",
+     "held"
     ]
    ],
-   "doc": "A verified artist with no payment country is held, not paid.\nWhy: the sample data never reaches this CASE branch (its one artist with no country is also unverified,\nand the first WHEN wins).\nExpect: artist 9001 reads 'HOLD: no payment country', payee 'Zero Country (--)'.",
-   "test": "test_s1_verified_artist_without_country_is_held",
+   "doc": "A verified artist with no payment country is held, and the country is the only reason shown.\nWhy: the sample's one artist with no country (Saltmarsh Tapes) is also unverified, so the data never shows a\nlicence that passes while the country fails. A run_status that ignored country would pass the sample data.\nExpect: artist 9001 reads licence 'confirmed', payment_country 'HOLD: no country', run_status 'held'.",
+   "test": "test_s1_verified_artist_without_country_is_held_for_country_alone",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S1",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "artist",
+     "row": {
+      "artist_id": "9002",
+      "stage_name": "Top Rate Unverified",
+      "country": "US",
+      "joined_date": "2026-09-01",
+      "payout_rate": "0.0090",
+      "verified": "0"
+     }
+    }
+   ],
+   "columns": [
+    "artist_id",
+    "stage_name",
+    "usd_per_1000_streams",
+    "days_under_licence",
+    "licence_check",
+    "payment_country",
+    "run_status"
+   ],
+   "expected": [
+    [
+     "1042",
+     "Velvet Static",
+     "4.00",
+     "200",
+     "confirmed",
+     "US",
+     "ready"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "3.80",
+     "239",
+     "confirmed",
+     "CA",
+     "ready"
+    ],
+    [
+     "1046",
+     "Ochre Parade",
+     "3.60",
+     "172",
+     "confirmed",
+     "MX",
+     "ready"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "3.50",
+     "253",
+     "confirmed",
+     "GB",
+     "ready"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "3.00",
+     "151",
+     "confirmed",
+     "DE",
+     "ready"
+    ],
+    [
+     "9002",
+     "Top Rate Unverified",
+     "9.00",
+     "29",
+     "HOLD: not confirmed",
+     "US",
+     "held"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "3.40",
+     "33",
+     "HOLD: not confirmed",
+     "JM",
+     "held"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "3.20",
+     "215",
+     "HOLD: not confirmed",
+     "AU",
+     "held"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "3.00",
+     "134",
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
+    ]
+   ],
+   "got": [
+    [
+     "1042",
+     "Velvet Static",
+     "4.00",
+     "200",
+     "confirmed",
+     "US",
+     "ready"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "3.80",
+     "239",
+     "confirmed",
+     "CA",
+     "ready"
+    ],
+    [
+     "1046",
+     "Ochre Parade",
+     "3.60",
+     "172",
+     "confirmed",
+     "MX",
+     "ready"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "3.50",
+     "253",
+     "confirmed",
+     "GB",
+     "ready"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "3.00",
+     "151",
+     "confirmed",
+     "DE",
+     "ready"
+    ],
+    [
+     "9002",
+     "Top Rate Unverified",
+     "9.00",
+     "29",
+     "HOLD: not confirmed",
+     "US",
+     "held"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "3.40",
+     "33",
+     "HOLD: not confirmed",
+     "JM",
+     "held"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "3.20",
+     "215",
+     "HOLD: not confirmed",
+     "AU",
+     "held"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "3.00",
+     "134",
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
+    ]
+   ],
+   "doc": "A held artist with the highest rate in the catalogue is still listed after every ready artist.\nWhy: ready-first must decide the order before rate does; in the sample data no held artist out-earns them all.\nExpect: artist 9002 (unverified, 0.0090 per stream, the top rate) comes after all five ready artists, first\namong the held.",
+   "test": "test_s1_held_artist_never_outranks_a_ready_one",
    "outcome": "passed"
   },
   {
@@ -1301,139 +1637,177 @@
    ],
    "columns": [
     "artist_id",
-    "payee",
+    "stage_name",
     "usd_per_1000_streams",
     "days_under_licence",
-    "payment_status"
+    "licence_check",
+    "payment_country",
+    "run_status"
    ],
    "expected": [
     [
      "900",
-     "Aardvark Tie (US)",
+     "Aardvark Tie",
      "4.00",
      "272",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1042",
-     "Velvet Static (US)",
+     "Velvet Static",
      "4.00",
      "200",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1044",
-     "Low Orbit Choir (CA)",
+     "Low Orbit Choir",
      "3.80",
      "239",
-     "PAYABLE"
+     "confirmed",
+     "CA",
+     "ready"
     ],
     [
      "1046",
-     "Ochre Parade (MX)",
+     "Ochre Parade",
      "3.60",
      "172",
-     "PAYABLE"
+     "confirmed",
+     "MX",
+     "ready"
     ],
     [
      "1043",
-     "Mara Quell (GB)",
+     "Mara Quell",
      "3.50",
      "253",
-     "PAYABLE"
+     "confirmed",
+     "GB",
+     "ready"
     ],
     [
      "1047",
-     "Juno Fleet (DE)",
+     "Juno Fleet",
      "3.00",
      "151",
-     "PAYABLE"
+     "confirmed",
+     "DE",
+     "ready"
     ],
     [
      "1049",
-     "Kestrel Ave (JM)",
+     "Kestrel Ave",
      "3.40",
      "33",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "JM",
+     "held"
     ],
     [
      "1045",
-     "Tin Harbour (AU)",
+     "Tin Harbour",
      "3.20",
      "215",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "AU",
+     "held"
     ],
     [
      "1048",
-     "Saltmarsh Tapes (--)",
+     "Saltmarsh Tapes",
      "3.00",
      "134",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
     ]
    ],
    "got": [
     [
      "900",
-     "Aardvark Tie (US)",
+     "Aardvark Tie",
      "4.00",
      "272",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1042",
-     "Velvet Static (US)",
+     "Velvet Static",
      "4.00",
      "200",
-     "PAYABLE"
+     "confirmed",
+     "US",
+     "ready"
     ],
     [
      "1044",
-     "Low Orbit Choir (CA)",
+     "Low Orbit Choir",
      "3.80",
      "239",
-     "PAYABLE"
+     "confirmed",
+     "CA",
+     "ready"
     ],
     [
      "1046",
-     "Ochre Parade (MX)",
+     "Ochre Parade",
      "3.60",
      "172",
-     "PAYABLE"
+     "confirmed",
+     "MX",
+     "ready"
     ],
     [
      "1043",
-     "Mara Quell (GB)",
+     "Mara Quell",
      "3.50",
      "253",
-     "PAYABLE"
+     "confirmed",
+     "GB",
+     "ready"
     ],
     [
      "1047",
-     "Juno Fleet (DE)",
+     "Juno Fleet",
      "3.00",
      "151",
-     "PAYABLE"
+     "confirmed",
+     "DE",
+     "ready"
     ],
     [
      "1049",
-     "Kestrel Ave (JM)",
+     "Kestrel Ave",
      "3.40",
      "33",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "JM",
+     "held"
     ],
     [
      "1045",
-     "Tin Harbour (AU)",
+     "Tin Harbour",
      "3.20",
      "215",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "AU",
+     "held"
     ],
     [
      "1048",
-     "Saltmarsh Tapes (--)",
+     "Saltmarsh Tapes",
      "3.00",
      "134",
-     "HOLD: identity not verified"
+     "HOLD: not confirmed",
+     "HOLD: no country",
+     "held"
     ]
    ],
    "doc": "Two payable artists on the same rate are ordered by artist_id.\nWhy: without a tie-break the order of equal rates is up to MySQL and could change between runs.\nExpect: artist 900 (rate 0.0040, same as 1042) is listed first, 1042 second.",
@@ -1784,135 +2158,547 @@
    "columns": [
     "model_class_index",
     "label",
-    "legend_line",
-    "composer_status"
+    "label_chars",
+    "label_column",
+    "description_chars",
+    "chars_left_on_line"
    ],
    "expected": [
     [
      "0",
      "blues",
-     "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
-     "READY"
+     "5",
+     "fits",
+     "59",
+     "21"
     ],
     [
      "1",
      "classical",
-     "classical: Orchestral and chamber writing in the Western art-music tradition",
-     "READY"
+     "9",
+     "sets the column width",
+     "65",
+     "15"
     ],
     [
      "2",
      "country",
-     "country: Narrative songwriting with steel guitar, fiddle and twang",
-     "READY"
+     "7",
+     "fits",
+     "57",
+     "23"
     ],
     [
      "3",
      "disco",
-     "disco: Four-on-the-floor dance grooves with lush strings and bass",
-     "READY"
+     "5",
+     "fits",
+     "58",
+     "22"
     ],
     [
      "4",
      "hiphop",
-     "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
-     "READY"
+     "6",
+     "fits",
+     "56",
+     "24"
     ],
     [
      "5",
      "jazz",
-     "jazz: Swing, improvisation and extended harmony",
-     "READY"
+     "4",
+     "fits",
+     "41",
+     "39"
     ],
     [
      "6",
      "metal",
-     "metal: Distorted guitars, heavy drums and aggressive dynamics",
-     "READY"
+     "5",
+     "fits",
+     "54",
+     "26"
     ],
     [
      "7",
      "pop",
-     "pop: Hook-driven songs built for broad appeal",
-     "READY"
+     "3",
+     "fits",
+     "40",
+     "40"
     ],
     [
      "8",
      "reggae",
-     "reggae: Offbeat skank rhythm and prominent bass lines",
-     "READY"
+     "6",
+     "fits",
+     "45",
+     "35"
     ],
     [
      "9",
      "rock",
-     "rock: (no description)",
-     "HIDE: no description for the composer"
+     "4",
+     "fits",
+     null,
+     null
     ]
    ],
    "got": [
     [
      "0",
      "blues",
-     "blues: Twelve-bar forms, blue notes and call-and-response phrasing",
-     "READY"
+     "5",
+     "fits",
+     "59",
+     "21"
     ],
     [
      "1",
      "classical",
-     "classical: Orchestral and chamber writing in the Western art-music tradition",
-     "READY"
+     "9",
+     "sets the column width",
+     "65",
+     "15"
     ],
     [
      "2",
      "country",
-     "country: Narrative songwriting with steel guitar, fiddle and twang",
-     "READY"
+     "7",
+     "fits",
+     "57",
+     "23"
     ],
     [
      "3",
      "disco",
-     "disco: Four-on-the-floor dance grooves with lush strings and bass",
-     "READY"
+     "5",
+     "fits",
+     "58",
+     "22"
     ],
     [
      "4",
      "hiphop",
-     "hiphop: Rhythmic vocal delivery over sampled or programmed beats",
-     "READY"
+     "6",
+     "fits",
+     "56",
+     "24"
     ],
     [
      "5",
      "jazz",
-     "jazz: Swing, improvisation and extended harmony",
-     "READY"
+     "4",
+     "fits",
+     "41",
+     "39"
     ],
     [
      "6",
      "metal",
-     "metal: Distorted guitars, heavy drums and aggressive dynamics",
-     "READY"
+     "5",
+     "fits",
+     "54",
+     "26"
     ],
     [
      "7",
      "pop",
-     "pop: Hook-driven songs built for broad appeal",
-     "READY"
+     "3",
+     "fits",
+     "40",
+     "40"
     ],
     [
      "8",
      "reggae",
-     "reggae: Offbeat skank rhythm and prominent bass lines",
-     "READY"
+     "6",
+     "fits",
+     "45",
+     "35"
     ],
     [
      "9",
      "rock",
-     "rock: (no description)",
-     "HIDE: no description for the composer"
+     "4",
+     "fits",
+     null,
+     null
     ]
    ],
-   "doc": "A genre with no description is flagged to be hidden from the blend composer.\nWhy: every genre in the sample data has a description, so the HIDE branch is never reached.\nExpect: genre 9 (rock) shows 'rock: (no description)' and 'HIDE: no description for the composer'.",
-   "test": "test_s3_genre_without_description_is_hidden",
+   "doc": "A genre with no description shows NULL for its description length and room left, and keeps its label row.\nWhy: description is the one optional genre column, and every genre in the sample data has one.\nExpect: genre 9 (rock) reads label_chars 4, 'fits', then NULL, NULL.",
+   "test": "test_s3_genre_without_description_has_no_line_figures",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S3",
+   "inputs": [
+    {
+     "kind": "update",
+     "sql": "UPDATE genre SET name = 'classic' WHERE genre_id = 1",
+     "rows": 1
+    }
+   ],
+   "columns": [
+    "model_class_index",
+    "label",
+    "label_chars",
+    "label_column",
+    "description_chars",
+    "chars_left_on_line"
+   ],
+   "expected": [
+    [
+     "0",
+     "blues",
+     "5",
+     "fits",
+     "59",
+     "21"
+    ],
+    [
+     "1",
+     "classic",
+     "7",
+     "sets the column width",
+     "65",
+     "15"
+    ],
+    [
+     "2",
+     "country",
+     "7",
+     "sets the column width",
+     "57",
+     "23"
+    ],
+    [
+     "3",
+     "disco",
+     "5",
+     "fits",
+     "58",
+     "22"
+    ],
+    [
+     "4",
+     "hiphop",
+     "6",
+     "fits",
+     "56",
+     "24"
+    ],
+    [
+     "5",
+     "jazz",
+     "4",
+     "fits",
+     "41",
+     "39"
+    ],
+    [
+     "6",
+     "metal",
+     "5",
+     "fits",
+     "54",
+     "26"
+    ],
+    [
+     "7",
+     "pop",
+     "3",
+     "fits",
+     "40",
+     "40"
+    ],
+    [
+     "8",
+     "reggae",
+     "6",
+     "fits",
+     "45",
+     "35"
+    ],
+    [
+     "9",
+     "rock",
+     "4",
+     "fits",
+     "40",
+     "40"
+    ]
+   ],
+   "got": [
+    [
+     "0",
+     "blues",
+     "5",
+     "fits",
+     "59",
+     "21"
+    ],
+    [
+     "1",
+     "classic",
+     "7",
+     "sets the column width",
+     "65",
+     "15"
+    ],
+    [
+     "2",
+     "country",
+     "7",
+     "sets the column width",
+     "57",
+     "23"
+    ],
+    [
+     "3",
+     "disco",
+     "5",
+     "fits",
+     "58",
+     "22"
+    ],
+    [
+     "4",
+     "hiphop",
+     "6",
+     "fits",
+     "56",
+     "24"
+    ],
+    [
+     "5",
+     "jazz",
+     "4",
+     "fits",
+     "41",
+     "39"
+    ],
+    [
+     "6",
+     "metal",
+     "5",
+     "fits",
+     "54",
+     "26"
+    ],
+    [
+     "7",
+     "pop",
+     "3",
+     "fits",
+     "40",
+     "40"
+    ],
+    [
+     "8",
+     "reggae",
+     "6",
+     "fits",
+     "45",
+     "35"
+    ],
+    [
+     "9",
+     "rock",
+     "4",
+     "fits",
+     "40",
+     "40"
+    ]
+   ],
+   "doc": "The genre that sets the label column width is found from the data, and genres tied on length all set it.\nWhy: in the sample data classical (9) is the one longest label, so a width hard-coded to 9, or a query that\nmarks only one row, would pass.\nExpect: with classical renamed 'classic' (7), the widest label is 7 and both classic and country set the width.",
+   "test": "test_s3_label_width_follows_the_data_and_ties_share_it",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S3",
+   "inputs": [
+    {
+     "kind": "update",
+     "sql": "UPDATE genre SET description = 'Bossa nova, samba-canção and música popular brasileira' WHERE genre_id = 5",
+     "rows": 1
+    }
+   ],
+   "columns": [
+    "model_class_index",
+    "label",
+    "label_chars",
+    "label_column",
+    "description_chars",
+    "chars_left_on_line"
+   ],
+   "expected": [
+    [
+     "0",
+     "blues",
+     "5",
+     "fits",
+     "59",
+     "21"
+    ],
+    [
+     "1",
+     "classical",
+     "9",
+     "sets the column width",
+     "65",
+     "15"
+    ],
+    [
+     "2",
+     "country",
+     "7",
+     "fits",
+     "57",
+     "23"
+    ],
+    [
+     "3",
+     "disco",
+     "5",
+     "fits",
+     "58",
+     "22"
+    ],
+    [
+     "4",
+     "hiphop",
+     "6",
+     "fits",
+     "56",
+     "24"
+    ],
+    [
+     "5",
+     "jazz",
+     "4",
+     "fits",
+     "54",
+     "26"
+    ],
+    [
+     "6",
+     "metal",
+     "5",
+     "fits",
+     "54",
+     "26"
+    ],
+    [
+     "7",
+     "pop",
+     "3",
+     "fits",
+     "40",
+     "40"
+    ],
+    [
+     "8",
+     "reggae",
+     "6",
+     "fits",
+     "45",
+     "35"
+    ],
+    [
+     "9",
+     "rock",
+     "4",
+     "fits",
+     "40",
+     "40"
+    ]
+   ],
+   "got": [
+    [
+     "0",
+     "blues",
+     "5",
+     "fits",
+     "59",
+     "21"
+    ],
+    [
+     "1",
+     "classical",
+     "9",
+     "sets the column width",
+     "65",
+     "15"
+    ],
+    [
+     "2",
+     "country",
+     "7",
+     "fits",
+     "57",
+     "23"
+    ],
+    [
+     "3",
+     "disco",
+     "5",
+     "fits",
+     "58",
+     "22"
+    ],
+    [
+     "4",
+     "hiphop",
+     "6",
+     "fits",
+     "56",
+     "24"
+    ],
+    [
+     "5",
+     "jazz",
+     "4",
+     "fits",
+     "54",
+     "26"
+    ],
+    [
+     "6",
+     "metal",
+     "5",
+     "fits",
+     "54",
+     "26"
+    ],
+    [
+     "7",
+     "pop",
+     "3",
+     "fits",
+     "40",
+     "40"
+    ],
+    [
+     "8",
+     "reggae",
+     "6",
+     "fits",
+     "45",
+     "35"
+    ],
+    [
+     "9",
+     "rock",
+     "4",
+     "fits",
+     "40",
+     "40"
+    ]
+   ],
+   "doc": "Description length is counted in characters, the unit of the RA's 80-character line, not in bytes.\nWhy: every sample description is plain ASCII, where characters and bytes agree; utf8mb4 stores an accented\nletter in two bytes, so LENGTH() would over-count.\nExpect: a jazz description with three accented letters reads 54 characters (57 bytes), 26 left on the line.",
+   "test": "test_s3_description_length_counts_characters_not_bytes",
    "outcome": "passed"
   },
   {

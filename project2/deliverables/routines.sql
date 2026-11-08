@@ -31,11 +31,13 @@
 	  What it does:     the steps, and why each is there, citing the RA
 	  Requirements:     4 function or 4 procedure (the brief: 2 procedures and 1
 	                    function, or 1 procedure and 2 functions)
-	  Uses:             the Unit 9 features it uses
+	  Uses:             the routine features it uses (Class notes below says which
+	                    come from Unit 9 and which go beyond the slides)
 	  Tables:           every table it reads or writes
 	  Parameters:       its parameters in order: [IN|OUT] name type
 	  Returns:          the return type (functions only)
 	  Errors:           what it refuses, and how
+	  Example:          one call to the routine, with its result
 	project2/tests/test_routines.py reads these fields, checks each routine against
 	MySQL's own catalogue (information_schema), and runs it against an independent
 	answer computed from the Project 1 data.
@@ -44,12 +46,22 @@
 	keeps control of the transaction (the tests roll every call back).
 
 	***** Re: Class notes and syntax *****
-	Unit 9: DELIMITER $$ lets each routine body contain ; without ending the
+	Course material: Unit 9: DELIMITER $$ lets each routine body contain ; without ending the
 	CREATE statement. DECLARE (local variables and a handler), IF ... ELSEIF ...
 	ELSE, SIGNAL SQLSTATE '45000' (a user-defined error), DECLARE EXIT HANDLER
-	FOR 1062 (catch MySQL's duplicate-key error) with RESIGNAL, and IN / OUT
-	parameters. A function that reads tables declares READS SQL DATA, and is NOT
-	DETERMINISTIC because the payout rate it reads can change.
+	FOR 1062 (catch MySQL's duplicate-key error by its error code), IN / OUT
+	parameters, and READS SQL DATA for a function that reads tables. Unit 10:
+	START TRANSACTION and ROLLBACK (the "Try it" block).
+	Beyond the slides: RESIGNAL (P2 re-raises a key clash that is not a
+	duplicate file); NOT DETERMINISTIC (F1; the slides show DETERMINISTIC, and NOT
+	DETERMINISTIC is MySQL's default, stated because the payout rate F1 reads can
+	change); MODIFIES SQL DATA (P1, P2); UTC_TIMESTAMP() (P1, the RA's UTC play
+	time); UNHEX(SHA2(...)) (P2's example call, to make a 32-byte checksum).
+	Branches: the "Try it" block reaches F1's 29- and 30-second branches, P1's
+	insert and P2's upload and duplicate paths. The guard branches, which refuse
+	bad input, are reached only by the tests: F1's NULL for an unknown recording,
+	P1's three SIGNALs, P2's unregistered-artist SIGNAL and its RESIGNAL for a
+	key clash that is not a duplicate file.
 */
 DELIMITER $$
 
@@ -192,7 +204,8 @@ END$$
 	  (RA: Track.audio_checksum). A duplicate upload is an everyday event, not a
 	  failure: the artist should be told which recording is already in the
 	  catalogue, and a batch of uploads should carry on. [E1] in single_table.sql
-	  shows the raw refusal (error 1062); this procedure is the business answering it.
+	  (kept disabled there) shows the raw refusal (error 1062); this procedure is
+	  the business answering it.
 	What it does:
 	- Refuses, with SIGNAL SQLSTATE '45000', an upload from an artist who is not
 	  registered.

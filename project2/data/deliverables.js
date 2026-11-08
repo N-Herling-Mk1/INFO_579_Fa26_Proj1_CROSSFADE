@@ -16,7 +16,8 @@ window.P2 = {
       id: "implementation", task: "Task 1", file: "database_implementation.sql",
       title: "Database implementation", weight: 25, state: "ready to test",
       summary: "Builds the Project 1 physical model as the MySQL database crossfade (10 tables, every key, " +
-        "index and CHECK named) and loads the Project 1 sample data unchanged: 401 rows. " +
+        "index and CHECK named) and loads the Project 1 sample data unchanged: 401 rows. Each statement's comment is tagged " +
+        "[B#], [T#] or [D#] and names the use cases that read its table. " +
         "Drops and rebuilds the database, so it can be run any number of times.",
       test: [
         "Download the script with the button above.",
@@ -42,8 +43,8 @@ window.P2 = {
       title: "Single-table queries", weight: 25, state: "ready to test",
       summary: "Seven queries, S1 to S7, one per question a single table answers: every non-associative table, " +
         "track twice. Each comment names its use cases, the business need it serves, the brief requirements it meets and its " +
-        "output columns. The file ends with [E1], EXPECTED TO FAIL: a duplicate upload MySQL must refuse with error 1062 (UC-15). " +
-        "67 tests check it against an independent Python answer computed from the Project 1 data. " +
+        "output columns. The file ends with [E1], kept disabled so the file runs clean: a duplicate upload MySQL must refuse " +
+        "with error 1062 (UC-15). 71 tests check it against an independent Python answer computed from the Project 1 data. " +
         "The starter kit is the same file with every comment and no SQL, plus the tests and both input files.",
       results: "single_table_results.js",
       kit: "../tests/crossfade_p2_test_kit.zip", kitLocked: true,   // answer-key kit: stays in the repo, no download button
@@ -55,7 +56,7 @@ window.P2 = {
         "Build the database: run <code>database_implementation.sql</code> in Workbench, or " +
           "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
         "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-password\"</code> then " +
-          "<code>python -m pytest test_single_table.py</code>. Expect 67 passed. Results land in <code>results/</code>.",
+          "<code>python -m pytest test_single_table.py</code>. Expect 71 passed. Results land in <code>results/</code>.",
         "From a clone of the repo instead: <code>python -m pytest project2/tests/test_single_table.py</code> (it finds every file itself). " +
           "Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-single\">Vetting &amp; tests \u2192 single_table</a>."
       ],

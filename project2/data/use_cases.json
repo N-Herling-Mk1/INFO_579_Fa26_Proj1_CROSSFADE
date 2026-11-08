@@ -88,7 +88,7 @@
   {
    "id": "UC-02",
    "title": "Route payments by country; pay only verified artists",
-   "question": "Who is payable in this royalty run, who is on hold, and why?",
+   "question": "Is each artist ready for this royalty run, and if not, which check is outstanding?",
    "evidence": [
     {
      "block": "attr:artist.country",
@@ -208,7 +208,7 @@
   {
    "id": "UC-05",
    "title": "Show the genre legend while listeners compose a blend",
-   "question": "Is every genre ready to show in the blend composer, in model class order?",
+   "question": "How wide must the composer's label column be, which genre sets that width, and how much of its one 80-character line does each description use?",
    "evidence": [
     {
      "block": "ent:genre",
@@ -221,6 +221,10 @@
     {
      "block": "attr:genre.name",
      "phrase": "The label by which the genre is known to listeners"
+    },
+    {
+     "block": "attr:genre.name",
+     "phrase": "the longest, classical, has nine characters"
     },
     {
      "block": "attr:genre.description",
@@ -439,7 +443,7 @@
      "ingest_status"
     ]
    },
-   "rest": "Needs track_score and scoring_model together: [M6] in multiple_table.sql lists the released recordings whose newest result predates the deployment of the model version now in service."
+   "rest": "Needs track_score and scoring_model together: [M6] in multiple_table.sql lists the released recordings whose newest result predates the deployment of the newest model version."
   },
   {
    "id": "UC-10",
@@ -898,7 +902,7 @@
      "artist_id"
     ]
    },
-   "rest": "An error case: [E1], the last statement in single_table.sql, marked EXPECTED TO FAIL (MySQL must refuse it with 1062). upload_track [P2] in routines.sql is the business answering it: its DECLARE EXIT HANDLER FOR 1062 catches the duplicate and tells the uploader which recording is already in the catalogue, instead of stopping."
+   "rest": "An error case: [E1], the last statement in single_table.sql, kept disabled inside its own comment so the file runs clean; the tests run it on its own and MySQL must refuse it with 1062. upload_track [P2] in routines.sql is the business answering it: its DECLARE EXIT HANDLER FOR 1062 catches the duplicate and tells the uploader which recording is already in the catalogue, instead of stopping."
   }
  ]
 }

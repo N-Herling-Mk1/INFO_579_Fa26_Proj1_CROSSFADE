@@ -265,9 +265,10 @@ S_GROUPS = [   # (group, test names, what it proves)
     ("behaviour", ["s#_..."],
      "Logic the sample data never reaches: a row is added or changed inside a transaction that is rolled back, and the "
      "query must still agree with the oracle on the changed data. Each case targets one branch, boundary or tie."),
-    ("expected error", ["expected_error_is_raised"],
-     "The [E1] statement at the end of the file, marked EXPECTED TO FAIL, must be refused by MySQL with exactly error "
-     "1062 on uq_track_audio_checksum, and track must be unchanged afterwards."),
+    ("expected error", ["error_statement_is_disabled", "expected_error_is_raised"],
+     "The [E1] statement at the end of the file is kept DISABLED (commented out), so a script run never stops on it. "
+     "Run on its own, it must be refused by MySQL with exactly error 1062 on uq_track_audio_checksum, and track must be "
+     "unchanged afterwards."),
     ("coverage", ["every_non_associative_table_is_queried", "each_requirement_is_met_at_least_twice",
                   "every_single_table_use_case_is_answered", "tags_are_unique_and_in_order"],
      "The file as a whole: all six non-associative tables are queried; each requirement (a)-(e) is met at least twice; "
@@ -529,8 +530,9 @@ M_MISSES = [
      "8 artists, 15 tracks, 8 listeners, 8 stations, 27 scores, 270 probabilities, 31 plays. Some joins never lose a row and some "
      "boundaries are never reached; they are tested only where a behaviour case adds the row.",
      "The {nc} behaviour cases, and the deliberate-mistake run below."),
-    ("Which version is 'in service'",
-     "M6 reads 'a model redeployment' (RA: Scored On) as a newer version going into service: the one deployed last. "
+    ("Which version counts as newest",
+     "M6 reads 'a model redeployment' (RA: Scored On) as a newer version going into service. Several versions stay in "
+     "service at once (RA: Scoring Model), so 'out of date' is measured against the one deployed last. "
      "If the business meant redeploying the same version (its deployed_on moving later), the same comparison applies "
      "to that version's own results, and M6 would need a second condition.",
      "The reading is stated in M6's comment; a behaviour case deploys a new version and checks every recording "

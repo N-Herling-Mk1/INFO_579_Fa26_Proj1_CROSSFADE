@@ -12,7 +12,7 @@ Restarted Nov 6, 2026. The earlier plan (to-do list, requirements tracker, `buil
 | File | Task | Weight | Status |
 |---|---|---|---|
 | `database_implementation.sql` | 1. Create the Project 1 tables and insert the Project 1 sample data | 25% | ready to test |
-| `single_table.sql` | 2. Single-table queries, one per non-associative table, covering (a) to (e) | 25% | ready to test (67 tests) |
+| `single_table.sql` | 2. Single-table queries, one per non-associative table, covering (a) to (e) | 25% | ready to test (71 tests) |
 | `multiple_table.sql` | 3. INNER JOIN over an associative table, LEFT OUTER JOIN, set operation, multi-row subquery, WITH | 25% | ready to test (80 tests) |
 | `routines.sql` | 4. 2 procedures + 1 function, or 1 procedure + 2 functions | 25% | not started |
 
@@ -26,6 +26,10 @@ Hand-maintained; edit the `.sql` directly. Style follows the Unit 5 assignment (
 `/* */` purpose comment before every statement, `CREATE TABLE IF NOT EXISTS crossfade.<table>`, every constraint named
 (`pk_`, `fk_<child>_<parent>`, `uq_`, `ck_`), one multi-row `INSERT` with a column list per table. Types follow the
 Project 1 data dictionary (fixed-length values as `CHAR`/`BINARY`, per the Unit 4 feedback).
+
+Each comment uses the same fields as the other three files: a tag (`[B#]` database, `[T#]` table definition, `[D#]`
+data load) and the table, `Use cases:` (the use cases that read the table, from `data/use_cases.json`), `Business need:`
+citing the RA, the design bullets, `Requirements:` and, for loads, `Rows:`.
 
 Choices beyond the Project 1 DDL, each explained in the script:
 
@@ -49,15 +53,16 @@ against `data.xlsx`), checks the integrity rules, prints PASS or FAIL. Needs onl
 
 Seven queries, S1 to S7: one per single-table use case (UC-01 to UC-06, UC-08, UC-10), so every non-associative table
 is queried and track twice. Each comment carries a tag, its use cases, the business need it serves (citing the RA), a
-business question, the brief requirements it meets ((a) S1 to S7, (b) S4 S6 S7, (c) all, (d) S2 S5, (e) S1 S3 S6 S7)
+business question, the brief requirements it meets ((a) S1 to S7, (b) S3 S4 S6 S7, (c) all, (d) S2 S5, (e) S1 S3 S6 S7)
 and its output columns. Day counts use the fixed report date 2026-09-30, so results are reproducible.
 
-The last statement, `[E1]`, is **EXPECTED TO FAIL**: it re-uploads an existing audio file, and MySQL must refuse it with
-error 1062 on `uq_track_audio_checksum` (UC-15). It is last because an error stops a script run; every query above it
-has already run.
+The last statement, `[E1]`, is a write the database must refuse: it re-uploads an existing audio file, and MySQL must
+refuse it with error 1062 on `uq_track_audio_checksum` (UC-15). It is kept **DISABLED** (inside its own block comment), so
+the file runs clean from top to bottom; it is not a brief requirement. The tests still run it on its own.
 
-Tests: `project2/tests/` (pytest + PyMySQL), 67 tests: contract, correctness against an independent Python oracle,
-behaviour (rolled-back transactions), the expected error [E1] and whole-file coverage. See `project2/tests/README.md`.
+Tests: `project2/tests/` (pytest + PyMySQL), 71 tests: contract, correctness against an independent Python oracle,
+behaviour (rolled-back transactions), the expected error [E1] (which must stay disabled) and whole-file coverage. See
+`project2/tests/README.md`.
 `python project2/tests/build_kit.py` rebuilds the downloadable test kit.
 
 ```

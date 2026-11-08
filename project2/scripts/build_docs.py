@@ -223,8 +223,9 @@ def guide(res, rows):
           P("The comment above each placeholder is the specification. The tests read its <b>[S#] TABLE</b> tag, <b>Use cases</b>, "
             "<b>Requirements</b>, <b>Output</b> and (for [E1]) <b>Expects</b> lines: keep them. Your column names and their order "
             "must equal <b>Output</b>; your rows must equal oracle.py's, in order, so every ORDER BY must break its ties. Every day "
-            f"count is measured to the fixed report date <font face='Courier'>'{REPORT_DATE}'</font>. [E1] is EXPECTED TO FAIL and "
-            "stays last: an error stops a script run. The use_case_reference.pdf in this kit shows each query's input and "
+            f"count is measured to the fixed report date <font face='Courier'>'{REPORT_DATE}'</font>. [E1] is a write MySQL must "
+            "refuse; write it inside the block comment under its comment, so it stays DISABLED and the file runs clean (the "
+            "tests run it on their own). The use_case_reference.pdf in this kit shows each query's input and "
             "expected output.")]
     return s
 
@@ -284,7 +285,7 @@ def reference(uc, res, rows):
             if q.get("need"):
                 block += [P("BUSINESS NEED", LABEL), P(esc(q["need"]), BODY)]
             if q.get("kind") == "expected_error":
-                block += [P("INPUT: a write the database must refuse (EXPECTED TO FAIL, the last statement in the file)", LABEL),
+                block += [P("INPUT: a write the database must refuse (kept DISABLED at the end of the file; the test runs it on its own)", LABEL),
                           code(q["sql"] + ";"),
                           P("EXPECTED OUTPUT", LABEL),
                           P(f"MySQL raises error <b>{esc(q.get('expects'))}</b>; crossfade.{esc(q['table'])} keeps its "

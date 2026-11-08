@@ -65,20 +65,21 @@ the SQL itself.
 1. `pip install -r requirements.txt` (a venv is a good idea: `python -m venv .venv`, then `.venv\\Scripts\\python -m pip ...`)
 2. Build the database: run `database_implementation.sql` in Workbench (open, Execute), or let the tests do it with `--fresh`.
 3. PowerShell: `$env:CROSSFADE_DB_PASSWORD = "your-root-password"`, then one file at a time:
-   `python -m pytest test_single_table.py` (target 67 passed) and `python -m pytest test_multiple_table.py`
+   `python -m pytest test_single_table.py` (target 71 passed) and `python -m pytest test_multiple_table.py`
    (target 80 passed). Add `--fresh` once to rebuild the database first.
 4. Write a query under its comment, rerun, repeat. With nothing written the per-query tests are skipped and the
    coverage and behaviour tests fail, each naming what is missing.
 
 ## Rules the comments fix
 
-- `Output:` is the contract for your column names and their order (`AS payee`, ...). The expected rows come from `oracle.py`.
+- `Output:` is the contract for your column names and their order (`AS usd_per_1000_streams`, ...). The expected rows come from `oracle.py`.
 - `Requirements:` must list exactly the (a)-(e) features your SQL uses: (a) single-row function, (b) aggregate,
   (c) `ORDER BY`, (d) `LIMIT n`, (e) `CASE` or `IF`. If you meet them differently, change the line to match.
 - Read only the columns your use cases list in `use_cases.json`, and only the one table named after the tag.
 - Every day count is measured to the fixed report date `'2026-09-30'`, not `CURDATE()`.
-- `[E1]` is **EXPECTED TO FAIL**: a write MySQL must refuse with error 1062. It stays last, because an error stops a
-  script run.
+- `[E1]` is a write MySQL must refuse with error 1062. Write it inside the block comment under its comment, ending with
+  `;`, so it stays **DISABLED**: a script run skips it and the file runs clean, while the tests still run it on its own.
+  Never type the two characters `*` `/` together inside that block: they would close the comment early.
 - multiple_table.sql: `Requirements: 3.x` must be met by the SQL itself (3.1 an associative table INNER JOINed to the
   two tables it relates, 3.2 `LEFT OUTER JOIN`, 3.3 `UNION`/`INTERSECT`/`EXCEPT`, 3.4 `IN`/`ANY`/`ALL`/`EXISTS (SELECT ...)`,
   3.5 starts with `WITH`). Name every join in full (`INNER JOIN`, `LEFT OUTER JOIN`); no bare `JOIN`, no comma joins.
@@ -87,12 +88,28 @@ the SQL itself.
 
 
 def blank(sql, eol, banner):
-    """Replace each statement that follows a tagged comment with a placeholder line."""
+    """Replace each statement that follows a tagged comment with a placeholder line. A DISABLED [E#] statement sits
+    in its own block comment right after its purpose comment; that block is replaced by a placeholder block, so the
+    starter never carries the answer and the statement the student writes there stays disabled."""
     out, pos = [], 0
     blocks = list(re.finditer(r"/\*.*?\*/", sql, re.S))
     if not blocks or "FILE:" not in blocks[0].group(0):
         sys.exit("answer key has no header comment")
+    disabled = {}                                    # index of a disabled statement's block -> (tag, table)
+    for k, b in enumerate(blocks[:-1]):
+        m = re.match(r"/\*\s*\[(E\d+)\]\s*([A-Z_]+\b)?", b.group(0))
+        if m and re.search(r"\bDISABLED\b", b.group(0)) and not sql[b.end():blocks[k + 1].start()].strip():
+            disabled[k + 1] = (m.group(1), (m.group(2) or "").lower())
     for k, b in enumerate(blocks):
+        if k in disabled:
+            tag, table = disabled[k]
+            out.append(sql[pos:b.start()] + f"/*{eol}-- [{tag}] write the statement on crossfade.{table} that MySQL must "
+                       f"refuse (see Expects) here, inside this block comment, ending it with a semicolon; keep both "
+                       f"comment markers{eol}*/")
+            print(f"      [{tag}] disabled statement removed ({len(b.group(0).splitlines())} lines)", flush=True)
+            nxt = blocks[k + 1].start() if k + 1 < len(blocks) else len(sql)
+            out.append(sql[b.end():nxt]); pos = nxt
+            continue
         out.append(sql[pos:b.end()])
         nxt = blocks[k + 1].start() if k + 1 < len(blocks) else len(sql)
         tail = sql[b.end():nxt]
