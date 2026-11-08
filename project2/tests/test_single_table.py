@@ -160,8 +160,57 @@ def test_result_matches_oracle(query, db, data):
         assert g == w, f"row {i}: MySQL {g} != oracle {w}"
 
 
+def top_level(clause_re, c):
+    """The body of a top-level ORDER BY or GROUP BY (not inside a subquery) of an upper-cased, literal-free
+    statement, up to the next top-level clause; None if there is none."""
+    for m in re.finditer(clause_re, c):
+        if c[:m.start()].count("(") != c[:m.start()].count(")"):
+            continue                                      # inside parentheses: a subquery's clause
+        rest = c[m.end():]
+        stop = r"\b(HAVING|ORDER\s+BY|LIMIT)\b" if "GROUP" in clause_re else r"\bLIMIT\b"
+        cut = re.search(stop, rest)
+        return rest[:cut.start()] if cut else rest
+    return None
+
+
+def plain_columns(clause):
+    """Bare column names in a comma list at depth 0 (`col`, `col DESC`, `t.col ASC`); expressions are skipped."""
+    out, d, cur = [], 0, ""
+    for ch in clause + ",":
+        if ch == "(": d += 1
+        if ch == ")": d -= 1
+        if ch == "," and d == 0:
+            m = re.fullmatch(r"\s*(?:\w+\.)?(\w+)(?:\s+(?:ASC|DESC))?\s*", cur)
+            if m: out.append(m.group(1).lower())
+            cur = ""
+        else:
+            cur += ch
+    return out
+
+
 def test_result_is_deterministic(query, db):
-    """Two runs give identical results: every ORDER BY breaks its ties."""
+    """The row order cannot depend on chance: ORDER BY includes columns that are unique per output row (a primary
+    or unique key of the table, or all the GROUP BY columns), so no two rows can tie on every sort key. Two runs
+    alone cannot prove this: MySQL usually returns tied rows in primary-key order, which hides a missing
+    tie-break. Then two runs must also agree."""
+    c = code(query)
+    order = top_level(r"\bORDER\s+BY\b", c)
+    assert order is not None, "no ORDER BY: the row order is up to the server"
+    keys = plain_columns(order)
+    with db.cursor() as cur:
+        cur.execute("SELECT INDEX_NAME, COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = 'crossfade' "
+                    "AND TABLE_NAME = %s AND NON_UNIQUE = 0 ORDER BY INDEX_NAME, SEQ_IN_INDEX", (query.table,))
+        unique = {}
+        for idx, col in cur.fetchall():
+            unique.setdefault(idx, []).append(col.lower())
+    sets = list(unique.values())
+    group = top_level(r"\bGROUP\s+BY\b", c)
+    if group is not None:
+        sets = [plain_columns(group)]                    # one output row per group: the group key is unique
+    ok = any(s and set(s) <= set(keys) for s in sets)
+    assert ok, (f"ORDER BY {', '.join(keys) or order.strip()} can tie: it includes no unique key "
+                f"({' or '.join('(' + ', '.join(s) + ')' for s in sets)}), so tied rows come back in whatever order "
+                f"MySQL finds them")
     assert run(db, query.sql) == run(db, query.sql)
 
 
@@ -325,6 +374,20 @@ def test_s5_accuracy_tie_prefers_the_newer_version(tx, q, data):
                                  "holdout_accuracy": "0.7887", "deployed_on": "2026-09-01"})
     rows = check(tx, q["S5"], t)
     assert [r[0] for r in rows] == ["tie_newer"]
+
+
+def test_s5_full_tie_goes_to_the_lower_model_id(tx, q, data):
+    """Two versions tied on both accuracy and deployment date: the lower model_id is the default, every time.
+    Why: without a last tie-break, LIMIT 1 would return whichever tied row MySQL found first.
+    Expect: tie_low (model_id 6) wins over tie_high (model_id 7); both at 0.9000, both deployed 2026-09-01, above
+    every sample version. tie_high is inserted first, so insertion order cannot be what decides."""
+    t = copy.deepcopy(data)
+    for mid, label in ((7, "tie_high"), (6, "tie_low")):
+        add(tx, t, "scoring_model", {"model_id": mid, "version_label": label, "fusion_type": "concat",
+                                     "embedding_dimension": 384, "segment_length": 3, "training_corpus": "GTZAN",
+                                     "holdout_accuracy": "0.9000", "deployed_on": "2026-09-01"})
+    rows = check(tx, q["S5"], t)
+    assert [r[0] for r in rows] == ["tie_low"]
 
 
 def test_s6_window_of_exactly_half_is_not_wide(tx, q, data):

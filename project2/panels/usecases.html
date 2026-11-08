@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../../assets/site.css?v=cb25b6e1">
 <script src="../data/usecases.js"></script>
 <script src="../data/single_table_results.js"></script>
+<script src="../data/multiple_table_results.js"></script>
 <style>
   /* file views */
   .uc-files { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; border-bottom: 2px solid var(--rule); }
@@ -75,6 +76,9 @@
   .legend-mini { font: 12px var(--mono); color: var(--ink-2); margin: 4px 0 0; }
   .legend-mini i { display: inline-block; width: 11px; height: 11px; vertical-align: -1px; margin: 0 4px 0 10px; border: 1px solid var(--rule); }
   .legend-mini i.new { background: #eaf7ee; } .legend-mini i.bad { background: #fdeeea; }
+  .seg .btn code { font: 600 13px var(--mono); background: none; color: inherit; }
+  .seg .btn:disabled { opacity: .45; cursor: default; }
+  .cs-card .grain { font: 12px var(--mono); color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -111,10 +115,7 @@
   <section>
     <div class="hm-head">
       <h2>Data coverage</h2>
-      <div class="seg" role="group" aria-label="Which use cases">
-        <button class="btn" data-mode="all" aria-pressed="true">All use cases</button>
-        <button class="btn" data-mode="single" aria-pressed="false">Single-table part only</button>
-      </div>
+      <div class="seg" role="group" aria-label="Which columns" id="hm-modes"></div>
     </div>
     <p class="note" id="hm-caption"></p>
     <div class="hm" id="hm"></div>
@@ -137,13 +138,15 @@
 
   document.getElementById("uc-n").textContent = U.useCases.length;
   /* ---------------------------------------------------------------- tiles */
-  var ca = U.coverage.all, cs = U.coverage.single;
+  var ca = U.coverage.all, cw = U.coverage.written || U.coverage.single;
   var nSingle = U.useCases.filter(function (u) { return Object.keys(u.single || {}).length; }).length;
+  var nMultiple = U.useCases.filter(function (u) { return Object.keys(u.multipleColumns || {}).length; }).length;
   document.getElementById("tiles").innerHTML = [
-    ["Use cases", U.useCases.length, nSingle + " have a single-table part"],
-    ["Columns read, all use cases", ca.columns + "/" + ca.columnsOf, pct(ca.columns, ca.columnsOf) + " of the physical model"],
-    ["Columns read, single-table part", cs.columns + "/" + cs.columnsOf, pct(cs.columns, cs.columnsOf)],
-    ["Cells read, single-table part", cs.cells + "/" + cs.cellsOf, pct(cs.cells, cs.cellsOf) + " of the sample data"]
+    ["Use cases", U.useCases.length, nSingle + " in single_table.sql, " + nMultiple + " in multiple_table.sql, " +
+      U.useCases.filter(function (u) { return Object.keys(u.routineColumns || {}).length; }).length + " in routines.sql"],
+    ["Columns needed, all use cases", ca.columns + "/" + ca.columnsOf, pct(ca.columns, ca.columnsOf) + " of the physical model"],
+    ["Columns read by the files written", cw.columns + "/" + cw.columnsOf, pct(cw.columns, cw.columnsOf) + " of the physical model"],
+    ["Cells read by the files written", cw.cells + "/" + cw.cellsOf, pct(cw.cells, cw.cellsOf) + " of the sample data"]
   ].map(function (t) {
     return '<div class="uc-tile"><span class="k">' + t[0] + '</span><span class="v">' + t[1] + '</span><span class="s">' + t[2] + "</span></div>";
   }).join("");
@@ -211,13 +214,13 @@
                 ucs: U.useCases.filter(function (u) { return Object.keys(u.single || {}).length; }),
                 none: "" },
     multiple: { file: "multiple_table.sql", task: "Task 3", R: window.P2_MULTIPLE,
-                ucs: U.useCases.filter(function (u) { return Object.keys(u.columns).length > 1; }),
-                none: "Candidates: the use cases whose data spans two or more tables. None is assigned to multiple_table.sql yet; " +
-                      "each one gets its query, expected output and test cases here once the file and its tests exist." },
+                ucs: U.useCases.filter(function (u) { return Object.keys(u.multipleColumns || {}).length; }),
+                none: "No results snapshot yet: run test_multiple_table.py to fill in the tests." },
     routines: { file: "routines.sql",       task: "Task 4", R: window.P2_ROUTINES,
-                ucs: U.useCases.slice(),
-                none: "routines.sql is not started. Every use case is a candidate until its 2 procedures + 1 function (or 1 + 2) are chosen; " +
-                      "their inputs, expected outputs and test cases will appear here." }
+                ucs: U.useCases.filter(function (u) { return Object.keys(u.routineColumns || {}).length; }),
+                status: "written, page in progress",
+                none: "routines.sql is written: play_royalty (F1), record_play (P1) and upload_track (P2). These are the use cases they serve. " +
+                      "Each routine's card, calls and test cases are added here with the rest of the routines pages." }
   };
   var ORDER = ["single", "multiple", "routines"];
   function tagsFor(view, uid) {
@@ -237,7 +240,7 @@
   document.getElementById("files").innerHTML = ORDER.map(function (k) {
     var v = VIEWS[k], R = v.R;
     var ft = R ? '<span class="ft ' + (R.failed ? "todo" : "ok") + '">' + R.passed + "/" + (R.passed + R.failed) + " tests passed</span>"
-               : '<span class="ft todo">' + v.task + " &middot; not started</span>";
+               : '<span class="ft todo">' + v.task + " &middot; " + (v.status || "not started") + "</span>";
     return '<button class="uc-file" role="tab" data-view="' + k + '" aria-selected="false"><code>' + v.file + "</code>" + ft + "</button>";
   }).join("");
 
@@ -247,7 +250,8 @@
     var v = VIEWS[view], withTests = !!v.R;
     document.getElementById("left-title").innerHTML = "Use cases &middot; <code>" + v.file + "</code>";
     document.getElementById("left-note").innerHTML = withTests
-      ? '<span class="dot full"></span> answered by that table alone &nbsp;<span class="dot part"></span> partly; the rest needs a join &nbsp;&middot;&nbsp; ' +
+      ? (view === "single" ? '<span class="dot full"></span> answered by that table alone &nbsp;<span class="dot part"></span> partly; the rest needs a join &nbsp;&middot;&nbsp; '
+                           : "each use case's query joins the tables listed &nbsp;&middot;&nbsp; ") +
         "last test run " + esc(v.R.generated.replace("T", " ")) + ": " + v.R.passed + " passed, " + v.R.failed + " failed"
       : esc(v.none);
     var head, body;
@@ -265,13 +269,22 @@
           '<td class="by">' + (tags.length ? tags.map(function (t) { return '<span class="tagchip' + (t[0] === "E" ? " e" : "") + '">' + t + "</span>"; }).join("") : '<span class="non">none</span>') + "</td>" +
           '<td class="st">' + (tl ? '<span class="' + (tl[0] === tl[1] ? "okn" : "badn") + '">' + tl[0] + "/" + tl[1] + "</span>" : '<span class="non">&ndash;</span>') + "</td></tr>";
       }).join("");
+    } else if (view === "multiple") {
+      head = "<thead><tr><th>UC</th><th>Use case</th><th>Tables it reads</th><th>Answered by</th><th>Tests</th></tr></thead>";
+      body = v.ucs.map(function (u) {
+        var tags = tagsFor(view, u.id), tl = tally(view, u.id);
+        return '<tr data-uc="' + u.id + '"><td class="id">' + u.id + '</td><td class="t"><b>' + esc(u.title) + '</b><span class="q">' + esc(u.question || "") + "</span></td>" +
+          '<td class="need">' + Object.keys(u.multipleColumns).map(function (t) { return "<code>" + t + "</code>"; }).join(" ") + "</td>" +
+          '<td class="by">' + (tags.length ? tags.map(function (t) { return '<span class="tagchip">' + t + "</span>"; }).join("") : '<span class="non">none</span>') + "</td>" +
+          '<td class="st">' + (tl ? '<span class="' + (tl[0] === tl[1] ? "okn" : "badn") + '">' + tl[0] + "/" + tl[1] + "</span>" : '<span class="non">&ndash;</span>') + "</td></tr>";
+      }).join("");
     } else {
       head = "<thead><tr><th>UC</th><th>Use case</th><th>Tables it needs</th><th>Tests</th></tr></thead>";
       body = v.ucs.map(function (u) {
         return '<tr data-uc="' + u.id + '"><td class="id">' + u.id + '</td><td class="t"><b>' + esc(u.title) + "</b>" +
           (u.question ? '<span class="q">' + esc(u.question) + "</span>" : "") + (u.rest ? '<span class="rest">' + esc(u.rest) + "</span>" : "") + "</td>" +
           '<td class="need">' + Object.keys(u.columns).map(function (t) { return "<code>" + t + "</code>"; }).join(" ") + "</td>" +
-          '<td class="st"><span class="non">not written</span></td></tr>';
+          '<td class="st"><span class="non">' + (v.status ? "pending" : "not written") + "</span></td></tr>";
       }).join("");
     }
     tbl.innerHTML = head + "<tbody>" + body + "</tbody>";
@@ -280,13 +293,16 @@
 
   /* ---------------------------------------------------------------- right panel: the chosen use case */
   var NAMES = {
-    test_comment_contract: "Comment carries tag, table, use cases, question and requirements",
+    test_comment_contract: "Comment carries its tag, use cases, need, question and requirements",
+    test_reads_declared_tables: "MySQL's plan (EXPLAIN) reads exactly the tables the comment lists",
+    test_meets_its_requirement: "The SQL really meets the Task 3 requirement it claims",
+    test_join_types_explicit: "Every join names its type (INNER JOIN, LEFT OUTER JOIN)",
     test_read_only_select: "One read-only SELECT; no SELECT *; only the crossfade schema",
     test_reads_exactly_one_table: "MySQL's plan (EXPLAIN) reads only its one table",
     test_requirements_match_declared: "Requirements (a)-(e) it declares are exactly the ones it uses",
     test_columns_match_use_cases: "Reads only columns its use cases declare",
     test_result_matches_oracle: "Result equals the oracle, row for row, in order",
-    test_result_is_deterministic: "Two runs give the same result",
+    test_result_is_deterministic: "ORDER BY includes a unique key, so rows cannot tie; two runs agree",
     test_expected_error_is_raised: "MySQL refuses it with exactly the expected error; table unchanged"
   };
   function grid(cols, rows, marks) {
@@ -317,22 +333,27 @@
   }
   function queryCard(R, tag, u) {
     var q = R.queries[tag], ts = R.tests[tag] || [], ok = ts.filter(function (x) { return x.outcome === "passed"; }).length;
-    var h = '<article class="cs-card"><header><span class="tagchip' + (tag[0] === "E" ? " e" : "") + '">' + tag + "</span><code>" + esc(q.table || "") + '</code><span class="qq">' + esc(q.question || "") + "</span>" +
+    var h = '<article class="cs-card"><header><span class="tagchip' + (tag[0] === "E" ? " e" : "") + '">' + tag + "</span><code>" + esc(q.table || (q.tables || []).join(", ")) + '</code><span class="qq">' + esc(q.question || "") + "</span>" +
       '<span class="' + (ok === ts.length ? "okn" : "badn") + '">' + ok + "/" + ts.length + " checks</span></header><div class=\"bd\">";
     if (q.need) h += '<h5>Business need</h5><p class="need">' + esc(q.need) + "</p>";
+    if (q.requirement) h += "<h5>Requirement<b>" + esc(q.requirement) + " " + esc(q.requirement_text || "") + "</b></h5>" +
+      '<div class="grain">' + (q.detected ? "detected: " + esc(q.detected) + " &middot; " : "") + "one row per " + esc((q.grain || []).join(", ")) + "</div>";
     if (q.kind === "expected_error") {
       h += "<h5>Input<b>a write the database must refuse &middot; EXPECTED TO FAIL, last statement in the file</b></h5><pre>" + esc(q.sql) + ";</pre>";
       h += "<h5>Expected output</h5><div>MySQL raises error <code>" + esc(q.expects) + "</code> and <code>" + esc(q.table) + "</code> keeps its " + "rows unchanged.</div>";
       h += '<div class="verdict ' + (ok === ts.length ? "ok" : "bad") + '">got: ' + esc((q.got || "not run").replace(/Duplicate entry '.*' for key/, "Duplicate entry '…' for key")) + "</div>";
     } else {
       h += "<h5>Input<b>the Project 1 sample data, through this query</b></h5>" +
-        '<div class="cols">Reads <code>crossfade.' + esc(q.table) + "</code>: " + (q.columns || []).map(function (c) { return "<code>" + esc(c) + "</code>"; }).join("") + "</div>" +
+        (Array.isArray(q.columns) || !q.columns
+          ? '<div class="cols">Reads <code>crossfade.' + esc(q.table) + "</code>: " + (q.columns || []).map(function (c) { return "<code>" + esc(c) + "</code>"; }).join("") + "</div>"
+          : Object.keys(q.columns).map(function (t) {
+              return '<div class="cols">Reads <code>crossfade.' + esc(t) + "</code>: " + q.columns[t].map(function (c) { return "<code>" + esc(c) + "</code>"; }).join("") + "</div>"; }).join("")) +
         (q.output ? '<div class="cols">Answers with: ' + q.output.map(function (c) { return "<code>" + esc(c) + "</code>"; }).join("") + "</div>" : "") +
         "<details><summary>show the SQL</summary><pre>" + esc(q.sql) + ";</pre></details>";
       if (q.expected) {
         var marks = q.expected.rows.map(function (r, i) { return same(r, (q.rows || [])[i]) ? "" : "bad"; });
         var bad = marks.filter(Boolean).length || (q.rows || []).length !== q.expected.rows.length;
-        h += "<h5>Expected output<b>" + q.expected.rows.length + " rows, computed in Python from data.csv (oracle.py)</b></h5>" + grid(q.expected.columns, q.expected.rows, marks) +
+        h += "<h5>Expected output<b>" + q.expected.rows.length + " rows, computed in Python from data.csv (" + (tag[0] === "M" ? "oracle_multiple.py" : "oracle.py") + ")</b></h5>" + grid(q.expected.columns, q.expected.rows, marks) +
           '<div class="verdict ' + (bad ? "bad" : "ok") + '">' + (bad ? "MySQL differs: rows marked red (" + (q.rows || []).length + " rows returned)"
             : "MySQL returned the same " + q.rows.length + " rows, same columns, same order") + "</div>";
       }
@@ -423,16 +444,33 @@
         (100 * pt.cells / pt.cellsOf).toFixed(1) + '%"></span><b>' + pct(pt.cells, pt.cellsOf) + "</b></div></div>";
     });
     document.getElementById("hm").innerHTML = h;
-    document.getElementById("hm-caption").textContent = mode === "all"
-      ? "All " + U.useCases.length + " use cases: " + cov.columns + " of " + cov.columnsOf + " columns and " + cov.cells + " of " + cov.cellsOf + " cells (" + pct(cov.cells, cov.cellsOf) + ")."
-      : "Single-table part only, the use cases Task 2 can answer: " + cov.columns + " of " + cov.columnsOf + " columns, but " + cov.cells + " of " + cov.cellsOf +
-        " cells (" + pct(cov.cells, cov.cellsOf) + "). The associative tables hold most of the data: genre_probability alone is " +
-        (U.rows.genre_probability * U.schema.genre_probability.length) + " cells.";
+    var nums = cov.columns + " of " + cov.columnsOf + " columns and " + cov.cells + " of " + cov.cellsOf + " cells (" + pct(cov.cells, cov.cellsOf) + ")";
+    document.getElementById("hm-caption").textContent = {
+      all: "All " + U.useCases.length + " use cases need " + nums + ".",
+      single: "single_table.sql, one table per query (Task 2): " + nums + ". The associative tables hold most of the data " +
+        "(genre_probability alone is " + (U.rows.genre_probability * U.schema.genre_probability.length) + " cells), and a single-table query never reads them.",
+      multiple: "multiple_table.sql, the joins (Task 3): " + nums + ". Shade counts the use cases whose query reads the column.",
+      routines: "routines.sql, the routines (Task 4): " + nums + ". Shade counts the use cases whose routine reads or writes the column.",
+      written: "Every file written so far, single_table.sql, multiple_table.sql and routines.sql together: " + nums + "." +
+        (cov.columns === cov.columnsOf ? " Every column is read by at least one query or routine." : " What is still hollow is read by no query or routine yet.")
+    }[mode] || "";
     var lg = '<span class="lg-item"><i class="sw zero"></i>0</span>';
     for (var n = 1; n <= MAXN; n++) lg += '<span class="lg-item"><i class="sw" style="--c:' + fill(n) + '"></i>' + n + "</span>";
     document.getElementById("hm-legend").innerHTML = '<span class="lg-title">use cases reading the column</span>' + lg;
     applyFocus();
   }
+  /* one mask per query file: the columns that file's queries read, plus all files written so far together */
+  var MODES = [
+    ["all", "All use cases", "every column the use cases need"],
+    ["single", "<code>single_table.sql</code>", "Task 2"],
+    ["multiple", "<code>multiple_table.sql</code>", "Task 3"],
+    ["routines", "<code>routines.sql</code>", "Task 4: columns its routines read or write"],
+    ["written", "All files written", "single_table.sql, multiple_table.sql and routines.sql together"]
+  ];
+  document.getElementById("hm-modes").innerHTML = MODES.map(function (m) {
+    var ok = !!U.coverage[m[0]];
+    return '<button class="btn" data-mode="' + m[0] + '" aria-pressed="' + (m[0] === "all") + '"' + (ok ? "" : " disabled") + ' title="' + m[2] + '">' + m[1] + "</button>";
+  }).join("");
   Array.prototype.forEach.call(document.querySelectorAll("[data-mode]"), function (b) {
     b.addEventListener("click", function () {
       mode = b.dataset.mode;
@@ -455,9 +493,10 @@
     });
     var cols = {};
     if (u) {
-      var src = mode === "single" ? Object.keys(u.single || {}).reduce(function (o, t) {
-        o[t] = (u.singleColumns || {})[t] || u.columns[t]; return o; }, {}) : u.columns;
-      Object.keys(src).forEach(function (t) { src[t].forEach(function (c) { cols[t + "." + c] = 1; }); });
+      var single = Object.keys(u.single || {}).reduce(function (o, t) {
+        o[t] = (u.singleColumns || {})[t] || u.columns[t]; return o; }, {});
+      var srcs = { all: [u.columns], single: [single], multiple: [u.multipleColumns || {}], written: [single, u.multipleColumns || {}] }[mode] || [u.columns];
+      srcs.forEach(function (src) { Object.keys(src).forEach(function (t) { src[t].forEach(function (c) { cols[t + "." + c] = 1; }); }); });
     }
     Array.prototype.forEach.call(document.querySelectorAll(".hm-cell"), function (c) {
       c.classList.toggle("focus", !!cols[c.dataset.col]);

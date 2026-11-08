@@ -186,6 +186,9 @@ body.sp-page ::-webkit-scrollbar-thumb { background: #007a8c; border-radius: 3px
   color: var(--sp-dim); background: rgba(0,229,255,.04); border: 1px solid var(--sp-border); border-radius: 9px; transition: all .18s; }
 .dk-turn:hover, .dk-turn:focus-visible { outline: none; color: #031018; background: var(--sp-cyan); border-color: var(--sp-cyan); box-shadow: 0 0 16px rgba(0,229,255,.55); }
 .dk-turn:active { transform: scale(.94); }
+/* FRONT's demonstration of the arrows (home/overview.html): lit as if hovered, then pressed */
+.dk-turn.demo-hover { color: #031018; background: var(--sp-cyan); border-color: var(--sp-cyan); box-shadow: 0 0 16px rgba(0,229,255,.55); }
+.dk-turn.demo-press { transform: scale(.88); box-shadow: 0 0 26px rgba(0,229,255,.9), 0 0 0 4px rgba(0,229,255,.25); }
 .dk-ctl { display: flex; align-items: center; gap: 14px; }
 .dk-front { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; cursor: pointer;
   color: var(--sp-faint); background: rgba(0,229,255,.03); border: 1px solid var(--sp-border); border-radius: 15px; transition: all .18s; }

@@ -873,7 +873,37 @@ window.UC = {
      "payout_rate"
     ]
    },
-   "rest": "Amounts actually owed need play, track and artist together (Task 3 or 4)."
+   "routineColumns": {
+    "artist": [
+     "artist_id",
+     "payout_rate"
+    ],
+    "track": [
+     "track_id",
+     "artist_id"
+    ],
+    "play": [
+     "track_id",
+     "seconds_played",
+     "royalty_amount"
+    ]
+   },
+   "rest": "Amounts actually owed need play, track and artist together: [M2] in multiple_table.sql (LEFT OUTER JOIN, so artists owed nothing still appear). The royalty of one play (rule I7) is play_royalty, [F1] in routines.sql, which record_play [P1] stores on every play.",
+   "multipleColumns": {
+    "artist": [
+     "artist_id",
+     "stage_name"
+    ],
+    "track": [
+     "track_id",
+     "artist_id"
+    ],
+    "play": [
+     "track_id",
+     "seconds_played",
+     "royalty_amount"
+    ]
+   }
   },
   {
    "id": "UC-02",
@@ -985,7 +1015,15 @@ window.UC = {
      "ingest_status"
     ]
    },
-   "rest": "Checking rule I5 needs track_score (Task 3)."
+   "routineColumns": {
+    "track": [
+     "track_id",
+     "release_date",
+     "audio_checksum",
+     "ingest_status"
+    ]
+   },
+   "rest": "Checking rule I5 needs track_score. routines.sql: upload_track [P2] enters each upload as 'awaiting scoring' and refuses a duplicate checksum; record_play [P1] refuses plays of a recording that is not yet released."
   },
   {
    "id": "UC-05",
@@ -1070,6 +1108,10 @@ window.UC = {
     {
      "block": "rule:I6",
      "phrase": "A play's Station ID may refer to a station created by another listener."
+    },
+    {
+     "block": "rule:I6",
+     "phrase": "A play's Station ID may refer to a station created by another listener"
     }
    ],
    "columns": {
@@ -1088,7 +1130,28 @@ window.UC = {
     ]
    },
    "single": {},
-   "rest": "Alone, listener only yields a list of names, which is not a real question. Needs station and play (Task 3)."
+   "routineColumns": {
+    "play": [
+     "listener_id",
+     "station_id"
+    ]
+   },
+   "rest": "Alone, listener only yields a list of names, which is not a real question. Station reach (creators UNION players): [M3] in multiple_table.sql. record_play [P1] in routines.sql accepts a play through another listener's station (rule I6).",
+   "multipleColumns": {
+    "station": [
+     "station_id",
+     "listener_id",
+     "name"
+    ],
+    "play": [
+     "station_id",
+     "listener_id"
+    ],
+    "listener": [
+     "listener_id",
+     "display_name"
+    ]
+   }
   },
   {
    "id": "UC-08",
@@ -1169,11 +1232,34 @@ window.UC = {
     ],
     "scoring_model": [
      "model_id",
-     "deployed_on"
+     "deployed_on",
+     "version_label"
+    ],
+    "track": [
+     "track_id",
+     "title",
+     "ingest_status"
     ]
    },
    "single": {},
-   "rest": "Needs track_score and scoring_model together (Task 3)."
+   "multipleColumns": {
+    "track_score": [
+     "track_id",
+     "model_id",
+     "scored_on"
+    ],
+    "scoring_model": [
+     "model_id",
+     "deployed_on",
+     "version_label"
+    ],
+    "track": [
+     "track_id",
+     "title",
+     "ingest_status"
+    ]
+   },
+   "rest": "Needs track_score and scoring_model together: [M6] in multiple_table.sql lists the released recordings whose newest result predates the deployment of the model version now in service."
   },
   {
    "id": "UC-10",
@@ -1234,7 +1320,19 @@ window.UC = {
      "created_on"
     ]
    },
-   "rest": "The blend weights (rule I1) live in station_blend (Task 3)."
+   "rest": "The blend weights (rule I1) live in station_blend: [M5] in multiple_table.sql fills each station from its blend and window.",
+   "multipleColumns": {
+    "station": [
+     "station_id",
+     "minimum_ambiguity",
+     "maximum_ambiguity"
+    ],
+    "station_blend": [
+     "station_id",
+     "genre_id",
+     "weight"
+    ]
+   }
   },
   {
    "id": "UC-11",
@@ -1289,10 +1387,38 @@ window.UC = {
     "genre": [
      "genre_id",
      "name"
+    ],
+    "track": [
+     "track_id",
+     "title"
     ]
    },
    "single": {},
-   "rest": "Lives in the associative tables track_score and genre_probability (Task 3)."
+   "rest": "Lives in the associative tables track_score and genre_probability: [M4] in multiple_table.sql finds recordings the model versions disagree on, and [M7] reads each result's full distribution for its runner-up genre and how close it is.",
+   "multipleColumns": {
+    "track": [
+     "track_id",
+     "title"
+    ],
+    "track_score": [
+     "track_id",
+     "model_id",
+     "genre_id",
+     "top_probability",
+     "model_divergence",
+     "segment_variance"
+    ],
+    "genre_probability": [
+     "track_id",
+     "model_id",
+     "genre_id",
+     "probability"
+    ],
+    "genre": [
+     "genre_id",
+     "name"
+    ]
+   }
   },
   {
    "id": "UC-12",
@@ -1321,7 +1447,8 @@ window.UC = {
      "station_id",
      "model_id",
      "minimum_ambiguity",
-     "maximum_ambiguity"
+     "maximum_ambiguity",
+     "name"
     ],
     "station_blend": [
      "station_id",
@@ -1331,7 +1458,8 @@ window.UC = {
     "track_score": [
      "track_id",
      "model_id",
-     "posterior_entropy"
+     "posterior_entropy",
+     "genre_id"
     ],
     "genre_probability": [
      "track_id",
@@ -1344,10 +1472,44 @@ window.UC = {
      "title",
      "duration",
      "ingest_status"
+    ],
+    "genre": [
+     "genre_id",
+     "name"
     ]
    },
    "single": {},
-   "rest": "Five tables; the natural home is a procedure (Task 4)."
+   "rest": "Five tables: [M5] in multiple_table.sql (WITH) applies the RA's four rules for a station's contents.",
+   "multipleColumns": {
+    "station": [
+     "station_id",
+     "name",
+     "model_id",
+     "minimum_ambiguity",
+     "maximum_ambiguity"
+    ],
+    "track_score": [
+     "track_id",
+     "model_id",
+     "genre_id",
+     "posterior_entropy"
+    ],
+    "track": [
+     "track_id",
+     "title",
+     "duration",
+     "ingest_status"
+    ],
+    "station_blend": [
+     "station_id",
+     "genre_id",
+     "weight"
+    ],
+    "genre": [
+     "genre_id",
+     "name"
+    ]
+   }
   },
   {
    "id": "UC-13",
@@ -1387,10 +1549,45 @@ window.UC = {
     "track": [
      "track_id",
      "duration"
+    ],
+    "listener": [
+     "listener_id",
+     "display_name"
     ]
    },
    "single": {},
-   "rest": "Lives in the associative table play (Task 3)."
+   "routineColumns": {
+    "play": [
+     "listener_id",
+     "track_id",
+     "played_at",
+     "seconds_played",
+     "completed",
+     "reaction"
+    ],
+    "track": [
+     "track_id",
+     "duration"
+    ]
+   },
+   "rest": "Lives in the associative table play: [M1] in multiple_table.sql joins it to listener and track. record_play [P1] in routines.sql records each play with completed computed from the recording's length (rule I7).",
+   "multipleColumns": {
+    "play": [
+     "listener_id",
+     "track_id",
+     "seconds_played",
+     "completed",
+     "reaction"
+    ],
+    "listener": [
+     "listener_id",
+     "display_name"
+    ],
+    "track": [
+     "track_id",
+     "duration"
+    ]
+   }
   },
   {
    "id": "UC-14",
@@ -1434,11 +1631,46 @@ window.UC = {
     ],
     "artist": [
      "artist_id",
-     "payout_rate"
+     "payout_rate",
+     "stage_name"
     ]
    },
    "single": {},
-   "rest": "play, track and artist together (Task 3 or 4)."
+   "routineColumns": {
+    "play": [
+     "listener_id",
+     "track_id",
+     "played_at",
+     "seconds_played",
+     "completed",
+     "royalty_amount"
+    ],
+    "track": [
+     "track_id",
+     "artist_id",
+     "duration"
+    ],
+    "artist": [
+     "artist_id",
+     "payout_rate"
+    ]
+   },
+   "rest": "play, track and artist together: [M2] in multiple_table.sql totals the ledger per artist. routines.sql writes it: record_play [P1] computes each royalty once, with play_royalty [F1], and stores it as a snapshot that a later rate change never rewrites.",
+   "multipleColumns": {
+    "artist": [
+     "artist_id",
+     "stage_name"
+    ],
+    "track": [
+     "track_id",
+     "artist_id"
+    ],
+    "play": [
+     "track_id",
+     "seconds_played",
+     "royalty_amount"
+    ]
+   }
   },
   {
    "id": "UC-15",
@@ -1461,6 +1693,9 @@ window.UC = {
      "title",
      "duration",
      "audio_checksum"
+    ],
+    "artist": [
+     "artist_id"
     ]
    },
    "single": {
@@ -1471,7 +1706,19 @@ window.UC = {
     "constraint": "uq_track_audio_checksum",
     "why": "The database itself must refuse the write: the UNIQUE index on audio_checksum is what detects the duplicate."
    },
-   "rest": "An error case: [E1], the last statement in single_table.sql, marked EXPECTED TO FAIL (MySQL must refuse it with 1062). Planned for routines.sql (Task 4): an upload procedure whose DECLARE ... HANDLER FOR 1062 catches the duplicate and answers the uploader instead of stopping."
+   "routineColumns": {
+    "track": [
+     "track_id",
+     "artist_id",
+     "title",
+     "duration",
+     "audio_checksum"
+    ],
+    "artist": [
+     "artist_id"
+    ]
+   },
+   "rest": "An error case: [E1], the last statement in single_table.sql, marked EXPECTED TO FAIL (MySQL must refuse it with 1062). upload_track [P2] in routines.sql is the business answering it: its DECLARE EXIT HANDLER FOR 1062 catches the duplicate and tells the uploader which recording is already in the catalogue, instead of stopping."
   }
  ],
  "schema": {
@@ -1645,11 +1892,13 @@ window.UC = {
     "artist.artist_id": [
      "UC-01",
      "UC-02",
-     "UC-14"
+     "UC-14",
+     "UC-15"
     ],
     "artist.stage_name": [
      "UC-01",
-     "UC-02"
+     "UC-02",
+     "UC-14"
     ],
     "artist.payout_rate": [
      "UC-01",
@@ -1659,6 +1908,8 @@ window.UC = {
      "UC-01",
      "UC-03",
      "UC-04",
+     "UC-09",
+     "UC-11",
      "UC-12",
      "UC-13",
      "UC-14",
@@ -1694,6 +1945,8 @@ window.UC = {
     ],
     "track.title": [
      "UC-03",
+     "UC-09",
+     "UC-11",
      "UC-12",
      "UC-15"
     ],
@@ -1711,6 +1964,7 @@ window.UC = {
     "track.ingest_status": [
      "UC-03",
      "UC-04",
+     "UC-09",
      "UC-12"
     ],
     "track.audio_checksum": [
@@ -1725,18 +1979,21 @@ window.UC = {
     ],
     "genre.genre_id": [
      "UC-05",
-     "UC-11"
+     "UC-11",
+     "UC-12"
     ],
     "genre.name": [
      "UC-05",
-     "UC-11"
+     "UC-11",
+     "UC-12"
     ],
     "genre.description": [
      "UC-05"
     ],
     "listener.listener_id": [
      "UC-06",
-     "UC-07"
+     "UC-07",
+     "UC-13"
     ],
     "listener.email": [
      "UC-06"
@@ -1748,7 +2005,8 @@ window.UC = {
      "UC-06"
     ],
     "listener.display_name": [
-     "UC-07"
+     "UC-07",
+     "UC-13"
     ],
     "station.station_id": [
      "UC-07",
@@ -1762,7 +2020,8 @@ window.UC = {
     ],
     "station.name": [
      "UC-07",
-     "UC-10"
+     "UC-10",
+     "UC-12"
     ],
     "play.listener_id": [
      "UC-07",
@@ -1777,7 +2036,8 @@ window.UC = {
      "UC-09"
     ],
     "scoring_model.version_label": [
-     "UC-08"
+     "UC-08",
+     "UC-09"
     ],
     "scoring_model.fusion_type": [
      "UC-08"
@@ -1835,7 +2095,8 @@ window.UC = {
      "UC-12"
     ],
     "track_score.genre_id": [
-     "UC-11"
+     "UC-11",
+     "UC-12"
     ],
     "track_score.top_probability": [
      "UC-11"
@@ -2059,6 +2320,691 @@ window.UC = {
     ],
     "track.artist_id": [
      "UC-15"
+    ]
+   }
+  },
+  "multiple": {
+   "columns": 42,
+   "columnsOf": 59,
+   "cells": 1760,
+   "cellsOf": 1920,
+   "perTable": {
+    "artist": {
+     "columns": 2,
+     "of": 6,
+     "cells": 16,
+     "cellsOf": 48
+    },
+    "track": {
+     "columns": 5,
+     "of": 7,
+     "cells": 75,
+     "cellsOf": 105
+    },
+    "genre": {
+     "columns": 2,
+     "of": 3,
+     "cells": 20,
+     "cellsOf": 30
+    },
+    "listener": {
+     "columns": 2,
+     "of": 5,
+     "cells": 16,
+     "cellsOf": 40
+    },
+    "scoring_model": {
+     "columns": 3,
+     "of": 8,
+     "cells": 15,
+     "cellsOf": 40
+    },
+    "station": {
+     "columns": 6,
+     "of": 7,
+     "cells": 48,
+     "cellsOf": 56
+    },
+    "track_score": {
+     "columns": 8,
+     "of": 8,
+     "cells": 216,
+     "cellsOf": 216
+    },
+    "genre_probability": {
+     "columns": 4,
+     "of": 4,
+     "cells": 1080,
+     "cellsOf": 1080
+    },
+    "station_blend": {
+     "columns": 3,
+     "of": 3,
+     "cells": 57,
+     "cellsOf": 57
+    },
+    "play": {
+     "columns": 7,
+     "of": 8,
+     "cells": 217,
+     "cellsOf": 248
+    }
+   },
+   "hits": {
+    "artist.artist_id": [
+     "UC-01",
+     "UC-14"
+    ],
+    "artist.stage_name": [
+     "UC-01",
+     "UC-14"
+    ],
+    "track.track_id": [
+     "UC-01",
+     "UC-09",
+     "UC-11",
+     "UC-12",
+     "UC-13",
+     "UC-14"
+    ],
+    "track.artist_id": [
+     "UC-01",
+     "UC-14"
+    ],
+    "play.track_id": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.seconds_played": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.royalty_amount": [
+     "UC-01",
+     "UC-14"
+    ],
+    "station.station_id": [
+     "UC-07",
+     "UC-10",
+     "UC-12"
+    ],
+    "station.listener_id": [
+     "UC-07"
+    ],
+    "station.name": [
+     "UC-07",
+     "UC-12"
+    ],
+    "play.station_id": [
+     "UC-07"
+    ],
+    "play.listener_id": [
+     "UC-07",
+     "UC-13"
+    ],
+    "listener.listener_id": [
+     "UC-07",
+     "UC-13"
+    ],
+    "listener.display_name": [
+     "UC-07",
+     "UC-13"
+    ],
+    "track_score.track_id": [
+     "UC-09",
+     "UC-11",
+     "UC-12"
+    ],
+    "track_score.model_id": [
+     "UC-09",
+     "UC-11",
+     "UC-12"
+    ],
+    "track_score.scored_on": [
+     "UC-09"
+    ],
+    "scoring_model.model_id": [
+     "UC-09"
+    ],
+    "scoring_model.deployed_on": [
+     "UC-09"
+    ],
+    "scoring_model.version_label": [
+     "UC-09"
+    ],
+    "track.title": [
+     "UC-09",
+     "UC-11",
+     "UC-12"
+    ],
+    "track.ingest_status": [
+     "UC-09",
+     "UC-12"
+    ],
+    "station.minimum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station.maximum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station_blend.station_id": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station_blend.genre_id": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station_blend.weight": [
+     "UC-10",
+     "UC-12"
+    ],
+    "track_score.genre_id": [
+     "UC-11",
+     "UC-12"
+    ],
+    "track_score.top_probability": [
+     "UC-11"
+    ],
+    "track_score.model_divergence": [
+     "UC-11"
+    ],
+    "track_score.segment_variance": [
+     "UC-11"
+    ],
+    "genre_probability.track_id": [
+     "UC-11"
+    ],
+    "genre_probability.model_id": [
+     "UC-11"
+    ],
+    "genre_probability.genre_id": [
+     "UC-11"
+    ],
+    "genre_probability.probability": [
+     "UC-11"
+    ],
+    "genre.genre_id": [
+     "UC-11",
+     "UC-12"
+    ],
+    "genre.name": [
+     "UC-11",
+     "UC-12"
+    ],
+    "station.model_id": [
+     "UC-12"
+    ],
+    "track_score.posterior_entropy": [
+     "UC-12"
+    ],
+    "track.duration": [
+     "UC-12",
+     "UC-13"
+    ],
+    "play.completed": [
+     "UC-13"
+    ],
+    "play.reaction": [
+     "UC-13"
+    ]
+   }
+  },
+  "routines": {
+   "columns": 17,
+   "columnsOf": 59,
+   "cells": 369,
+   "cellsOf": 1920,
+   "perTable": {
+    "artist": {
+     "columns": 2,
+     "of": 6,
+     "cells": 16,
+     "cellsOf": 48
+    },
+    "track": {
+     "columns": 7,
+     "of": 7,
+     "cells": 105,
+     "cellsOf": 105
+    },
+    "genre": {
+     "columns": 0,
+     "of": 3,
+     "cells": 0,
+     "cellsOf": 30
+    },
+    "listener": {
+     "columns": 0,
+     "of": 5,
+     "cells": 0,
+     "cellsOf": 40
+    },
+    "scoring_model": {
+     "columns": 0,
+     "of": 8,
+     "cells": 0,
+     "cellsOf": 40
+    },
+    "station": {
+     "columns": 0,
+     "of": 7,
+     "cells": 0,
+     "cellsOf": 56
+    },
+    "track_score": {
+     "columns": 0,
+     "of": 8,
+     "cells": 0,
+     "cellsOf": 216
+    },
+    "genre_probability": {
+     "columns": 0,
+     "of": 4,
+     "cells": 0,
+     "cellsOf": 1080
+    },
+    "station_blend": {
+     "columns": 0,
+     "of": 3,
+     "cells": 0,
+     "cellsOf": 57
+    },
+    "play": {
+     "columns": 8,
+     "of": 8,
+     "cells": 248,
+     "cellsOf": 248
+    }
+   },
+   "hits": {
+    "artist.artist_id": [
+     "UC-01",
+     "UC-14",
+     "UC-15"
+    ],
+    "artist.payout_rate": [
+     "UC-01",
+     "UC-14"
+    ],
+    "track.track_id": [
+     "UC-01",
+     "UC-04",
+     "UC-13",
+     "UC-14",
+     "UC-15"
+    ],
+    "track.artist_id": [
+     "UC-01",
+     "UC-14",
+     "UC-15"
+    ],
+    "play.track_id": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.seconds_played": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.royalty_amount": [
+     "UC-01",
+     "UC-14"
+    ],
+    "track.release_date": [
+     "UC-04"
+    ],
+    "track.audio_checksum": [
+     "UC-04",
+     "UC-15"
+    ],
+    "track.ingest_status": [
+     "UC-04"
+    ],
+    "play.listener_id": [
+     "UC-07",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.station_id": [
+     "UC-07"
+    ],
+    "play.played_at": [
+     "UC-13",
+     "UC-14"
+    ],
+    "play.completed": [
+     "UC-13",
+     "UC-14"
+    ],
+    "play.reaction": [
+     "UC-13"
+    ],
+    "track.duration": [
+     "UC-13",
+     "UC-14",
+     "UC-15"
+    ],
+    "track.title": [
+     "UC-15"
+    ]
+   }
+  },
+  "written": {
+   "columns": 59,
+   "columnsOf": 59,
+   "cells": 1920,
+   "cellsOf": 1920,
+   "perTable": {
+    "artist": {
+     "columns": 6,
+     "of": 6,
+     "cells": 48,
+     "cellsOf": 48
+    },
+    "track": {
+     "columns": 7,
+     "of": 7,
+     "cells": 105,
+     "cellsOf": 105
+    },
+    "genre": {
+     "columns": 3,
+     "of": 3,
+     "cells": 30,
+     "cellsOf": 30
+    },
+    "listener": {
+     "columns": 5,
+     "of": 5,
+     "cells": 40,
+     "cellsOf": 40
+    },
+    "scoring_model": {
+     "columns": 8,
+     "of": 8,
+     "cells": 40,
+     "cellsOf": 40
+    },
+    "station": {
+     "columns": 7,
+     "of": 7,
+     "cells": 56,
+     "cellsOf": 56
+    },
+    "track_score": {
+     "columns": 8,
+     "of": 8,
+     "cells": 216,
+     "cellsOf": 216
+    },
+    "genre_probability": {
+     "columns": 4,
+     "of": 4,
+     "cells": 1080,
+     "cellsOf": 1080
+    },
+    "station_blend": {
+     "columns": 3,
+     "of": 3,
+     "cells": 57,
+     "cellsOf": 57
+    },
+    "play": {
+     "columns": 8,
+     "of": 8,
+     "cells": 248,
+     "cellsOf": 248
+    }
+   },
+   "hits": {
+    "track.artist_id": [
+     "UC-01",
+     "UC-14",
+     "UC-15"
+    ],
+    "track.track_id": [
+     "UC-01",
+     "UC-03",
+     "UC-04",
+     "UC-09",
+     "UC-11",
+     "UC-12",
+     "UC-13",
+     "UC-14",
+     "UC-15"
+    ],
+    "play.royalty_amount": [
+     "UC-01",
+     "UC-14"
+    ],
+    "play.seconds_played": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.track_id": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "artist.artist_id": [
+     "UC-01",
+     "UC-02",
+     "UC-14",
+     "UC-15"
+    ],
+    "artist.payout_rate": [
+     "UC-01",
+     "UC-14"
+    ],
+    "artist.stage_name": [
+     "UC-01",
+     "UC-02",
+     "UC-14"
+    ],
+    "artist.country": [
+     "UC-02"
+    ],
+    "artist.joined_date": [
+     "UC-02"
+    ],
+    "artist.verified": [
+     "UC-02"
+    ],
+    "track.duration": [
+     "UC-03",
+     "UC-12",
+     "UC-13",
+     "UC-14",
+     "UC-15"
+    ],
+    "track.ingest_status": [
+     "UC-03",
+     "UC-04",
+     "UC-09",
+     "UC-12"
+    ],
+    "track.release_date": [
+     "UC-03",
+     "UC-04"
+    ],
+    "track.title": [
+     "UC-03",
+     "UC-09",
+     "UC-11",
+     "UC-12",
+     "UC-15"
+    ],
+    "track.audio_checksum": [
+     "UC-04",
+     "UC-15"
+    ],
+    "genre.description": [
+     "UC-05"
+    ],
+    "genre.genre_id": [
+     "UC-05",
+     "UC-11",
+     "UC-12"
+    ],
+    "genre.name": [
+     "UC-05",
+     "UC-11",
+     "UC-12"
+    ],
+    "listener.email": [
+     "UC-06"
+    ],
+    "listener.listener_id": [
+     "UC-06",
+     "UC-07",
+     "UC-13"
+    ],
+    "listener.plan_tier": [
+     "UC-06"
+    ],
+    "listener.signup_date": [
+     "UC-06"
+    ],
+    "play.listener_id": [
+     "UC-07",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.station_id": [
+     "UC-07"
+    ],
+    "station.listener_id": [
+     "UC-07"
+    ],
+    "station.name": [
+     "UC-07",
+     "UC-10",
+     "UC-12"
+    ],
+    "station.station_id": [
+     "UC-07",
+     "UC-08",
+     "UC-10",
+     "UC-12"
+    ],
+    "listener.display_name": [
+     "UC-07",
+     "UC-13"
+    ],
+    "station.model_id": [
+     "UC-08",
+     "UC-10",
+     "UC-12"
+    ],
+    "scoring_model.deployed_on": [
+     "UC-08",
+     "UC-09"
+    ],
+    "scoring_model.embedding_dimension": [
+     "UC-08"
+    ],
+    "scoring_model.fusion_type": [
+     "UC-08"
+    ],
+    "scoring_model.holdout_accuracy": [
+     "UC-08"
+    ],
+    "scoring_model.model_id": [
+     "UC-08",
+     "UC-09"
+    ],
+    "scoring_model.segment_length": [
+     "UC-08"
+    ],
+    "scoring_model.training_corpus": [
+     "UC-08"
+    ],
+    "scoring_model.version_label": [
+     "UC-08",
+     "UC-09"
+    ],
+    "track_score.model_id": [
+     "UC-09",
+     "UC-11",
+     "UC-12"
+    ],
+    "track_score.scored_on": [
+     "UC-09"
+    ],
+    "track_score.track_id": [
+     "UC-09",
+     "UC-11",
+     "UC-12"
+    ],
+    "station.created_on": [
+     "UC-10"
+    ],
+    "station.maximum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station.minimum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station_blend.genre_id": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station_blend.station_id": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station_blend.weight": [
+     "UC-10",
+     "UC-12"
+    ],
+    "track_score.genre_id": [
+     "UC-11",
+     "UC-12"
+    ],
+    "track_score.model_divergence": [
+     "UC-11"
+    ],
+    "track_score.segment_variance": [
+     "UC-11"
+    ],
+    "track_score.top_probability": [
+     "UC-11"
+    ],
+    "genre_probability.genre_id": [
+     "UC-11"
+    ],
+    "genre_probability.model_id": [
+     "UC-11"
+    ],
+    "genre_probability.probability": [
+     "UC-11"
+    ],
+    "genre_probability.track_id": [
+     "UC-11"
+    ],
+    "track_score.posterior_entropy": [
+     "UC-12"
+    ],
+    "play.completed": [
+     "UC-13",
+     "UC-14"
+    ],
+    "play.played_at": [
+     "UC-13",
+     "UC-14"
+    ],
+    "play.reaction": [
+     "UC-13"
     ]
    }
   }

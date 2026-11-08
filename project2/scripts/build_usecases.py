@@ -185,6 +185,11 @@ def main():
             for c in cols:
                 if c not in SCHEMA.get(t, []):
                     print(f"      {uc['id']}: no column {t}.{c}"); bad += 1
+        for key in ("singleColumns", "multipleColumns", "routineColumns"):
+            for t, cols in (uc.get(key) or {}).items():
+                extra = sorted(set(cols) - set(uc["columns"].get(t, [])))
+                if extra:
+                    print(f"      {uc['id']}: {key} {t}.{extra} not in its columns"); bad += 1
         for t in uc.get("single", {}):
             if t in ASSOCIATIVE or t not in SCHEMA:
                 print(f"      {uc['id']}: single-table mapping to {t}, which is not a non-associative table"); bad += 1
@@ -221,9 +226,20 @@ def main():
     single_full = [u for u in ucs if any(v == "full" for v in u.get("single", {}).values())]
     single_any = [{**u, "columns": {t: u.get("singleColumns", {}).get(t, u["columns"].get(t, []))
                                     for t in u.get("single", {})}} for u in ucs if u.get("single")]
-    cov = {"all": coverage(ucs), "single": coverage(single_any)}
+    multiple = [{**u, "columns": u["multipleColumns"]} for u in ucs if u.get("multipleColumns")]
+    routines = [{**u, "columns": u["routineColumns"]} for u in ucs if u.get("routineColumns")]
+    written = []
+    for u in ucs:
+        parts = [next((x for x in grp if x["id"] == u["id"]), {}) for grp in (single_any, multiple, routines)]
+        if any(parts):
+            tabs = set().union(*(p.get("columns", {}) for p in parts))
+            written.append({**u, "columns": {t: sorted(set().union(*(set(p.get("columns", {}).get(t, [])) for p in parts)))
+                                             for t in tabs}})
+    # one mask per file on the use-case page: what each file reads (routines: reads or writes), and all files together
+    cov = {"all": coverage(ucs), "single": coverage(single_any), "multiple": coverage(multiple),
+           "routines": coverage(routines), "written": coverage(written)}
     for k, v in cov.items():
-        print(f"      {k:>6}: {v['columns']}/{v['columnsOf']} columns ({100 * v['columns'] / v['columnsOf']:.0f}%), "
+        print(f"      {k:>8}: {v['columns']}/{v['columnsOf']} columns ({100 * v['columns'] / v['columnsOf']:.0f}%), "
               f"{v['cells']}/{v['cellsOf']} cells ({100 * v['cells'] / v['cellsOf']:.0f}%)", flush=True)
 
     step(5, total, "writing " + os.path.relpath(OUT, ROOT))

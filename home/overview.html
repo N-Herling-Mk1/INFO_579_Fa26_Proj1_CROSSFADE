@@ -6,10 +6,13 @@
 <title>CROSSFADE</title>
 <link rel="icon" href="../assets/images/favicon.ico" sizes="any">
 <link rel="stylesheet" href="../assets/site.css?v=cb25b6e1">
-<link rel="stylesheet" href="../assets/splash.css?v=1dc662ca">
+<link rel="stylesheet" href="../assets/splash.css?v=024a3452">
 <script src="../project1/data/site_data.js"></script>
 <script src="../project2/data/deliverables.js"></script>
+<script src="../project2/data/implementation_results.js"></script>
 <script src="../project2/data/single_table_results.js"></script>
+<script src="../project2/data/multiple_table_results.js"></script>
+<script src="../project2/data/routines_results.js"></script>
 <script src="../assets/sfx.js?v=c0bf5be8"></script>
 </head>
 <body class="sp-page">
@@ -37,7 +40,8 @@
   <section class="sp-body">
     <h2 class="sp-h">Sections</h2>
     <!-- Section drum: every section on the faces of a rotating cylinder (each twice, so the barrel is wide).
-         FRONT steps it round on its own; the arrows turn it by hand (and switch FRONT off). The face that comes
+         FRONT steps it round on its own, and shows how: each step lights the right arrow, then presses it.
+         Pressing any drum button yourself takes over (FRONT off for the rest of the visit). The face that comes
          flush lights up and is projected into the holo panel with live stats. Click a face or the panel to go. -->
     <div class="deck rise" style="--d:3" id="deck" tabindex="-1">
       <button class="dk-turn" id="dk-prev" type="button" aria-label="Turn the drum left" title="Turn left (&larr;)">
@@ -137,13 +141,15 @@
     });
   }
 
-  /* latest pytest run of single_table.sql */
-  var R = window.P2_SINGLE;
-  if (R) {
-    var tot = R.passed + R.failed;
-    $("t-tests").innerHTML = R.passed + "<small>/ " + tot + "</small>";
-    $("t-tests").className = "v " + (R.failed ? "warn" : "ok");
-    $("t-tests").title = "single_table.sql, run " + R.generated.replace("T", " ");
+  /* latest pytest run of every Project 2 file, added up */
+  var RUNS = [["database_implementation.sql", window.P2_IMPL], ["single_table.sql", window.P2_SINGLE],
+              ["multiple_table.sql", window.P2_MULTIPLE], ["routines.sql", window.P2_ROUTINES]].filter(function (x) { return x[1]; });
+  if (RUNS.length) {
+    var pass = 0, fail = 0;
+    RUNS.forEach(function (x) { pass += x[1].passed; fail += x[1].failed; });
+    $("t-tests").innerHTML = pass + "<small>/ " + (pass + fail) + "</small>";
+    $("t-tests").className = "v " + (fail ? "warn" : "ok");
+    $("t-tests").title = RUNS.map(function (x) { return x[0] + ": " + x[1].passed + "/" + (x[1].passed + x[1].failed); }).join(" · ");
   }
 
   /* countdown to the next due date (end of that day, local time) */
@@ -171,7 +177,8 @@
     var N = SEC.length, FACES = SEC.concat(SEC), NF = FACES.length, STEP = 360 / NF;
     var deck = $("deck"), holo = $("holo"), btn = $("dk-front");
     var angle = 0, front = 0, timer = null, landT = null, hold = false, mode = !still;
-    try { var m = localStorage.getItem("cf-front"); if (m !== null && !still) mode = m === "1"; } catch (e) {}
+    /* the visitor's own choice lasts for the visit (sessionStorage): a new visit starts with the demo again */
+    try { var m = sessionStorage.getItem("cf-front"); if (m !== null && !still) mode = m === "1"; } catch (e) {}
 
     rot.innerHTML = FACES.map(function (f, i) {
       return '<a class="dface" href="../index.html#' + f[0] + '" data-sec="' + f[0] + '" title="' + f[1] + " (Alt+" + (i % N + 1) + ')"' +
@@ -217,7 +224,10 @@
       return n < 0 ? "closed " + iso.slice(5).replace("-", "/") : n === 0 ? "due today, 11:59 PM" : n === 1 ? "due tomorrow, 11:59 PM" : "due in " + n + " days";
     }
     function stats(sec) {
-      var S = window.SITE || {}, R = window.P2_SINGLE, P = window.P2;
+      var S = window.SITE || {}, P = window.P2, R = { passed: 0, failed: 0 };
+      [window.P2_IMPL, window.P2_SINGLE, window.P2_MULTIPLE, window.P2_ROUTINES].forEach(function (x) {
+        if (x) { R.passed += x.passed; R.failed += x.failed; } });
+      if (!R.passed && !R.failed) R = null;
       var rows = S.tables ? S.tables.reduce(function (n, t) { return n + t.rows.length; }, 0) : 401;
       var tables = S.tables ? S.tables.length : 10;
       var st = S.status || {}, ks = Object.keys(st), done = ks.filter(function (k) { return st[k]; }).length;
@@ -248,17 +258,29 @@
     }
 
     /* FRONT (auto) and the hand controls */
-    function setMode(on) {
+    /* auto step = a demonstration of the hand control: the right arrow lights up as if hovered, is pressed, and
+       the drum turns, so the visitor sees the arrows are there to use. Silent: it is not the visitor's click. */
+    var next = $("dk-next"), demoT = [];
+    function demoStop() { demoT.forEach(clearTimeout); demoT = []; next.classList.remove("demo-hover", "demo-press"); }
+    function demoStep() {
+      if (hold || document.hidden) return;
+      demoStop();
+      next.classList.add("demo-hover");
+      demoT.push(setTimeout(function () { next.classList.add("demo-press"); }, 700));
+      demoT.push(setTimeout(function () { next.classList.remove("demo-press"); turnTo(front + 1); }, 880));
+      demoT.push(setTimeout(function () { next.classList.remove("demo-hover"); }, 1300));
+    }
+    function setMode(on, save) {
       mode = on; btn.setAttribute("aria-pressed", on ? "true" : "false");
       $("dk-mode").textContent = on ? "auto" : "manual";
-      clearInterval(timer); timer = null;
-      if (on) timer = setInterval(function () { if (!hold && !document.hidden) turnTo(front + 1); }, 3600);
-      try { localStorage.setItem("cf-front", on ? "1" : "0"); } catch (e) {}
+      clearInterval(timer); timer = null; demoStop();
+      if (on) timer = setInterval(demoStep, 3600);
+      if (save) try { sessionStorage.setItem("cf-front", on ? "1" : "0"); } catch (e) {}
     }
-    function step(d) { if (mode) setMode(false); if (SFX) SFX.tick(d); turnTo(front + d); }
+    function step(d) { if (mode) setMode(false, true); if (SFX) SFX.tick(d); turnTo(front + d); }
     /* sounds (assets/sfx.js): inside the shell use its SFX, so there is one audio context and one mute switch */
     var SFX = (function () { try { if (parent !== window && parent.SFX) return parent.SFX; } catch (e) {} return window.SFX || null; })();
-    btn.addEventListener("click", function () { setMode(!mode); if (SFX) SFX.toggle(mode); if (mode) turnTo(front + 1); });
+    btn.addEventListener("click", function () { setMode(!mode, true); if (SFX) SFX.toggle(mode); if (mode) demoStep(); });
     $("dk-prev").addEventListener("click", function () { step(-1); });
     $("dk-next").addEventListener("click", function () { step(1); });
     deck.addEventListener("keydown", function (e) {

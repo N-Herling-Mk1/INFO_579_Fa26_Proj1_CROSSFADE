@@ -1,0 +1,229 @@
+{
+ "mutants": [
+  {
+   "mutant": "f1-thirty-seconds-excluded",
+   "query": "F1",
+   "mistake": "a play of exactly 30 seconds earns nothing (> instead of >=)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_f1_thirty_seconds_is_the_boundary",
+    "test_f1_follows_a_rate_change",
+    "test_try_it_block_gives_the_documented_answers"
+   ]
+  },
+  {
+   "mutant": "f1-unknown-is-zero",
+   "query": "F1",
+   "mistake": "a recording that does not exist earns 0 instead of NULL",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_f1_unknown_recording_has_no_royalty"
+   ]
+  },
+  {
+   "mutant": "f1-one-rate-for-all",
+   "query": "F1",
+   "mistake": "every recording paid at one artist's rate (join condition wrong)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_f1_agrees_with_every_recorded_play",
+    "test_p1_full_length_play_is_completed",
+    "test_p1_shared_station_is_accepted"
+   ]
+  },
+  {
+   "mutant": "f1-declared-deterministic",
+   "query": "F1",
+   "mistake": "declared DETERMINISTIC, though the rate it reads can change",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_data_access_declared[F1]",
+    "test_uses_what_it_lists[F1]"
+   ]
+  },
+  {
+   "mutant": "f1-declared-no-sql",
+   "query": "F1",
+   "mistake": "declared NO SQL, though it reads two tables",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_data_access_declared[F1]",
+    "test_uses_what_it_lists[F1]"
+   ]
+  },
+  {
+   "mutant": "p1-completed-at-thirty",
+   "query": "P1",
+   "mistake": "completed means 30 seconds or more, not the whole recording",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_p1_records_an_abandoned_skip",
+    "test_p1_ledger_survives_a_rate_change",
+    "test_try_it_block_gives_the_documented_answers"
+   ]
+  },
+  {
+   "mutant": "p1-awaiting-scoring-allowed",
+   "query": "P1",
+   "mistake": "only rejected recordings refused: one awaiting scoring can be streamed",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_p1_refuses_an_invalid_play[awaiting_scoring]"
+   ]
+  },
+  {
+   "mutant": "p1-full-play-refused",
+   "query": "P1",
+   "mistake": "a play as long as the recording refused (>= instead of >)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_p1_full_length_play_is_completed",
+    "test_p1_shared_station_is_accepted",
+    "test_p1_repeated_report_is_rejected"
+   ]
+  },
+  {
+   "mutant": "p1-fixed-royalty",
+   "query": "P1",
+   "mistake": "a fixed royalty instead of the artist's rate through play_royalty",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_reads_declared_tables[P1]",
+    "test_p1_full_length_play_is_completed",
+    "test_p1_short_play_earns_nothing",
+    "test_p1_shared_station_is_accepted"
+   ]
+  },
+  {
+   "mutant": "p1-local-time",
+   "query": "P1",
+   "mistake": "no time given: local time (NOW) instead of UTC",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_p1_no_time_given_records_utc_now"
+   ]
+  },
+  {
+   "mutant": "p1-station-dropped",
+   "query": "P1",
+   "mistake": "the station that surfaced the play not recorded",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_p1_shared_station_is_accepted"
+   ]
+  },
+  {
+   "mutant": "p1-swallows-repeats",
+   "query": "P1",
+   "mistake": "a repeated report of a play silently ignored (CONTINUE HANDLER FOR 1062)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_p1_repeated_report_is_rejected"
+   ]
+  },
+  {
+   "mutant": "p1-uses-line-wrong",
+   "query": "P1",
+   "mistake": "the comment lists a feature the procedure does not use",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_uses_what_it_lists[P1]"
+   ]
+  },
+  {
+   "mutant": "p1-parameter-line-wrong",
+   "query": "P1",
+   "mistake": "the comment declares a parameter type MySQL does not have",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_created_as_declared[P1]"
+   ]
+  },
+  {
+   "mutant": "p2-handler-for-every-error",
+   "query": "P2",
+   "mistake": "the handler catches every error, not just 1062",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_uses_what_it_lists[P2]",
+    "test_p2_handler_catches_only_duplicates"
+   ]
+  },
+  {
+   "mutant": "p2-no-resignal",
+   "query": "P2",
+   "mistake": "a key clash on the new track ID reported as a duplicate (RESIGNAL removed)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_uses_what_it_lists[P2]",
+    "test_p2_key_clash_is_not_reported_as_a_duplicate"
+   ]
+  },
+  {
+   "mutant": "p2-enters-as-scored",
+   "query": "P2",
+   "mistake": "an upload enters the catalogue as scored, skipping the pipeline",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_p2_new_upload_awaits_scoring"
+   ]
+  },
+  {
+   "mutant": "p2-reuses-an-id",
+   "query": "P2",
+   "mistake": "the new track takes the highest existing ID instead of the next one",
+   "caught": true,
+   "failed": 35,
+   "first_failures": [
+    "test_comment_contract[F1]",
+    "test_comment_contract[P1]",
+    "test_comment_contract[P2]",
+    "test_created_as_declared[F1]"
+   ]
+  },
+  {
+   "mutant": "p2-artist-not-checked",
+   "query": "P2",
+   "mistake": "an unregistered artist is not refused in words (left to the foreign key)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_reads_declared_tables[P2]",
+    "test_p2_unregistered_artist_is_refused",
+    "test_declared_columns_are_touched"
+   ]
+  },
+  {
+   "mutant": "p2-tables-line-wrong",
+   "query": "P2",
+   "mistake": "artist left off the comment's Tables line",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_reads_declared_tables[P2]"
+   ]
+  }
+ ],
+ "caught": 20,
+ "total": 20,
+ "not_applicable": [],
+ "real_file": "========================= 1 failed, 49 passed in 0.92s =========================",
+ "already_failing": []
+}

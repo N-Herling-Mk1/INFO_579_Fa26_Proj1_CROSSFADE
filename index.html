@@ -10,18 +10,22 @@
 <meta property="og:title" content="CROSSFADE | INFO 579 Group 1">
 <meta property="og:description" content="CROSSFADE, a between-genres streaming service for independent artists, built three ways for INFO 579: database design, an SQL database and a NoSQL database.">
 <meta property="og:url" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/">
-<meta property="og:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_card.png">
-<meta property="og:image:width" content="1280">
-<meta property="og:image:height" content="640">
-<meta property="og:image:alt" content="INFO 579 logo beside the CROSSFADE wordmark">
+<meta property="og:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_crossfade_card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:alt" content="An audio waveform crossfading into a glowing database linked to music, listener, station, tag and scoring icons, above the CROSSFADE wordmark; INFO 579">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_card.png">
+<meta name="twitter:title" content="CROSSFADE | INFO 579 Group 1">
+<meta name="twitter:description" content="CROSSFADE, a between-genres streaming service for independent artists, built three ways for INFO 579: database design, an SQL database and a NoSQL database.">
+<meta name="twitter:image:alt" content="An audio waveform crossfading into a glowing database linked to music, listener, station, tag and scoring icons, above the CROSSFADE wordmark; INFO 579">
+<meta name="twitter:image" content="https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/assets/images/og_crossfade_card.jpg">
 <link rel="icon" href="assets/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/site.css?v=cb25b6e1">
-<link rel="stylesheet" href="assets/shell.css?v=a3c3a24d">
+<link rel="stylesheet" href="assets/shell.css?v=849f8743">
 <script src="project1/data/site_data.js"></script>
 </head>
 <body class="shell-body" data-acc="home">
@@ -37,6 +41,15 @@
       <span class="sh-tag" aria-hidden="true"><span>INFO 579</span><span>DB Shell</span></span>
     </a>
     <span class="sh-div" aria-hidden="true"></span>
+    <!-- back / forward sit with HOME; a rule separates that group from the project sections -->
+    <div class="tb-hist" role="group" aria-label="Pages visited">
+      <button class="tb-hb" id="tb-back" type="button" aria-label="Back" title="Back" disabled>
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tb-hb" id="tb-fwd" type="button" aria-label="Forward" title="Forward" disabled>
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M7.5 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
     <nav class="tb-nav" aria-label="Sections" id="tb-nav"></nav>
     <span class="sh-div" aria-hidden="true"></span>
     <div class="sh-status" title="Current view">
@@ -78,7 +91,8 @@
     <iframe id="main" title="CROSSFADE panel"></iframe>
     <div class="veil" id="veil" aria-hidden="true"><div class="vbar"></div><div class="vtxt">Deploying panel</div></div>
     <!-- Boot overlay: real load milestones (shell, data, fonts, deliverables, panel) paced over the 4 s intro.
-         At 100% it plays the three-tone ready chime; if the browser has not allowed sound yet, it waits for one click/key. -->
+         At 100% it plays the three-tone ready chime; the browser allows sound only after a click or key, so until the
+         visitor has given one it waits for Enter (a click anywhere or any key does the same). -->
     <div class="boot" id="boot" role="progressbar" aria-label="Loading CROSSFADE" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <div class="bt-card">
         <div class="bt-k"><span class="bt-led" aria-hidden="true"></span>System boot<span class="bt-sep">//</span><span id="bt-n">0/5</span></div>
@@ -122,11 +136,16 @@
                      ["files", "Files", "project1/panels/files.html"]]]] },
     p2: { label: "Project 2", short: "P2", sub: "SQL Database", ctx: "Project 2 · SQL Database", groups: [
       ["Overview", [["overview", "Deliverables", "project2/panels/overview.html"],
+                    ["rubric", "Rubric", "project2/panels/rubric.html"],
                     ["usecases", "Use cases", "project2/panels/usecases.html"]]],
       ["Files", [["implementation", "database_implementation", "project2/panels/file.html?f=implementation"],
                  ["single", "single_table", "project2/panels/file.html?f=single"],
                  ["multiple", "multiple_table", "project2/panels/file.html?f=multiple"],
                  ["routines", "routines", "project2/panels/file.html?f=routines"]]],
+      ["Vetting & tests", [["vet-implementation", "database_implementation", "project2/panels/vetting.html?f=implementation", null, "228 tests"],
+                           ["vet-single", "single_table", "project2/panels/vetting.html?f=single", null, "67 tests"],
+                           ["vet-multiple", "multiple_table", "project2/panels/vetting.html?f=multiple", null, "80 tests"],
+                           ["vet-routines", "routines", "project2/panels/vetting.html?f=routines", null, "50 tests"]]],
       ["Reference", [["brief", "Assignment brief", "project2/panels/brief.html"]]]] },
     p3: { label: "Project 3", short: "P3", sub: "NoSQL Database", ctx: "Project 3 · NoSQL Database", groups: [
       ["", [["overview", "Overview", "project3/panel.html"]]]] },
@@ -145,6 +164,17 @@
   var ctxEl = document.getElementById("tb-ctx"), hubEl = document.getElementById("side-hub");
   var DARK = { "home/overview.html": 1, "history/panel.html": 1 };                   // panels drawn dark; the rest are light reading surfaces
   var cur = { sec: null, page: null }, veilTimer = null;
+  /* the panel is loaded with location.replace, not by setting the iframe's src: a src change adds an entry to the
+     browser's history, so the browser's back button would step the panel instead of the page route. */
+  var frameSrc = "";
+  function loadFrame(src) {
+    frameSrc = src;
+    try { frame.contentWindow.location.replace(new URL(src, location.href).href); }
+    catch (e) { frame.setAttribute("src", src); }
+  }
+  var backBtn = document.getElementById("tb-back"), fwdBtn = document.getElementById("tb-fwd"), histMove = null;
+  var hist = { list: [], i: -1 };                                   // pages visited this session (see back / forward below)
+  try { var hv = JSON.parse(sessionStorage.getItem("cf-hist")); if (hv && Array.isArray(hv.list)) hist = hv; } catch (e) {}
 
   function pages(sec) { var out = []; SECTIONS[sec].groups.forEach(function (g) { out = out.concat(g[1]); }); return out; }
   function page(sec, id) { return pages(sec).filter(function (p) { return p[0] === id; })[0]; }
@@ -155,7 +185,8 @@
     var s = SECTIONS[k];
     return '<a class="tb-btn" href="#' + k + '" data-sec="' + k + '" title="' + s.label + ' (Alt+' + (ORDER.indexOf(k) + 1) + ')">' +
       '<span class="gl" aria-hidden="true"></span><span class="tx"><span class="l">' + s.label + '</span><span class="ls">' + (s.short || s.label) + "</span>" +
-      (s.sub ? '<span class="s">' + s.sub + "</span>" : "") + "</span></a>";
+      (s.sub ? '<span class="s">' + s.sub + "</span>" : "") + "</span></a>" +
+      (k === "home" ? '<span class="sh-div tb-sep" aria-hidden="true"></span>' : "");
   }).join("");
 
   /* ---- side rail for one section */
@@ -216,13 +247,14 @@
     ctxEl.textContent = (SECTIONS[r.sec].short || SECTIONS[r.sec].label) + " · " + p[1].replace("↳ ", "");
     Array.prototype.forEach.call(sideNav.querySelectorAll(".sn"), function (a) { a.toggleAttribute("aria-current", a.dataset.page === r.page); });
     var src = p[2] + (r.rest.length ? "#" + r.rest.join("/") : "");
-    if (frame.getAttribute("src") !== src) {
-      var samePage = (frame.getAttribute("src") || "").split("#")[0] === p[2];
+    if (frameSrc !== src) {
+      var samePage = frameSrc.split("#")[0] === p[2];
       if (!samePage) veilOn();
       stage.classList.toggle("dark", !!DARK[p[2]]);
-      frame.setAttribute("src", src);
+      loadFrame(src);
     }
     cur = { sec: r.sec, page: r.page };
+    histNote("#" + [r.sec, r.page].concat(r.rest).join("/"));
     document.title = (r.sec === "home" && r.page === "overview" ? "" : p[1].replace("↳ ", "") + " | " + (r.sec === "home" ? "" : SECTIONS[r.sec].label + " | ")) + "CROSSFADE";
   }
   window.addEventListener("hashchange", show);
@@ -257,7 +289,8 @@
       var h = frame.contentWindow.location.hash.replace(/^#/, "");
       var want = "#" + cur.sec + "/" + cur.page + (h ? "/" + h : "");
       if (location.hash !== want) history.replaceState(null, "", want);
-      frame.setAttribute("src", page(cur.sec, cur.page)[2] + (h ? "#" + h : ""));
+      if (hist.list[hist.i] !== want) { hist.list[hist.i] = want; histSave(); }   // back returns to this tab / entry
+      frameSrc = page(cur.sec, cur.page)[2] + (h ? "#" + h : "");   // the panel is already there: just note it
     });
   });
 
@@ -265,6 +298,12 @@
      (bar + %), the menu button blinks for 4 s, the ready chime plays, then the rail opens and the top bar
      settles to 80% of its height. */
   var tog = document.getElementById("rail-toggle"), bootT = null;
+  /* every control is locked until the boot sequence is done: the top bar, the rail and the panel are inert
+     (no clicks, no keyboard focus), and the Alt+1..6 keys wait too. The boot overlay's own Enter button and its
+     click-or-key-to-continue stay live, since they are part of the boot. */
+  var LOCKED = [document.querySelector(".topbar"), document.getElementById("side"), frame];
+  function lock(on) { LOCKED.forEach(function (el) { if (on) el.setAttribute("inert", ""); else el.removeAttribute("inert"); }); }
+  lock(true);
   function setRail(open) {
     app.classList.toggle("rail-hidden", !open);
     tog.setAttribute("aria-expanded", open ? "true" : "false");
@@ -277,11 +316,12 @@
     if (bo) { bo.classList.add("out"); setTimeout(function () { bo.hidden = true; }, 600); }
     tog.classList.remove("blink");
     app.classList.remove("booting");
+    lock(false);
     setRail(true);
     document.body.classList.add("compact");
   }
   tog.addEventListener("click", function () {
-    if (app.classList.contains("booting")) { Boot.skip(); return; }
+    if (app.classList.contains("booting")) return;                    // locked until the boot is done
     if (window.SFX) window.SFX.tap();
     setRail(app.classList.contains("rail-hidden"));
   });
@@ -290,10 +330,10 @@
 
   /* ---- boot overlay: loading bar + %, then the ready chime */
   var Boot = (function () {
-    var BOOT_MS = 4000, t0 = performance.now(), shown = 0, raf = null, waiting = false;
+    var BOOT_MS = 4000, t0 = performance.now(), shown = 0, raf = null;
+    var enter = document.getElementById("bt-enter"), hint = document.getElementById("bt-hint");
     var fill = document.getElementById("bt-fill"), pct = document.getElementById("bt-pct");
     var stepEl = document.getElementById("bt-step"), nEl = document.getElementById("bt-n");
-    var enter = document.getElementById("bt-enter"), hint = document.getElementById("bt-hint");
     /* real milestones, in order; each is marked done when it actually happens */
     var M = [["Starting shell", true], ["Loading data", !!window.SITE], ["Loading fonts", false],
              ["Checking deliverables", !window.P2], ["Deploying panel", false]];
@@ -334,21 +374,20 @@
       window.removeEventListener("keydown", go, true);
       finishBoot();
     }
+    /* at 100%: the ready chime, then the site. A browser plays sound only after the visitor's first click or key,
+       so unless one has already happened the overlay waits for Enter (or any click or key), which also unlocks the
+       audio for the interface sounds that follow. With sound switched off it goes straight in. */
     function complete() {
       bootEl.classList.add("full");
       if (!window.SFX || !window.SFX.enabled()) { setTimeout(finishBoot, 250); return; }
       if (soundAllowed()) { setTimeout(go, 250); return; }
-      /* the browser will not play sound until the user interacts: wait for one click or key */
-      waiting = true;
       enter.hidden = false; hint.hidden = false; bootEl.classList.add("wait");
       setTimeout(function () { try { enter.focus({ preventScroll: true }); } catch (e) {} }, 50);
       window.addEventListener("pointerdown", go, true);
       window.addEventListener("keydown", go, true);
     }
     return {
-      start: function () { raf = requestAnimationFrame(frameTick); },
-      /* the menu button pressed during the load: skip ahead (that click also allows sound) */
-      skip: function () { cancelAnimationFrame(raf); if (waiting) return; fill.style.width = "100%"; pct.textContent = "100%"; go(); }
+      start: function () { raf = requestAnimationFrame(frameTick); }
     };
   })();
 
@@ -371,9 +410,47 @@
   });
   drawSnd();
 
+  /* ---- back / forward: the pages visited this session, in order (kept in sessionStorage, so a reload keeps them).
+     A new page drops anything ahead of the current one, as a browser does. The browser's own back and forward
+     buttons move along the same list. */
+  function histSave() { try { sessionStorage.setItem("cf-hist", JSON.stringify(hist)); } catch (e) {} }
+  function histLabel(h) {
+    var r = parse(h), p = page(r.sec, r.page);
+    return (SECTIONS[r.sec].short || SECTIONS[r.sec].label) + " · " + p[1].replace("↳ ", "");
+  }
+  function histDraw() {
+    var b = hist.i > 0 ? hist.list[hist.i - 1] : null, f = hist.i < hist.list.length - 1 ? hist.list[hist.i + 1] : null;
+    backBtn.disabled = !b; fwdBtn.disabled = !f;
+    backBtn.title = b ? "Back to " + histLabel(b) : "Back"; fwdBtn.title = f ? "Forward to " + histLabel(f) : "Forward";
+    backBtn.setAttribute("aria-label", backBtn.title); fwdBtn.setAttribute("aria-label", fwdBtn.title);
+  }
+  function histNote(h) {
+    if (histMove !== null && hist.list[histMove] === h) hist.i = histMove;                  // our own buttons
+    else if (hist.list[hist.i] === h) { /* same entry: a reload */ }
+    else if (hist.list[hist.i - 1] === h) hist.i--;                                          // the browser's back
+    else if (hist.list[hist.i + 1] === h) hist.i++;                                          // the browser's forward
+    else {
+      hist.list = hist.list.slice(0, hist.i + 1).concat([h]);
+      if (hist.list.length > 60) hist.list.shift();
+      hist.i = hist.list.length - 1;
+    }
+    histMove = null; histSave(); histDraw();
+  }
+  function histGo(d) {
+    var j = hist.i + d;
+    if (app.classList.contains("booting") || j < 0 || j >= hist.list.length) return;
+    histMove = j;
+    location.hash = hist.list[j];
+  }
+  backBtn.addEventListener("click", function () { histGo(-1); });
+  fwdBtn.addEventListener("click", function () { histGo(1); });
+
   /* ---- Alt+1..6 jump to a section (also forwarded from inside same-origin panels) */
   function keys(e) {
-    if (!e.altKey || e.ctrlKey || e.metaKey) return;
+    if (!e.altKey || e.ctrlKey || e.metaKey || app.classList.contains("booting")) return;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {           // Alt+arrows: the same back / forward list
+      e.preventDefault(); histGo(e.key === "ArrowLeft" ? -1 : 1); return;
+    }
     var i = parseInt(e.key, 10);
     if (i >= 1 && i <= ORDER.length) { e.preventDefault(); location.hash = ORDER[i - 1]; }
   }

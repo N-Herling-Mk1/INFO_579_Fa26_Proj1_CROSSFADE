@@ -150,7 +150,8 @@
 	- The architecture label includes the training corpus, because the RA keeps it
 	  so that results from differently trained versions are never silently compared.
 	- On equal accuracy the newer deployment wins (deployed_on DESC): it began
-	  scoring incoming uploads most recently (RA: Deployed On).
+	  scoring incoming uploads most recently (RA: Deployed On). If both tie, the
+	  lower model_id wins, so LIMIT 1 always picks the same version.
 	Requirements: (a) CONCAT, ROUND  (c) ORDER BY  (d) LIMIT
 	Output: version_label, architecture, accuracy_pct, deployed_on
 */

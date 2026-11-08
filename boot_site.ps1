@@ -2,7 +2,8 @@
   boot_site.ps1 - serve the CROSSFADE docs site locally.
   Scans loopback ports 8000-8020 for the first free one, starts python's
   http.server from the repo root, opens the browser, and shows the live
-  request log. Ctrl+C stops the server.
+  request log. Ctrl+C stops the server. Pages are served with caching off
+  (tools/serve.py), so the browser always shows the files as they are on disk.
 
   Usage:  .\boot_site.ps1            (auto port, opens browser)
           .\boot_site.ps1 -Port 8010
@@ -44,5 +45,6 @@ Write-Host "      serving $url" -ForegroundColor Green
 
 Write-Host "[3/3] starting server (Ctrl+C to stop)" -ForegroundColor Cyan
 if (-not $NoOpen) { Start-Process $url }
-try { & $py.Source -m http.server $Port --bind 127.0.0.1 }
+# tools/serve.py: python's http.server with caching off, so an updated page is never shown from the browser's cache
+try { & $py.Source (Join-Path $root "tools\serve.py") $Port }
 finally { Write-Host "server stopped" -ForegroundColor Yellow }

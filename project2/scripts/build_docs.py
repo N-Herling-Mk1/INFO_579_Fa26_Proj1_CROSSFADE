@@ -95,6 +95,9 @@ def build(path, story, title, size):
 def load():
     uc = json.loads((P2 / "data" / "use_cases.json").read_text(encoding="utf-8"))["useCases"]
     res = json.loads((P2 / "data" / "single_table_results.json").read_text(encoding="utf-8"))
+    pm = P2 / "data" / "multiple_table_results.json"                    # Task 3, merged into the use case reference
+    res_m = json.loads(pm.read_text(encoding="utf-8")) if pm.exists() else {"queries": {}, "cases": [], "passed": 0, "failed": 0}
+    res["multiple"] = res_m
     rows = {}
     for f in sorted((ROOT / "project1" / "data_export" / "csv").glob("*.csv")):
         with open(f, encoding="utf-8-sig", newline="") as h:
@@ -193,7 +196,7 @@ def guide(res, rows):
                 ["test_requirements_match_declared", "query", "Requirements: lists (a)-(e) the SQL does not use, or misses one it does"],
                 ["test_columns_match_use_cases", "query", "reads a column its use cases do not declare in use_cases.json"],
                 ["test_result_matches_oracle", "query", "columns, row count, a value or the row order differ from the expected answer"],
-                ["test_result_is_deterministic", "query", "two runs differ: an ORDER BY does not break its ties"],
+                ["test_result_is_deterministic", "query", "the ORDER BY includes no unique key (or GROUP BY columns), so tied rows could come back in any order; or two runs differ"],
                 ["test_s#_...", "case", "logic the sample data never reaches (a row added or changed, rolled back) gives the wrong rows"],
                 ["test_expected_error_is_raised[E1]", "error", "the duplicate upload was not refused with error 1062, or the table changed"],
                 ["coverage tests (4)", "file", "a table never queried, a requirement met fewer than twice, a use case unanswered, "
@@ -227,24 +230,33 @@ def guide(res, rows):
 
 
 # ============================================================================ PDF 2: use case reference
+FILE_OF = {"S": "single_table.sql", "E": "single_table.sql", "M": "multiple_table.sql"}
+
+
 def reference(uc, res, rows):
-    Q, cases = res["queries"], res.get("cases", [])
+    rm = res.get("multiple") or {"queries": {}, "cases": []}
+    Q, cases = {**res["queries"], **rm["queries"]}, res.get("cases", []) + rm.get("cases", [])
     tags_for = lambda uid: sorted((t for t, q in Q.items() if uid in (q.get("use_cases") or [])),
-                                  key=lambda t: (t[0] != "S", int(t[1:])))
+                                  key=lambda t: ("SEM".index(t[0]), int(t[1:])))
     W = landscape(letter)[0] - 1.4 * inch
     s = [P("Use case reference", H1),
          P(f"CROSSFADE, INFO 579 Project 2. {len(uc)} use cases from the Project 1 requirements analysis (RA). For each: the "
-           "tables and columns it needs, which Project 2 file answers it, and, where single_table.sql answers it, the query's "
-           "input and expected output and every test case. Expected outputs are computed in Python from the Project 1 sample "
-           f"data (oracle.py) and were matched by MySQL in the test run of {esc(res['generated'].replace('T', ' '))} "
-           f"({res['passed']} passed, {res['failed']} failed). Day counts use the fixed report date {REPORT_DATE}.", SMALL)]
+           "tables and columns it needs, which Project 2 file answers it, and, for each query in single_table.sql and "
+           "multiple_table.sql, its input and expected output and every test case. Expected outputs are computed in Python "
+           "from the Project 1 sample data (oracle.py, oracle_multiple.py) and were matched by MySQL in the last test runs: "
+           f"single_table.sql {esc(res['generated'].replace('T', ' '))} ({res['passed']} passed, {res['failed']} failed)"
+           + (f"; multiple_table.sql {esc(rm['generated'].replace('T', ' '))} ({rm['passed']} passed, {rm['failed']} failed)"
+              if rm.get("generated") else "") + f". Day counts use the fixed report date {REPORT_DATE}.", SMALL)]
 
     # summary table
     summ = []
     for u in uc:
         tags = tags_for(u["id"])
+        by = {}
+        for t in tags:
+            by.setdefault(FILE_OF[t[0]], []).append(t)
         summ.append([u["id"], u["title"], ", ".join(u["columns"]),
-                     ("single_table.sql: " + ", ".join(tags)) if tags else "multiple_table.sql / routines.sql (not written yet)"])
+                     "; ".join(f"{f}: {', '.join(ts)}" for f, ts in by.items()) or "routines.sql (not written yet)"])
     s += [P("Summary", H2), grid(["UC", "Use case", "Tables it needs", "Answered by"], summ,
                                  widths=[0.55 * inch, 3.6 * inch, 2.9 * inch, W - 7.05 * inch], font=8, mono_cols=(0,))]
 
@@ -262,12 +274,13 @@ def reference(uc, res, rows):
                    widths=[1.3 * inch, W - 3.6 * inch, 1.0 * inch, 1.3 * inch], font=8, mono_cols=(0, 1))]
         tags = tags_for(u["id"])
         if not tags:
-            s.append(P("<b>Input / expected output:</b> not defined yet. This use case is answered in multiple_table.sql or "
-                       "routines.sql; its query, input and expected output are added when that file and its tests are written.", BODY))
+            s.append(P("<b>Input / expected output:</b> not defined yet. This use case is answered in routines.sql; its "
+                       "routine, input and expected output are added when that file and its tests are written.", BODY))
             continue
         for tag in tags:
             q = Q[tag]
-            block = [P(f"{tag}  |  crossfade.{esc(q.get('table'))}  |  single_table.sql", H3)]
+            where = esc(q.get("table") and "crossfade." + q["table"] or ", ".join(q.get("tables") or []))
+            block = [P(f"{tag}  |  {where}  |  {FILE_OF[tag[0]]}", H3)]
             if q.get("need"):
                 block += [P("BUSINESS NEED", LABEL), P(esc(q["need"]), BODY)]
             if q.get("kind") == "expected_error":
@@ -279,12 +292,18 @@ def reference(uc, res, rows):
                             + esc(re.sub(r"Duplicate entry '.*' for key", "Duplicate entry '...' for key", q.get("got", ""))), BODY)]
                 s.append(KeepTogether(block))
                 continue
-            block += [P("QUESTION", LABEL), P(esc(q.get("question", "")), BODY),
-                      P("INPUT", LABEL),
-                      P(f"The Project 1 sample data in <font face='Courier'>crossfade.{esc(q['table'])}</font> "
-                        f"({rows.get(q['table'], '?')} rows), read through these columns: "
-                        f"<font face='Courier'>{esc(', '.join(q.get('columns') or []))}</font>. "
-                        f"Brief requirements met: {esc(' '.join('(' + r + ')' for r in q.get('declared') or []))}.", BODY),
+            if isinstance(q.get("columns"), dict):                     # multiple_table.sql: columns per table
+                reads = "; ".join(f"<font face='Courier'>crossfade.{esc(t)}</font> ({rows.get(t, '?')} rows): "
+                                  f"<font face='Courier'>{esc(', '.join(c))}</font>" for t, c in q["columns"].items())
+                inp = (f"The Project 1 sample data, read through these tables and columns: {reads}. Task 3 requirement met: "
+                       f"{esc(q.get('requirement', ''))} {esc(q.get('requirement_text', ''))}. One row per "
+                       f"{esc(', '.join(q.get('grain') or []))}.")
+            else:
+                inp = (f"The Project 1 sample data in <font face='Courier'>crossfade.{esc(q['table'])}</font> "
+                       f"({rows.get(q['table'], '?')} rows), read through these columns: "
+                       f"<font face='Courier'>{esc(', '.join(q.get('columns') or []))}</font>. "
+                       f"Brief requirements met: {esc(' '.join('(' + r + ')' for r in q.get('declared') or []))}.")
+            block += [P("QUESTION", LABEL), P(esc(q.get("question", "")), BODY), P("INPUT", LABEL), P(inp, BODY),
                       code(q["sql"] + ";")]
             s += block
             exp = q.get("expected") or {"columns": q.get("columns_out", []), "rows": q.get("rows", [])}

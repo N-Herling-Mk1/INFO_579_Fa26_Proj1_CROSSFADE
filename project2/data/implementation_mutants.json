@@ -1,0 +1,207 @@
+{
+ "mutants": [
+  {
+   "mutant": "varchar-size",
+   "mistake": "a column one character wider than the model (genre.name VARCHAR(10))",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_schema_columns[genre]"
+   ]
+  },
+  {
+   "mutant": "unsigned-dropped",
+   "mistake": "UNSIGNED missing on a key (track.track_id INT)",
+   "caught": true,
+   "failed": 200,
+   "first_failures": [
+    "test_load_first_run",
+    "test_load_second_run",
+    "test_schema_tables",
+    "test_schema_columns[track]"
+   ]
+  },
+  {
+   "mutant": "check-dropped",
+   "mistake": "a CHECK left out (I4, the ambiguity window)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_schema_constraint_names",
+    "test_enforce_check[ck_station_ambiguity_window]"
+   ]
+  },
+  {
+   "mutant": "primary-key-wrong",
+   "mistake": "an extra column in a composite primary key (play)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_schema_primary_key[play]"
+   ]
+  },
+  {
+   "mutant": "optional-made-required",
+   "mistake": "an optional column made NOT NULL (play.reaction)",
+   "caught": true,
+   "failed": 161,
+   "first_failures": [
+    "test_load_first_run",
+    "test_load_second_run",
+    "test_schema_columns[play]",
+    "test_read_one_row[genre]"
+   ]
+  },
+  {
+   "mutant": "required-made-optional",
+   "mistake": "a required column left nullable (track.title)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_schema_columns[track]",
+    "test_enforce_not_null[track-title]"
+   ]
+  },
+  {
+   "mutant": "cascade-dropped",
+   "mistake": "ON DELETE CASCADE left out (station_blend -> station)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_schema_foreign_key[fk_station_blend_station]",
+    "test_enforce_delete_station_cascades_blend_and_keeps_plays"
+   ]
+  },
+  {
+   "mutant": "foreign-key-renamed",
+   "mistake": "a foreign key under another name (fk_play_stn)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_schema_foreign_key[fk_play_station]",
+    "test_schema_no_extra_foreign_keys",
+    "test_enforce_orphan_refused[fk_play_station]"
+   ]
+  },
+  {
+   "mutant": "foreign-key-dropped",
+   "mistake": "a foreign key left out (track -> artist)",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_schema_foreign_key[fk_track_artist]",
+    "test_schema_no_extra_foreign_keys",
+    "test_enforce_orphan_refused[fk_track_artist]",
+    "test_enforce_delete_parent_refused[artist]"
+   ]
+  },
+  {
+   "mutant": "unique-dropped",
+   "mistake": "a unique key left out (listener.email)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_schema_unique_key[uq_listener_email]",
+    "test_enforce_duplicate_unique[uq_listener_email]"
+   ]
+  },
+  {
+   "mutant": "checks-switched-off",
+   "mistake": "foreign-key checks switched off during the load",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_load_every_statement_commented",
+    "test_load_never_switches_checks_off",
+    "test_load_inventory"
+   ]
+  },
+  {
+   "mutant": "not-re-runnable",
+   "mistake": "DROP DATABASE IF EXISTS removed (the script cannot run twice)",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_load_first_run",
+    "test_load_second_run",
+    "test_load_no_warnings",
+    "test_load_inventory"
+   ]
+  },
+  {
+   "mutant": "decimal-rounds",
+   "mistake": "a DECIMAL one place too short, so MySQL rounds the data (probability DECIMAL(5,3))",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_load_no_warnings",
+    "test_schema_columns[genre_probability]",
+    "test_data_every_cell[genre_probability]",
+    "test_data_integrity_rule[I2-ten-probabilities-summing-to-one]"
+   ]
+  },
+  {
+   "mutant": "enum-extra-value",
+   "mistake": "an ENUM value the model does not have (plan_tier 'family')",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_schema_columns[listener]"
+   ]
+  },
+  {
+   "mutant": "date-as-datetime",
+   "mistake": "DATE stored as DATETIME (listener.signup_date)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_schema_columns[listener]",
+    "test_data_every_cell[listener]"
+   ]
+  },
+  {
+   "mutant": "checksum-varbinary",
+   "mistake": "the fixed 32-byte checksum stored as VARBINARY(64)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_schema_columns[track]",
+    "test_enforce_type_limit[track-audio_checksum-too-long]"
+   ]
+  },
+  {
+   "mutant": "value-changed",
+   "mistake": "one royalty amount changed (0.0035 -> 0.0036)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_data_every_cell[play]",
+    "test_data_integrity_rule[I7-royalty-is-payout-rate-from-30-seconds]"
+   ]
+  },
+  {
+   "mutant": "row-dropped",
+   "mistake": "one artist row left out (1049)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_data_row_count[artist]",
+    "test_data_every_cell[artist]",
+    "test_enforce_rollback_leaves_data"
+   ]
+  },
+  {
+   "mutant": "comment-removed",
+   "mistake": "the purpose comment before one CREATE TABLE removed (the brief)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_load_every_statement_commented"
+   ]
+  }
+ ],
+ "caught": 19,
+ "total": 19,
+ "not_applicable": [],
+ "real_script": "============================= 228 passed in 0.76s =============================="
+}

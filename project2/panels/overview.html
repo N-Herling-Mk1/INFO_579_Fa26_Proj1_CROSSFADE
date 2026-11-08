@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
 <link rel="stylesheet" href="../../assets/site.css?v=cb25b6e1">
 <script src="../data/deliverables.js"></script>
+<script src="../data/submission.js"></script>
 <style>
   /* download column: icon buttons, live once the file exists in project2/deliverables/ */
   .deltable th.dl, .deltable td.dl { text-align: right; white-space: nowrap; width: 1%; }
@@ -57,8 +58,18 @@
       '<td><span class="mark open" id="m-' + f.id + '">not started</span></td>' +
       '<td class="dl">' + kit + '<a class="dlbtn off" id="d-' + f.id + '" href="../deliverables/' + f.file + '" download title="' + f.file + ' not written yet" aria-label="Download ' + f.file + '" aria-disabled="true" tabindex="-1">' + ARROW + '</a></td></tr>';
   }).join("") +
-    '<tr><td><code>' + P.zip + '</code><span class="sub">All four files, uploaded to D2L</span></td><td>Submit</td><td></td>' +
-    '<td><span class="mark open">not built</span></td><td class="dl"></td></tr>';
+    '<tr><td><code>' + P.zip + '</code><span class="sub" id="zip-sub">All four files, uploaded to D2L</span></td><td>Submit</td><td></td>' +
+    '<td><span class="mark open" id="zip-mark">not built</span></td><td class="dl"><a class="dlbtn off" id="zip-dl" href="../deliverables/' + P.zip +
+    '" download title="Not built yet: python project2/scripts/build_submission.py" aria-label="Download ' + P.zip + '" aria-disabled="true" tabindex="-1">' + ARROW + '</a></td></tr>';
+  /* the submission zip (project2/scripts/build_submission.py): live once it is in project2/deliverables/ */
+  fetch("../deliverables/" + encodeURIComponent(P.zip), { method: "HEAD", cache: "no-store" }).then(function (r) {
+    if (!r.ok) return;
+    var S = window.P2_SUBMISSION, m = document.getElementById("zip-mark"), d = document.getElementById("zip-dl");
+    m.textContent = "built"; m.className = "mark ready";
+    d.className = "dlbtn"; d.title = "Download " + P.zip; d.removeAttribute("aria-disabled"); d.removeAttribute("tabindex");
+    if (S) document.getElementById("zip-sub").textContent = S.files.length + " files · " + (S.bytes / 1024).toFixed(1) + " KB · built " +
+      S.built.replace("T", " ").slice(0, 16) + (S.warnings.length ? " · " + S.warnings.length + " warning(s)" : "") + " · upload to D2L";
+  }).catch(function () {});
   document.getElementById("general").innerHTML = P.general.map(function (g) { return "<li>" + g + "</li>"; }).join("");
   P.present("../", function (f, ok) {
     if (!ok) return;

@@ -1,0 +1,8198 @@
+/* Written by project2/tests (pytest) at the end of a run. Do not edit. */
+window.P2_MULTIPLE = {
+ "file": "multiple_table.sql",
+ "generated": "2026-11-07T23:20:08",
+ "passed": 80,
+ "failed": 0,
+ "queries": {
+  "M1": {
+   "title": "listener taste profile",
+   "tables": [
+    "play",
+    "listener",
+    "track"
+   ],
+   "use_cases": [
+    "UC-13"
+   ],
+   "question": "For each listener, how many recordings did they start, finish, save and skip, and how much of the audio they started did they hear?",
+   "need": "CROSSFADE learns listener taste from what they actually play: how much of each recording they hear, whether they finish it, and whether they save or skip it (RA: Overview, \"learning listener taste\"; Play).",
+   "requirement": "3.1",
+   "requirement_text": "an associative table and the two tables it relates, joined with INNER JOIN",
+   "grain": [
+    "listener_id"
+   ],
+   "output": [
+    "listener_id",
+    "display_name",
+    "plays",
+    "completed_plays",
+    "saves",
+    "skips",
+    "pct_of_audio_heard"
+   ],
+   "sql": "SELECT l.listener_id,\n       l.display_name,\n       COUNT(*) AS plays,\n       SUM(CASE WHEN p.completed = 1 THEN 1 ELSE 0 END) AS completed_plays,\n       SUM(CASE WHEN p.reaction = 'saved' THEN 1 ELSE 0 END) AS saves,\n       SUM(CASE WHEN p.reaction = 'skipped' THEN 1 ELSE 0 END) AS skips,\n       ROUND(100 * SUM(p.seconds_played) / SUM(t.duration), 1) AS pct_of_audio_heard\nFROM crossfade.play AS p\nINNER JOIN crossfade.listener AS l ON l.listener_id = p.listener_id\nINNER JOIN crossfade.track AS t ON t.track_id = p.track_id\nGROUP BY l.listener_id, l.display_name\nORDER BY pct_of_audio_heard DESC,\n         l.listener_id",
+   "detected": "play joined to ['listener', 'track']",
+   "columns": {
+    "play": [
+     "completed",
+     "listener_id",
+     "reaction",
+     "seconds_played",
+     "track_id"
+    ],
+    "listener": [
+     "display_name",
+     "listener_id"
+    ],
+    "track": [
+     "duration",
+     "track_id"
+    ]
+   },
+   "columns_out": [
+    "listener_id",
+    "display_name",
+    "plays",
+    "completed_plays",
+    "saves",
+    "skips",
+    "pct_of_audio_heard"
+   ],
+   "rows": [
+    [
+     "20937",
+     "dokafor",
+     "1",
+     "1",
+     "0",
+     "0",
+     "100.0"
+    ],
+    [
+     "20936",
+     "wenz",
+     "4",
+     "3",
+     "1",
+     "0",
+     "97.2"
+    ],
+    [
+     "20934",
+     "priyam",
+     "5",
+     "4",
+     "2",
+     "0",
+     "95.9"
+    ],
+    [
+     "20935",
+     "tbarros",
+     "4",
+     "3",
+     "1",
+     "0",
+     "89.4"
+    ],
+    [
+     "20938",
+     "hito",
+     "4",
+     "2",
+     "1",
+     "1",
+     "79.1"
+    ],
+    [
+     "20933",
+     "klind",
+     "4",
+     "3",
+     "1",
+     "1",
+     "74.6"
+    ],
+    [
+     "20932",
+     "amara_o",
+     "4",
+     "1",
+     "0",
+     "1",
+     "64.9"
+    ],
+    [
+     "20931",
+     "jrivera",
+     "5",
+     "2",
+     "2",
+     "2",
+     "45.9"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "listener_id",
+     "display_name",
+     "plays",
+     "completed_plays",
+     "saves",
+     "skips",
+     "pct_of_audio_heard"
+    ],
+    "rows": [
+     [
+      "20937",
+      "dokafor",
+      "1",
+      "1",
+      "0",
+      "0",
+      "100.0"
+     ],
+     [
+      "20936",
+      "wenz",
+      "4",
+      "3",
+      "1",
+      "0",
+      "97.2"
+     ],
+     [
+      "20934",
+      "priyam",
+      "5",
+      "4",
+      "2",
+      "0",
+      "95.9"
+     ],
+     [
+      "20935",
+      "tbarros",
+      "4",
+      "3",
+      "1",
+      "0",
+      "89.4"
+     ],
+     [
+      "20938",
+      "hito",
+      "4",
+      "2",
+      "1",
+      "1",
+      "79.1"
+     ],
+     [
+      "20933",
+      "klind",
+      "4",
+      "3",
+      "1",
+      "1",
+      "74.6"
+     ],
+     [
+      "20932",
+      "amara_o",
+      "4",
+      "1",
+      "0",
+      "1",
+      "64.9"
+     ],
+     [
+      "20931",
+      "jrivera",
+      "5",
+      "2",
+      "2",
+      "2",
+      "45.9"
+     ]
+    ]
+   }
+  },
+  "M2": {
+   "title": "royalty run: what each artist is owed",
+   "tables": [
+    "artist",
+    "track",
+    "play"
+   ],
+   "use_cases": [
+    "UC-01",
+    "UC-14"
+   ],
+   "question": "In this royalty run, how much does each artist earn from the plays of their recordings, and how many of those plays qualified?",
+   "need": "CROSSFADE pays every artist a per-stream royalty from an exact ledger: each play keeps the royalty it earned when it was recorded, so a later rate change never rewrites what is owed (RA: Overview; Play: Royalty Amount; rule I7).",
+   "requirement": "3.2",
+   "requirement_text": "two or more tables joined with LEFT OUTER JOIN",
+   "grain": [
+    "artist_id"
+   ],
+   "output": [
+    "artist_id",
+    "payee",
+    "plays",
+    "qualifying_plays",
+    "usd_owed"
+   ],
+   "sql": "SELECT a.artist_id,\n       a.stage_name AS payee,\n       COUNT(p.track_id) AS plays,\n       SUM(CASE WHEN p.seconds_played >= 30 THEN 1 ELSE 0 END) AS qualifying_plays,\n       IFNULL(SUM(p.royalty_amount), 0) AS usd_owed\nFROM crossfade.artist AS a\nLEFT OUTER JOIN crossfade.track AS t ON t.artist_id = a.artist_id\nLEFT OUTER JOIN crossfade.play AS p ON p.track_id = t.track_id\nGROUP BY a.artist_id, a.stage_name\nORDER BY usd_owed DESC,\n         a.artist_id",
+   "detected": "LEFT OUTER JOIN",
+   "columns": {
+    "artist": [
+     "artist_id",
+     "stage_name"
+    ],
+    "track": [
+     "artist_id",
+     "track_id"
+    ],
+    "play": [
+     "royalty_amount",
+     "seconds_played",
+     "track_id"
+    ]
+   },
+   "columns_out": [
+    "artist_id",
+    "payee",
+    "plays",
+    "qualifying_plays",
+    "usd_owed"
+   ],
+   "rows": [
+    [
+     "1046",
+     "Ochre Parade",
+     "6",
+     "6",
+     "0.02160"
+    ],
+    [
+     "1042",
+     "Velvet Static",
+     "6",
+     "5",
+     "0.02000"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "6",
+     "5",
+     "0.01500"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "4",
+     "3",
+     "0.01140"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "5",
+     "3",
+     "0.00960"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "3",
+     "3",
+     "0.00900"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "1",
+     "1",
+     "0.00350"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "0",
+     "0",
+     "0.00000"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "artist_id",
+     "payee",
+     "plays",
+     "qualifying_plays",
+     "usd_owed"
+    ],
+    "rows": [
+     [
+      "1046",
+      "Ochre Parade",
+      "6",
+      "6",
+      "0.02160"
+     ],
+     [
+      "1042",
+      "Velvet Static",
+      "6",
+      "5",
+      "0.02000"
+     ],
+     [
+      "1047",
+      "Juno Fleet",
+      "6",
+      "5",
+      "0.01500"
+     ],
+     [
+      "1044",
+      "Low Orbit Choir",
+      "4",
+      "3",
+      "0.01140"
+     ],
+     [
+      "1045",
+      "Tin Harbour",
+      "5",
+      "3",
+      "0.00960"
+     ],
+     [
+      "1048",
+      "Saltmarsh Tapes",
+      "3",
+      "3",
+      "0.00900"
+     ],
+     [
+      "1043",
+      "Mara Quell",
+      "1",
+      "1",
+      "0.00350"
+     ],
+     [
+      "1049",
+      "Kestrel Ave",
+      "0",
+      "0",
+      "0.00000"
+     ]
+    ]
+   }
+  },
+  "M3": {
+   "title": "station reach",
+   "tables": [
+    "station",
+    "play",
+    "listener"
+   ],
+   "use_cases": [
+    "UC-07"
+   ],
+   "question": "How many listeners does each station reach, its creator included, and which stations have been shared beyond their creator?",
+   "need": "stations can be shared, and a shared station appears under its creator's display name (RA: Listener: Display Name; Station: Name; rule I6, \"A play's Station ID may refer to a station created by another listener\").",
+   "requirement": "3.3",
+   "requirement_text": "a set operation (UNION, INTERSECT or EXCEPT)",
+   "grain": [
+    "station_id"
+   ],
+   "output": [
+    "station_id",
+    "station",
+    "created_by",
+    "listeners_reached",
+    "reach_status"
+   ],
+   "sql": "SELECT s.station_id,\n       s.name AS station,\n       l.display_name AS created_by,\n       COUNT(*) AS listeners_reached,\n       CASE WHEN COUNT(*) > 1 THEN 'shared' ELSE 'creator only' END AS reach_status\nFROM (SELECT station_id, listener_id\n      FROM crossfade.station\n      UNION\n      SELECT station_id, listener_id\n      FROM crossfade.play\n      WHERE station_id IS NOT NULL) AS r\nINNER JOIN crossfade.station AS s ON s.station_id = r.station_id\nINNER JOIN crossfade.listener AS l ON l.listener_id = s.listener_id\nGROUP BY s.station_id, s.name, l.display_name\nORDER BY listeners_reached DESC,\n         s.station_id",
+   "detected": "UNION",
+   "columns": {
+    "station": [
+     "listener_id",
+     "name",
+     "station_id"
+    ],
+    "listener": [
+     "display_name",
+     "listener_id"
+    ],
+    "play": [
+     "listener_id",
+     "station_id"
+    ]
+   },
+   "columns_out": [
+    "station_id",
+    "station",
+    "created_by",
+    "listeners_reached",
+    "reach_status"
+   ],
+   "rows": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "jrivera",
+     "2",
+     "shared"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "priyam",
+     "2",
+     "shared"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "klind",
+     "1",
+     "creator only"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "tbarros",
+     "1",
+     "creator only"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "wenz",
+     "1",
+     "creator only"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "dokafor",
+     "1",
+     "creator only"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "station_id",
+     "station",
+     "created_by",
+     "listeners_reached",
+     "reach_status"
+    ],
+    "rows": [
+     [
+      "7710",
+      "Late Jazz Hop",
+      "jrivera",
+      "2",
+      "shared"
+     ],
+     [
+      "7714",
+      "Harbour Dub",
+      "priyam",
+      "2",
+      "shared"
+     ],
+     [
+      "7711",
+      "Porch and Pedal",
+      "amara_o",
+      "1",
+      "creator only"
+     ],
+     [
+      "7712",
+      "Neon Waltz",
+      "amara_o",
+      "1",
+      "creator only"
+     ],
+     [
+      "7713",
+      "Iron Choir",
+      "klind",
+      "1",
+      "creator only"
+     ],
+     [
+      "7715",
+      "Glitterball Drift",
+      "tbarros",
+      "1",
+      "creator only"
+     ],
+     [
+      "7716",
+      "Rust Belt Radio",
+      "wenz",
+      "1",
+      "creator only"
+     ],
+     [
+      "7717",
+      "Blue Hour",
+      "dokafor",
+      "1",
+      "creator only"
+     ]
+    ]
+   }
+  },
+  "M4": {
+   "title": "recordings the models disagree on",
+   "tables": [
+    "track",
+    "track_score"
+   ],
+   "use_cases": [
+    "UC-11"
+   ],
+   "question": "Which recordings do the model versions place in different top genres, and how far apart are their distributions?",
+   "need": "CROSSFADE places every recording between genres; each model version returns a distribution with measures of how uncertain and how inconsistent it is, and model divergence records how far one version sits from the others that scored the same recording (RA: Overview; Track Score: Model Divergence).",
+   "requirement": "3.4",
+   "requirement_text": "a subquery with a multi-row operation (IN, NOT IN, ANY, SOME, ALL or EXISTS)",
+   "grain": [
+    "track_id"
+   ],
+   "output": [
+    "track_id",
+    "title",
+    "models_scoring",
+    "highest_divergence"
+   ],
+   "sql": "SELECT t.track_id,\n       t.title,\n       (SELECT COUNT(*)\n        FROM crossfade.track_score AS sc\n        WHERE sc.track_id = t.track_id) AS models_scoring,\n       (SELECT MAX(sd.model_divergence)\n        FROM crossfade.track_score AS sd\n        WHERE sd.track_id = t.track_id) AS highest_divergence\nFROM crossfade.track AS t\nWHERE t.track_id IN (SELECT s.track_id\n                     FROM crossfade.track_score AS s\n                     GROUP BY s.track_id\n                     HAVING COUNT(DISTINCT s.genre_id) > 1)\nORDER BY highest_divergence DESC,\n         t.track_id",
+   "detected": "IN (SELECT ...)",
+   "columns": {
+    "track": [
+     "title",
+     "track_id"
+    ],
+    "track_score": [
+     "genre_id",
+     "model_divergence",
+     "track_id"
+    ]
+   },
+   "columns_out": [
+    "track_id",
+    "title",
+    "models_scoring",
+    "highest_divergence"
+   ],
+   "rows": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "track_id",
+     "title",
+     "models_scoring",
+     "highest_divergence"
+    ],
+    "rows": [
+     [
+      "4821",
+      "Cathedral Static",
+      "2",
+      "0.1025"
+     ],
+     [
+      "4828",
+      "Afterimage Club",
+      "2",
+      "0.0421"
+     ],
+     [
+      "4818",
+      "Copper Lanterns",
+      "2",
+      "0.0283"
+     ]
+    ]
+   }
+  },
+  "M5": {
+   "title": "filling each station",
+   "tables": [
+    "station",
+    "track_score",
+    "track",
+    "station_blend",
+    "genre"
+   ],
+   "use_cases": [
+    "UC-12",
+    "UC-10"
+   ],
+   "question": "For each station, which recordings qualify under its model, window and blend, in what order, and how long would the station run?",
+   "need": "a station stores a genre blend and an ambiguity window, not a fixed list, and the service \"returns recordings that genuinely occupy that region\" (RA: Overview; Station). Which recordings belong on a station has to be worked out from the business plan's own rules, so the query applies each of them in turn: 1. only scored recordings can be streamed (RA: Track: Ingest Status); 2. a station is evaluated against its one nominated model version, \"so that a station's contents do not change meaning when a different version scores the catalogue\" (RA: Scoring Model 1:N Station); 3. the recording's posterior entropy must lie inside the station's window: the minimum excludes recordings \"that sit squarely inside a single genre\", the maximum those \"the models cannot place with any confidence\" (RA: Minimum and Maximum Ambiguity); 4. its top genre must be one of the station's blend genres (RA: Station Blend). The RA stores the top genre and the entropy on the scoring result \"so that stations can filter without reading ten rows per score\" (RA: Track Score), so the filter reads track_score, not the ten genre_probability rows. The RA does not rank qualifying recordings, so the query orders them by the station's own preference: the blend weight of their top genre, highest first (RA: Weight, \"the share of the station's blend given to this genre\"), then the higher posterior entropy, the recording further between genres, which is the service's selling point; track_id breaks ties.",
+   "requirement": "3.5",
+   "requirement_text": "a derived table defined with WITH",
+   "grain": [
+    "station_id",
+    "track_id"
+   ],
+   "output": [
+    "station_id",
+    "station",
+    "track_id",
+    "title",
+    "top_genre",
+    "genre_weight",
+    "posterior_entropy",
+    "station_recordings",
+    "station_run_minutes"
+   ],
+   "sql": "WITH eligible AS (\n    SELECT st.station_id,\n           st.name AS station,\n           t.track_id,\n           t.title,\n           t.duration,\n           g.name AS top_genre,\n           b.weight AS genre_weight,\n           s.posterior_entropy\n    FROM crossfade.station AS st\n    INNER JOIN crossfade.track_score AS s ON s.model_id = st.model_id\n    INNER JOIN crossfade.track AS t ON t.track_id = s.track_id\n    INNER JOIN crossfade.station_blend AS b ON b.station_id = st.station_id\n                                           AND b.genre_id = s.genre_id\n    INNER JOIN crossfade.genre AS g ON g.genre_id = s.genre_id\n    WHERE t.ingest_status = 'scored'\n      AND s.posterior_entropy BETWEEN st.minimum_ambiguity AND st.maximum_ambiguity\n),\nstation_length AS (\n    SELECT station_id,\n           COUNT(*) AS recordings,\n           ROUND(SUM(duration) / 60, 1) AS run_minutes\n    FROM eligible\n    GROUP BY station_id\n)\nSELECT e.station_id,\n       e.station,\n       e.track_id,\n       e.title,\n       e.top_genre,\n       e.genre_weight,\n       e.posterior_entropy,\n       sl.recordings AS station_recordings,\n       sl.run_minutes AS station_run_minutes\nFROM eligible AS e\nINNER JOIN station_length AS sl ON sl.station_id = e.station_id\nORDER BY e.station_id,\n         e.genre_weight DESC,\n         e.posterior_entropy DESC,\n         e.track_id",
+   "detected": "WITH",
+   "columns": {
+    "track": [
+     "duration",
+     "ingest_status",
+     "title",
+     "track_id"
+    ],
+    "station": [
+     "maximum_ambiguity",
+     "minimum_ambiguity",
+     "model_id",
+     "name",
+     "station_id"
+    ],
+    "track_score": [
+     "genre_id",
+     "model_id",
+     "posterior_entropy",
+     "track_id"
+    ],
+    "genre": [
+     "genre_id",
+     "name"
+    ],
+    "station_blend": [
+     "genre_id",
+     "station_id",
+     "weight"
+    ]
+   },
+   "columns_out": [
+    "station_id",
+    "station",
+    "track_id",
+    "title",
+    "top_genre",
+    "genre_weight",
+    "posterior_entropy",
+    "station_recordings",
+    "station_run_minutes"
+   ],
+   "rows": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "station_id",
+     "station",
+     "track_id",
+     "title",
+     "top_genre",
+     "genre_weight",
+     "posterior_entropy",
+     "station_recordings",
+     "station_run_minutes"
+    ],
+    "rows": [
+     [
+      "7710",
+      "Late Jazz Hop",
+      "4817",
+      "Low Tide Signal",
+      "jazz",
+      "0.60",
+      "0.4619",
+      "1",
+      "3.6"
+     ],
+     [
+      "7711",
+      "Porch and Pedal",
+      "4823",
+      "Dust on the Dial",
+      "country",
+      "0.70",
+      "0.5065",
+      "4",
+      "12.6"
+     ],
+     [
+      "7711",
+      "Porch and Pedal",
+      "4824",
+      "Harbour Lights Waltz",
+      "country",
+      "0.70",
+      "0.4276",
+      "4",
+      "12.6"
+     ],
+     [
+      "7711",
+      "Porch and Pedal",
+      "4829",
+      "Tapeworm Blues",
+      "blues",
+      "0.30",
+      "0.4989",
+      "4",
+      "12.6"
+     ],
+     [
+      "7711",
+      "Porch and Pedal",
+      "4818",
+      "Copper Lanterns",
+      "blues",
+      "0.30",
+      "0.4628",
+      "4",
+      "12.6"
+     ],
+     [
+      "7712",
+      "Neon Waltz",
+      "4828",
+      "Afterimage Club",
+      "pop",
+      "0.50",
+      "0.5261",
+      "4",
+      "16.2"
+     ],
+     [
+      "7712",
+      "Neon Waltz",
+      "4820",
+      "Second Weather",
+      "pop",
+      "0.50",
+      "0.5158",
+      "4",
+      "16.2"
+     ],
+     [
+      "7712",
+      "Neon Waltz",
+      "4821",
+      "Cathedral Static",
+      "classical",
+      "0.20",
+      "0.4998",
+      "4",
+      "16.2"
+     ],
+     [
+      "7712",
+      "Neon Waltz",
+      "4819",
+      "Glass Meridian",
+      "classical",
+      "0.20",
+      "0.4114",
+      "4",
+      "16.2"
+     ],
+     [
+      "7713",
+      "Iron Choir",
+      "4821",
+      "Cathedral Static",
+      "metal",
+      "0.50",
+      "0.5700",
+      "3",
+      "13.5"
+     ],
+     [
+      "7713",
+      "Iron Choir",
+      "4827",
+      "Stahlwerk",
+      "metal",
+      "0.50",
+      "0.4784",
+      "3",
+      "13.5"
+     ],
+     [
+      "7713",
+      "Iron Choir",
+      "4819",
+      "Glass Meridian",
+      "classical",
+      "0.34",
+      "0.5310",
+      "3",
+      "13.5"
+     ],
+     [
+      "7714",
+      "Harbour Dub",
+      "4825",
+      "Marigold Dub",
+      "reggae",
+      "0.60",
+      "0.6107",
+      "1",
+      "3.9"
+     ],
+     [
+      "7715",
+      "Glitterball Drift",
+      "4826",
+      "Plaza at Noon",
+      "disco",
+      "0.34",
+      "0.5503",
+      "2",
+      "7.0"
+     ],
+     [
+      "7715",
+      "Glitterball Drift",
+      "4828",
+      "Afterimage Club",
+      "disco",
+      "0.34",
+      "0.5417",
+      "2",
+      "7.0"
+     ],
+     [
+      "7716",
+      "Rust Belt Radio",
+      "4829",
+      "Tapeworm Blues",
+      "blues",
+      "0.25",
+      "0.4989",
+      "4",
+      "12.6"
+     ],
+     [
+      "7716",
+      "Rust Belt Radio",
+      "4818",
+      "Copper Lanterns",
+      "blues",
+      "0.25",
+      "0.4628",
+      "4",
+      "12.6"
+     ],
+     [
+      "7716",
+      "Rust Belt Radio",
+      "4823",
+      "Dust on the Dial",
+      "country",
+      "0.20",
+      "0.5065",
+      "4",
+      "12.6"
+     ],
+     [
+      "7716",
+      "Rust Belt Radio",
+      "4824",
+      "Harbour Lights Waltz",
+      "country",
+      "0.20",
+      "0.4276",
+      "4",
+      "12.6"
+     ],
+     [
+      "7717",
+      "Blue Hour",
+      "4829",
+      "Tapeworm Blues",
+      "blues",
+      "1.00",
+      "0.5220",
+      "1",
+      "3.2"
+     ]
+    ]
+   }
+  },
+  "M6": {
+   "title": "results to recompute",
+   "tables": [
+    "track_score",
+    "track",
+    "scoring_model"
+   ],
+   "use_cases": [
+    "UC-09"
+   ],
+   "question": "Which released recordings have no scoring result from the model version now in service, and how far out of date is their newest result?",
+   "need": "every recording is scored by the model version in service at ingest, and newer versions are deployed over time (RA: Scoring Model: the date a version \"was placed in service and began scoring incoming uploads\"). Scored On is kept for exactly one purpose: \"to establish which results predate a model redeployment and must be recomputed\" (RA: Track Score: Scored On).",
+   "requirement": "3.1",
+   "requirement_text": "an associative table and the two tables it relates, joined with INNER JOIN",
+   "grain": [
+    "track_id"
+   ],
+   "output": [
+    "track_id",
+    "title",
+    "results",
+    "scored_by",
+    "last_scored_on",
+    "days_out_of_date"
+   ],
+   "sql": "SELECT t.track_id,\n       t.title,\n       COUNT(*) AS results,\n       GROUP_CONCAT(m.version_label ORDER BY m.deployed_on, m.model_id SEPARATOR ', ') AS scored_by,\n       MAX(s.scored_on) AS last_scored_on,\n       DATEDIFF((SELECT MAX(n.deployed_on) FROM crossfade.scoring_model AS n), MAX(s.scored_on)) AS days_out_of_date\nFROM crossfade.track_score AS s\nINNER JOIN crossfade.track AS t ON t.track_id = s.track_id\nINNER JOIN crossfade.scoring_model AS m ON m.model_id = s.model_id\nWHERE t.ingest_status = 'scored'\nGROUP BY t.track_id, t.title\nHAVING MAX(s.scored_on) < (SELECT MAX(n.deployed_on) FROM crossfade.scoring_model AS n)\nORDER BY days_out_of_date DESC,\n         t.track_id",
+   "detected": "track_score joined to ['scoring_model', 'track']",
+   "columns": {
+    "track": [
+     "ingest_status",
+     "title",
+     "track_id"
+    ],
+    "scoring_model": [
+     "deployed_on",
+     "model_id",
+     "version_label"
+    ],
+    "track_score": [
+     "model_id",
+     "scored_on",
+     "track_id"
+    ]
+   },
+   "columns_out": [
+    "track_id",
+    "title",
+    "results",
+    "scored_by",
+    "last_scored_on",
+    "days_out_of_date"
+   ],
+   "rows": [
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-01 10:35:49",
+     "114"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "109"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "track_id",
+     "title",
+     "results",
+     "scored_by",
+     "last_scored_on",
+     "days_out_of_date"
+    ],
+    "rows": [
+     [
+      "4819",
+      "Glass Meridian",
+      "2",
+      "beardown, beardown_rrm_cfg12",
+      "2026-03-01 10:35:49",
+      "114"
+     ],
+     [
+      "4821",
+      "Cathedral Static",
+      "2",
+      "beardown, beardown_rrm_cfg12",
+      "2026-03-06 16:35:42",
+      "109"
+     ],
+     [
+      "4823",
+      "Dust on the Dial",
+      "2",
+      "beardown_rrm_cfg12, beardown_rrm",
+      "2026-03-24 15:58:35",
+      "91"
+     ],
+     [
+      "4824",
+      "Harbour Lights Waltz",
+      "1",
+      "beardown_rrm",
+      "2026-03-24 17:19:44",
+      "91"
+     ],
+     [
+      "4820",
+      "Second Weather",
+      "2",
+      "beardown_rrm_cfg12, beardown_rrm",
+      "2026-03-31 19:48:26",
+      "84"
+     ],
+     [
+      "4818",
+      "Copper Lanterns",
+      "2",
+      "beardown, beardown_rrm",
+      "2026-04-26 10:47:01",
+      "58"
+     ],
+     [
+      "4825",
+      "Marigold Dub",
+      "2",
+      "beardown, beardown_rrm",
+      "2026-05-07 22:13:19",
+      "47"
+     ],
+     [
+      "4827",
+      "Stahlwerk",
+      "2",
+      "beardown, beardown_rrm",
+      "2026-05-31 03:30:19",
+      "23"
+     ],
+     [
+      "4829",
+      "Tapeworm Blues",
+      "2",
+      "beardown_rrm_cfg12, beardown_rrm",
+      "2026-06-09 19:02:52",
+      "14"
+     ]
+    ]
+   }
+  },
+  "M7": {
+   "title": "where each recording sits between genres",
+   "tables": [
+    "genre_probability",
+    "track_score",
+    "track",
+    "genre"
+   ],
+   "use_cases": [
+    "UC-11"
+   ],
+   "question": "For each scoring result, which genre is the runner-up to the top genre, how close is it, and does the recording change character partway through?",
+   "need": "the catalogue \"is indexed by where a recording sits between genres rather than by a single genre label\" (RA: Overview). Genre Probability \"holds the full distribution that stations match against, which the single top genre on Track Score cannot express\" (RA: Genre Probability), so placing a recording between genres means reading past its top genre to the genre it sits closest to next.",
+   "requirement": "3.5",
+   "requirement_text": "a derived table defined with WITH",
+   "grain": [
+    "track_id",
+    "model_id"
+   ],
+   "output": [
+    "track_id",
+    "title",
+    "model_id",
+    "top_genre",
+    "top_probability",
+    "runner_up_genre",
+    "runner_up_probability",
+    "margin",
+    "segment_variance"
+   ],
+   "sql": "WITH second_place AS (\n    SELECT gp.track_id,\n           gp.model_id,\n           MAX(gp.probability) AS probability\n    FROM crossfade.genre_probability AS gp\n    INNER JOIN crossfade.track_score AS s ON s.track_id = gp.track_id\n                                         AND s.model_id = gp.model_id\n    WHERE gp.genre_id <> s.genre_id\n    GROUP BY gp.track_id, gp.model_id\n),\nrunner_up AS (\n    SELECT gp.track_id,\n           gp.model_id,\n           MIN(gp.genre_id) AS genre_id,\n           sp.probability\n    FROM crossfade.genre_probability AS gp\n    INNER JOIN second_place AS sp ON sp.track_id = gp.track_id\n                                 AND sp.model_id = gp.model_id\n                                 AND sp.probability = gp.probability\n    INNER JOIN crossfade.track_score AS s ON s.track_id = gp.track_id\n                                         AND s.model_id = gp.model_id\n    WHERE gp.genre_id <> s.genre_id\n    GROUP BY gp.track_id, gp.model_id, sp.probability\n)\nSELECT t.track_id,\n       t.title,\n       s.model_id,\n       g1.name AS top_genre,\n       s.top_probability,\n       g2.name AS runner_up_genre,\n       r.probability AS runner_up_probability,\n       s.top_probability - r.probability AS margin,\n       s.segment_variance\nFROM crossfade.track_score AS s\nINNER JOIN crossfade.track AS t ON t.track_id = s.track_id\nINNER JOIN runner_up AS r ON r.track_id = s.track_id\n                         AND r.model_id = s.model_id\nINNER JOIN crossfade.genre AS g1 ON g1.genre_id = s.genre_id\nINNER JOIN crossfade.genre AS g2 ON g2.genre_id = r.genre_id\nORDER BY margin,\n         t.track_id,\n         s.model_id",
+   "detected": "WITH",
+   "columns": {
+    "track": [
+     "title",
+     "track_id"
+    ],
+    "genre_probability": [
+     "genre_id",
+     "model_id",
+     "probability",
+     "track_id"
+    ],
+    "track_score": [
+     "genre_id",
+     "model_id",
+     "segment_variance",
+     "top_probability",
+     "track_id"
+    ],
+    "genre": [
+     "genre_id",
+     "name"
+    ]
+   },
+   "columns_out": [
+    "track_id",
+    "title",
+    "model_id",
+    "top_genre",
+    "top_probability",
+    "runner_up_genre",
+    "runner_up_probability",
+    "margin",
+    "segment_variance"
+   ],
+   "rows": [
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "expected": {
+    "columns": [
+     "track_id",
+     "title",
+     "model_id",
+     "top_genre",
+     "top_probability",
+     "runner_up_genre",
+     "runner_up_probability",
+     "margin",
+     "segment_variance"
+    ],
+    "rows": [
+     [
+      "4820",
+      "Second Weather",
+      "2",
+      "pop",
+      "0.4357",
+      "disco",
+      "0.4304",
+      "0.0053",
+      "0.0057"
+     ],
+     [
+      "4828",
+      "Afterimage Club",
+      "2",
+      "pop",
+      "0.4461",
+      "disco",
+      "0.4273",
+      "0.0188",
+      "0.0054"
+     ],
+     [
+      "4827",
+      "Stahlwerk",
+      "4",
+      "metal",
+      "0.4514",
+      "rock",
+      "0.3636",
+      "0.0878",
+      "0.0072"
+     ],
+     [
+      "4820",
+      "Second Weather",
+      "4",
+      "pop",
+      "0.4671",
+      "disco",
+      "0.3764",
+      "0.0907",
+      "0.0256"
+     ],
+     [
+      "4818",
+      "Copper Lanterns",
+      "4",
+      "blues",
+      "0.5077",
+      "jazz",
+      "0.4133",
+      "0.0944",
+      "0.0109"
+     ],
+     [
+      "4818",
+      "Copper Lanterns",
+      "1",
+      "jazz",
+      "0.4819",
+      "blues",
+      "0.3774",
+      "0.1045",
+      "0.0111"
+     ],
+     [
+      "4826",
+      "Plaza at Noon",
+      "4",
+      "disco",
+      "0.4338",
+      "reggae",
+      "0.3212",
+      "0.1126",
+      "0.0180"
+     ],
+     [
+      "4819",
+      "Glass Meridian",
+      "1",
+      "classical",
+      "0.4890",
+      "pop",
+      "0.3745",
+      "0.1145",
+      "0.0105"
+     ],
+     [
+      "4829",
+      "Tapeworm Blues",
+      "2",
+      "blues",
+      "0.4947",
+      "rock",
+      "0.3777",
+      "0.1170",
+      "0.0265"
+     ],
+     [
+      "4821",
+      "Cathedral Static",
+      "1",
+      "metal",
+      "0.4799",
+      "classical",
+      "0.3612",
+      "0.1187",
+      "0.0081"
+     ],
+     [
+      "4826",
+      "Plaza at Noon",
+      "5",
+      "disco",
+      "0.4943",
+      "reggae",
+      "0.3632",
+      "0.1311",
+      "0.0193"
+     ],
+     [
+      "4823",
+      "Dust on the Dial",
+      "2",
+      "country",
+      "0.5153",
+      "rock",
+      "0.3570",
+      "0.1583",
+      "0.0128"
+     ],
+     [
+      "4819",
+      "Glass Meridian",
+      "2",
+      "classical",
+      "0.5562",
+      "pop",
+      "0.3888",
+      "0.1674",
+      "0.0233"
+     ],
+     [
+      "4829",
+      "Tapeworm Blues",
+      "4",
+      "blues",
+      "0.5363",
+      "rock",
+      "0.3526",
+      "0.1837",
+      "0.0036"
+     ],
+     [
+      "4817",
+      "Low Tide Signal",
+      "1",
+      "jazz",
+      "0.5438",
+      "hiphop",
+      "0.3426",
+      "0.2012",
+      "0.0243"
+     ],
+     [
+      "4828",
+      "Afterimage Club",
+      "5",
+      "disco",
+      "0.5516",
+      "pop",
+      "0.3023",
+      "0.2493",
+      "0.0246"
+     ],
+     [
+      "4825",
+      "Marigold Dub",
+      "1",
+      "reggae",
+      "0.4964",
+      "hiphop",
+      "0.2332",
+      "0.2632",
+      "0.0273"
+     ],
+     [
+      "4821",
+      "Cathedral Static",
+      "2",
+      "classical",
+      "0.5556",
+      "metal",
+      "0.2865",
+      "0.2691",
+      "0.0288"
+     ],
+     [
+      "4817",
+      "Low Tide Signal",
+      "5",
+      "jazz",
+      "0.5800",
+      "hiphop",
+      "0.2843",
+      "0.2957",
+      "0.0051"
+     ],
+     [
+      "4817",
+      "Low Tide Signal",
+      "4",
+      "jazz",
+      "0.6002",
+      "hiphop",
+      "0.2859",
+      "0.3143",
+      "0.0289"
+     ],
+     [
+      "4817",
+      "Low Tide Signal",
+      "2",
+      "jazz",
+      "0.6131",
+      "hiphop",
+      "0.2898",
+      "0.3233",
+      "0.0058"
+     ],
+     [
+      "4823",
+      "Dust on the Dial",
+      "4",
+      "country",
+      "0.6131",
+      "rock",
+      "0.2525",
+      "0.3606",
+      "0.0179"
+     ],
+     [
+      "4825",
+      "Marigold Dub",
+      "4",
+      "reggae",
+      "0.5743",
+      "hiphop",
+      "0.1940",
+      "0.3803",
+      "0.0246"
+     ],
+     [
+      "4827",
+      "Stahlwerk",
+      "1",
+      "metal",
+      "0.6295",
+      "rock",
+      "0.2481",
+      "0.3814",
+      "0.0117"
+     ],
+     [
+      "4822",
+      "Hymn for a Server Room",
+      "5",
+      "classical",
+      "0.6804",
+      "jazz",
+      "0.1499",
+      "0.5305",
+      "0.0121"
+     ],
+     [
+      "4822",
+      "Hymn for a Server Room",
+      "4",
+      "classical",
+      "0.7354",
+      "jazz",
+      "0.1269",
+      "0.6085",
+      "0.0276"
+     ],
+     [
+      "4824",
+      "Harbour Lights Waltz",
+      "4",
+      "country",
+      "0.7401",
+      "blues",
+      "0.1002",
+      "0.6399",
+      "0.0089"
+     ]
+    ]
+   }
+  }
+ },
+ "tests": {
+  "M1": [
+   {
+    "test": "test_comment_contract[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M1]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M1]",
+    "outcome": "passed"
+   }
+  ],
+  "M2": [
+   {
+    "test": "test_comment_contract[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M2]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M2]",
+    "outcome": "passed"
+   }
+  ],
+  "M3": [
+   {
+    "test": "test_comment_contract[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M3]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M3]",
+    "outcome": "passed"
+   }
+  ],
+  "M4": [
+   {
+    "test": "test_comment_contract[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M4]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M4]",
+    "outcome": "passed"
+   }
+  ],
+  "M5": [
+   {
+    "test": "test_comment_contract[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M5]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M5]",
+    "outcome": "passed"
+   }
+  ],
+  "M6": [
+   {
+    "test": "test_comment_contract[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M6]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M6]",
+    "outcome": "passed"
+   }
+  ],
+  "M7": [
+   {
+    "test": "test_comment_contract[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_only_select[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_reads_declared_tables[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_meets_its_requirement[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_join_types_explicit[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_columns_match_use_cases[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_matches_oracle[M7]",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_result_is_deterministic[M7]",
+    "outcome": "passed"
+   }
+  ],
+  "file": [
+   {
+    "test": "test_m1_listener_with_no_plays_is_absent",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m1_abandoned_skip_lowers_the_share_heard",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m2_artist_with_uploads_but_no_plays_is_owed_zero",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m2_short_play_is_counted_but_does_not_qualify",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m3_listener_playing_anothers_station_shares_it",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m3_unplayed_station_still_reaches_its_creator",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m4_new_disagreeing_score_adds_the_recording",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m4_third_version_raises_the_highest_divergence",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m4_agreeing_new_score_adds_nothing",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m4_disagreement_without_divergence_is_listed_last",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m5_window_edges_are_inside",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m5_rejected_recording_is_never_streamed",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m5_only_blend_genres_and_its_own_model_count",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m6_deployment_day_is_the_boundary",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m6_new_deployment_makes_every_recording_stale",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m6_rejected_recording_is_never_rescored",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m7_tie_for_second_place_takes_the_lower_genre_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m7_top_tie_is_exactly_between_genres",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_m7_result_without_a_distribution_is_absent",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_each_requirement_is_met",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_every_multiple_table_use_case_is_answered",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_declared_columns_are_read",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_tags_are_unique_and_in_order",
+    "outcome": "passed"
+   }
+  ]
+ },
+ "cases": [
+  {
+   "tag": "M1",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "listener",
+     "row": {
+      "listener_id": "20990",
+      "email": "quiet@example.com",
+      "display_name": "quiet",
+      "plan_tier": "free",
+      "signup_date": "2026-09-01"
+     }
+    }
+   ],
+   "columns": [
+    "listener_id",
+    "display_name",
+    "plays",
+    "completed_plays",
+    "saves",
+    "skips",
+    "pct_of_audio_heard"
+   ],
+   "expected": [
+    [
+     "20937",
+     "dokafor",
+     "1",
+     "1",
+     "0",
+     "0",
+     "100.0"
+    ],
+    [
+     "20936",
+     "wenz",
+     "4",
+     "3",
+     "1",
+     "0",
+     "97.2"
+    ],
+    [
+     "20934",
+     "priyam",
+     "5",
+     "4",
+     "2",
+     "0",
+     "95.9"
+    ],
+    [
+     "20935",
+     "tbarros",
+     "4",
+     "3",
+     "1",
+     "0",
+     "89.4"
+    ],
+    [
+     "20938",
+     "hito",
+     "4",
+     "2",
+     "1",
+     "1",
+     "79.1"
+    ],
+    [
+     "20933",
+     "klind",
+     "4",
+     "3",
+     "1",
+     "1",
+     "74.6"
+    ],
+    [
+     "20932",
+     "amara_o",
+     "4",
+     "1",
+     "0",
+     "1",
+     "64.9"
+    ],
+    [
+     "20931",
+     "jrivera",
+     "5",
+     "2",
+     "2",
+     "2",
+     "45.9"
+    ]
+   ],
+   "got": [
+    [
+     "20937",
+     "dokafor",
+     "1",
+     "1",
+     "0",
+     "0",
+     "100.0"
+    ],
+    [
+     "20936",
+     "wenz",
+     "4",
+     "3",
+     "1",
+     "0",
+     "97.2"
+    ],
+    [
+     "20934",
+     "priyam",
+     "5",
+     "4",
+     "2",
+     "0",
+     "95.9"
+    ],
+    [
+     "20935",
+     "tbarros",
+     "4",
+     "3",
+     "1",
+     "0",
+     "89.4"
+    ],
+    [
+     "20938",
+     "hito",
+     "4",
+     "2",
+     "1",
+     "1",
+     "79.1"
+    ],
+    [
+     "20933",
+     "klind",
+     "4",
+     "3",
+     "1",
+     "1",
+     "74.6"
+    ],
+    [
+     "20932",
+     "amara_o",
+     "4",
+     "1",
+     "0",
+     "1",
+     "64.9"
+    ],
+    [
+     "20931",
+     "jrivera",
+     "5",
+     "2",
+     "2",
+     "2",
+     "45.9"
+    ]
+   ],
+   "doc": "A listener who has played nothing has no taste profile yet.\nWhy: every sample listener has plays, so the INNER JOIN never has to drop anyone.\nExpect: listener 20990 (no plays) is not in the result; the 8 sample listeners are.",
+   "test": "test_m1_listener_with_no_plays_is_absent",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M1",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "play",
+     "row": {
+      "listener_id": "20937",
+      "track_id": "4817",
+      "played_at": "2026-09-01 10:00:00",
+      "station_id": null,
+      "seconds_played": "107",
+      "completed": "0",
+      "reaction": "skipped",
+      "royalty_amount": "0.00350"
+     }
+    }
+   ],
+   "columns": [
+    "listener_id",
+    "display_name",
+    "plays",
+    "completed_plays",
+    "saves",
+    "skips",
+    "pct_of_audio_heard"
+   ],
+   "expected": [
+    [
+     "20936",
+     "wenz",
+     "4",
+     "3",
+     "1",
+     "0",
+     "97.2"
+    ],
+    [
+     "20934",
+     "priyam",
+     "5",
+     "4",
+     "2",
+     "0",
+     "95.9"
+    ],
+    [
+     "20935",
+     "tbarros",
+     "4",
+     "3",
+     "1",
+     "0",
+     "89.4"
+    ],
+    [
+     "20938",
+     "hito",
+     "4",
+     "2",
+     "1",
+     "1",
+     "79.1"
+    ],
+    [
+     "20933",
+     "klind",
+     "4",
+     "3",
+     "1",
+     "1",
+     "74.6"
+    ],
+    [
+     "20937",
+     "dokafor",
+     "2",
+     "1",
+     "0",
+     "1",
+     "73.4"
+    ],
+    [
+     "20932",
+     "amara_o",
+     "4",
+     "1",
+     "0",
+     "1",
+     "64.9"
+    ],
+    [
+     "20931",
+     "jrivera",
+     "5",
+     "2",
+     "2",
+     "2",
+     "45.9"
+    ]
+   ],
+   "got": [
+    [
+     "20936",
+     "wenz",
+     "4",
+     "3",
+     "1",
+     "0",
+     "97.2"
+    ],
+    [
+     "20934",
+     "priyam",
+     "5",
+     "4",
+     "2",
+     "0",
+     "95.9"
+    ],
+    [
+     "20935",
+     "tbarros",
+     "4",
+     "3",
+     "1",
+     "0",
+     "89.4"
+    ],
+    [
+     "20938",
+     "hito",
+     "4",
+     "2",
+     "1",
+     "1",
+     "79.1"
+    ],
+    [
+     "20933",
+     "klind",
+     "4",
+     "3",
+     "1",
+     "1",
+     "74.6"
+    ],
+    [
+     "20937",
+     "dokafor",
+     "2",
+     "1",
+     "0",
+     "1",
+     "73.4"
+    ],
+    [
+     "20932",
+     "amara_o",
+     "4",
+     "1",
+     "0",
+     "1",
+     "64.9"
+    ],
+    [
+     "20931",
+     "jrivera",
+     "5",
+     "2",
+     "2",
+     "2",
+     "45.9"
+    ]
+   ],
+   "doc": "An abandoned, skipped play lowers the share of audio heard and counts as a skip, not a completion.\nWhy: the sample's top listener (20937) heard all of their one recording; a second, half-heard play must pull the\nshare down by duration, not by play count.\nExpect: 20937 has 2 plays, 1 completed, 1 skip, and hears 100 * (189 + 107) / (189 + 214) = 73.4 percent.",
+   "test": "test_m1_abandoned_skip_lowers_the_share_heard",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M2",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "artist",
+     "row": {
+      "artist_id": "9002",
+      "stage_name": "Silent Upload",
+      "country": "US",
+      "joined_date": "2026-09-01",
+      "payout_rate": "0.0030",
+      "verified": "1"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9401",
+      "artist_id": "9002",
+      "title": "Case Track 9401",
+      "duration": "200",
+      "release_date": "2026-09-01",
+      "audio_checksum": "0x00000000000000000000000000000000000000000000000000000000000024b9",
+      "ingest_status": "scored"
+     }
+    }
+   ],
+   "columns": [
+    "artist_id",
+    "payee",
+    "plays",
+    "qualifying_plays",
+    "usd_owed"
+   ],
+   "expected": [
+    [
+     "1046",
+     "Ochre Parade",
+     "6",
+     "6",
+     "0.02160"
+    ],
+    [
+     "1042",
+     "Velvet Static",
+     "6",
+     "5",
+     "0.02000"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "6",
+     "5",
+     "0.01500"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "4",
+     "3",
+     "0.01140"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "5",
+     "3",
+     "0.00960"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "3",
+     "3",
+     "0.00900"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "1",
+     "1",
+     "0.00350"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "0",
+     "0",
+     "0.00000"
+    ],
+    [
+     "9002",
+     "Silent Upload",
+     "0",
+     "0",
+     "0.00000"
+    ]
+   ],
+   "got": [
+    [
+     "1046",
+     "Ochre Parade",
+     "6",
+     "6",
+     "0.02160"
+    ],
+    [
+     "1042",
+     "Velvet Static",
+     "6",
+     "5",
+     "0.02000"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "6",
+     "5",
+     "0.01500"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "4",
+     "3",
+     "0.01140"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "5",
+     "3",
+     "0.00960"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "3",
+     "3",
+     "0.00900"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "1",
+     "1",
+     "0.00350"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "0",
+     "0",
+     "0.00000"
+    ],
+    [
+     "9002",
+     "Silent Upload",
+     "0",
+     "0",
+     "0.00000"
+    ]
+   ],
+   "doc": "An artist whose recordings nobody has played yet is listed, owed zero.\nWhy: the sample's one artist with no plays (1049) has no uploads either, so the second LEFT OUTER JOIN (track to\nplay) never has to keep a track with no plays.\nExpect: artist 9002 with track 9401 and no plays: 0 plays, 0 qualifying, 0 owed, listed after every earning artist.",
+   "test": "test_m2_artist_with_uploads_but_no_plays_is_owed_zero",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M2",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "play",
+     "row": {
+      "listener_id": "20937",
+      "track_id": "4829",
+      "played_at": "2026-09-01 10:00:00",
+      "station_id": null,
+      "seconds_played": "29",
+      "completed": "0",
+      "reaction": null,
+      "royalty_amount": "0.00000"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "play",
+     "row": {
+      "listener_id": "20937",
+      "track_id": "4829",
+      "played_at": "2026-09-02 10:00:00",
+      "station_id": null,
+      "seconds_played": "30",
+      "completed": "0",
+      "reaction": null,
+      "royalty_amount": "0.00350"
+     }
+    }
+   ],
+   "columns": [
+    "artist_id",
+    "payee",
+    "plays",
+    "qualifying_plays",
+    "usd_owed"
+   ],
+   "expected": [
+    [
+     "1046",
+     "Ochre Parade",
+     "6",
+     "6",
+     "0.02160"
+    ],
+    [
+     "1042",
+     "Velvet Static",
+     "6",
+     "5",
+     "0.02000"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "6",
+     "5",
+     "0.01500"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "5",
+     "4",
+     "0.01250"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "4",
+     "3",
+     "0.01140"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "5",
+     "3",
+     "0.00960"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "1",
+     "1",
+     "0.00350"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "0",
+     "0",
+     "0.00000"
+    ]
+   ],
+   "got": [
+    [
+     "1046",
+     "Ochre Parade",
+     "6",
+     "6",
+     "0.02160"
+    ],
+    [
+     "1042",
+     "Velvet Static",
+     "6",
+     "5",
+     "0.02000"
+    ],
+    [
+     "1047",
+     "Juno Fleet",
+     "6",
+     "5",
+     "0.01500"
+    ],
+    [
+     "1048",
+     "Saltmarsh Tapes",
+     "5",
+     "4",
+     "0.01250"
+    ],
+    [
+     "1044",
+     "Low Orbit Choir",
+     "4",
+     "3",
+     "0.01140"
+    ],
+    [
+     "1045",
+     "Tin Harbour",
+     "5",
+     "3",
+     "0.00960"
+    ],
+    [
+     "1043",
+     "Mara Quell",
+     "1",
+     "1",
+     "0.00350"
+    ],
+    [
+     "1049",
+     "Kestrel Ave",
+     "0",
+     "0",
+     "0.00000"
+    ]
+   ],
+   "doc": "A play under 30 seconds counts as a play but not as a qualifying play (RA rule I7).\nWhy: checks the 30-second boundary: one play at 29 seconds, one at exactly 30.\nExpect: artist 1048 (track 4829) gains 2 plays and 1 qualifying play; what it is owed grows by the two recorded\nroyalties (0.00000 and 0.00350).",
+   "test": "test_m2_short_play_is_counted_but_does_not_qualify",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M3",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "play",
+     "row": {
+      "listener_id": "20937",
+      "track_id": "4827",
+      "played_at": "2026-09-01 10:00:00",
+      "station_id": "7713",
+      "seconds_played": "254",
+      "completed": "0",
+      "reaction": null,
+      "royalty_amount": "0.00350"
+     }
+    }
+   ],
+   "columns": [
+    "station_id",
+    "station",
+    "created_by",
+    "listeners_reached",
+    "reach_status"
+   ],
+   "expected": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "jrivera",
+     "2",
+     "shared"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "klind",
+     "2",
+     "shared"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "priyam",
+     "2",
+     "shared"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "tbarros",
+     "1",
+     "creator only"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "wenz",
+     "1",
+     "creator only"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "dokafor",
+     "1",
+     "creator only"
+    ]
+   ],
+   "got": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "jrivera",
+     "2",
+     "shared"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "klind",
+     "2",
+     "shared"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "priyam",
+     "2",
+     "shared"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "tbarros",
+     "1",
+     "creator only"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "wenz",
+     "1",
+     "creator only"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "dokafor",
+     "1",
+     "creator only"
+    ]
+   ],
+   "doc": "A listener playing a station someone else created makes it shared, and equal reach orders by station_id.\nWhy: in the sample only two stations are shared; a third at the same reach checks the tie-break.\nExpect: 20937 plays station 7713 (created by 20933): 7713 reaches 2, 'shared', listed between 7710 and 7714.",
+   "test": "test_m3_listener_playing_anothers_station_shares_it",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M3",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "station",
+     "row": {
+      "station_id": "7799",
+      "listener_id": "20938",
+      "model_id": "3",
+      "name": "Unplayed",
+      "minimum_ambiguity": "0.20",
+      "maximum_ambiguity": "0.80",
+      "created_on": "2026-09-01"
+     }
+    }
+   ],
+   "columns": [
+    "station_id",
+    "station",
+    "created_by",
+    "listeners_reached",
+    "reach_status"
+   ],
+   "expected": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "jrivera",
+     "2",
+     "shared"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "priyam",
+     "2",
+     "shared"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "klind",
+     "1",
+     "creator only"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "tbarros",
+     "1",
+     "creator only"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "wenz",
+     "1",
+     "creator only"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "dokafor",
+     "1",
+     "creator only"
+    ],
+    [
+     "7799",
+     "Unplayed",
+     "hito",
+     "1",
+     "creator only"
+    ]
+   ],
+   "got": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "jrivera",
+     "2",
+     "shared"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "priyam",
+     "2",
+     "shared"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "amara_o",
+     "1",
+     "creator only"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "klind",
+     "1",
+     "creator only"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "tbarros",
+     "1",
+     "creator only"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "wenz",
+     "1",
+     "creator only"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "dokafor",
+     "1",
+     "creator only"
+    ],
+    [
+     "7799",
+     "Unplayed",
+     "hito",
+     "1",
+     "creator only"
+    ]
+   ],
+   "doc": "A station nobody has played yet still reaches its creator.\nWhy: every sample station has been played through, so the creator half of the UNION is never the only source.\nExpect: station 7799 (created by 20938, no plays) is listed with 1 listener, 'creator only', created_by 'hito'.",
+   "test": "test_m3_unplayed_station_still_reaches_its_creator",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M4",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "9",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.4500",
+      "model_divergence": "0.0421",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "models_scoring",
+    "highest_divergence"
+   ],
+   "expected": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "got": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "doc": "A second model version that names a different top genre puts the recording on the list; equal divergence\norders by track_id.\nWhy: 4824 is scored by one version only in the sample, so it can never qualify; a disagreeing score with the\nsame divergence as 4828 (0.0421) checks the tie-break too.\nExpect: 4824 joins with 2 models scoring, listed just before 4828.",
+   "test": "test_m4_new_disagreeing_score_adds_the_recording",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M4",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4821",
+      "model_id": "4",
+      "genre_id": "6",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5500",
+      "model_divergence": "0.2000",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "models_scoring",
+    "highest_divergence"
+   ],
+   "expected": [
+    [
+     "4821",
+     "Cathedral Static",
+     "3",
+     "0.2000"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "got": [
+    [
+     "4821",
+     "Cathedral Static",
+     "3",
+     "0.2000"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "doc": "With three versions scoring a recording, the highest of their divergences is reported.\nWhy: every listed sample recording is scored by exactly two versions, whose divergences from each other are the\nsame number, so MAX and MIN agree and a wrong aggregate would go unnoticed.\nExpect: model 4 also scores 4821 (metal, divergence 0.2000): 4821 shows 3 models scoring, highest 0.2000.",
+   "test": "test_m4_third_version_raises_the_highest_divergence",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M4",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "2",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.4500",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "models_scoring",
+    "highest_divergence"
+   ],
+   "expected": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "got": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ]
+   ],
+   "doc": "Another version that agrees on the top genre does not make a disagreement.\nWhy: the IN subquery must count distinct top genres, not scores.\nExpect: model 1 scores 4824 as genre 2, like model 4 did: the result is unchanged (3 recordings).",
+   "test": "test_m4_agreeing_new_score_adds_nothing",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M4",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track",
+     "row": {
+      "track_id": "9500",
+      "artist_id": "1042",
+      "title": "Case Track 9500",
+      "duration": "200",
+      "release_date": "2026-09-01",
+      "audio_checksum": "0x000000000000000000000000000000000000000000000000000000000000251c",
+      "ingest_status": "scored"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "9500",
+      "model_id": "1",
+      "genre_id": "9",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.6000",
+      "model_divergence": null,
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "9500",
+      "model_id": "2",
+      "genre_id": "5",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.6000",
+      "model_divergence": null,
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "models_scoring",
+    "highest_divergence"
+   ],
+   "expected": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ],
+    [
+     "9500",
+     "Case Track 9500",
+     "2",
+     null
+    ]
+   ],
+   "got": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "0.1025"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "0.0421"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "0.0283"
+    ],
+    [
+     "9500",
+     "Case Track 9500",
+     "2",
+     null
+    ]
+   ],
+   "doc": "A disagreement whose divergence is not recorded is still listed, after every measured one.\nWhy: model_divergence may be NULL; MAX of NULLs is NULL, and MySQL sorts NULL last in a DESC order.\nExpect: new recording 9500, scored rock by model 1 and jazz by model 2, both without divergence: listed last,\nhighest_divergence NULL.",
+   "test": "test_m4_disagreement_without_divergence_is_listed_last",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M5",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "station",
+     "row": {
+      "station_id": "7798",
+      "listener_id": "20938",
+      "model_id": "3",
+      "name": "Edges",
+      "minimum_ambiguity": "0.40",
+      "maximum_ambiguity": "0.60",
+      "created_on": "2026-09-01"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "station_blend",
+     "row": {
+      "station_id": "7798",
+      "genre_id": "2",
+      "weight": "1.00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4817",
+      "model_id": "3",
+      "genre_id": "2",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.4000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4818",
+      "model_id": "3",
+      "genre_id": "2",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.6000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4819",
+      "model_id": "3",
+      "genre_id": "2",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.3999",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4820",
+      "model_id": "3",
+      "genre_id": "2",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.6001",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "station_id",
+    "station",
+    "track_id",
+    "title",
+    "top_genre",
+    "genre_weight",
+    "posterior_entropy",
+    "station_recordings",
+    "station_run_minutes"
+   ],
+   "expected": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ],
+    [
+     "7798",
+     "Edges",
+     "4818",
+     "Copper Lanterns",
+     "country",
+     "1.00",
+     "0.6000",
+     "2",
+     "6.7"
+    ],
+    [
+     "7798",
+     "Edges",
+     "4817",
+     "Low Tide Signal",
+     "country",
+     "1.00",
+     "0.4000",
+     "2",
+     "6.7"
+    ]
+   ],
+   "got": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ],
+    [
+     "7798",
+     "Edges",
+     "4818",
+     "Copper Lanterns",
+     "country",
+     "1.00",
+     "0.6000",
+     "2",
+     "6.7"
+    ],
+    [
+     "7798",
+     "Edges",
+     "4817",
+     "Low Tide Signal",
+     "country",
+     "1.00",
+     "0.4000",
+     "2",
+     "6.7"
+    ]
+   ],
+   "doc": "A recording whose entropy equals the window's minimum or maximum is on the station; one just outside is not.\nWhy: no sample score falls exactly on a window edge, so BETWEEN's inclusive edges are never tested.\nExpect: station 7798 (model 3, window 0.40 to 0.60, blend country 1.00) with four model-3 country scores:\n4818 (0.6000) and 4817 (0.4000) are on it, higher entropy first; 4819 (0.3999) and 4820 (0.6001) are not.",
+   "test": "test_m5_window_edges_are_inside",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M5",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4831",
+      "model_id": "2",
+      "genre_id": "0",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "station_id",
+    "station",
+    "track_id",
+    "title",
+    "top_genre",
+    "genre_weight",
+    "posterior_entropy",
+    "station_recordings",
+    "station_run_minutes"
+   ],
+   "expected": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ]
+   ],
+   "got": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ]
+   ],
+   "doc": "A rejected recording stays off every station even if a model scored it.\nWhy: every scored row in the sample belongs to a scored recording, so the ingest-status rule is never needed.\nExpect: rejected track 4831, scored by model 2 as genre 0 at entropy 0.5000 (inside station 7717's window and\nblend), is not on 7717, which still holds 1 recording.",
+   "test": "test_m5_rejected_recording_is_never_streamed",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M5",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "station",
+     "row": {
+      "station_id": "7797",
+      "listener_id": "20938",
+      "model_id": "4",
+      "name": "One Genre",
+      "minimum_ambiguity": "0.00",
+      "maximum_ambiguity": "1.00",
+      "created_on": "2026-09-01"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "station_blend",
+     "row": {
+      "station_id": "7797",
+      "genre_id": "8",
+      "weight": "1.00"
+     }
+    }
+   ],
+   "columns": [
+    "station_id",
+    "station",
+    "track_id",
+    "title",
+    "top_genre",
+    "genre_weight",
+    "posterior_entropy",
+    "station_recordings",
+    "station_run_minutes"
+   ],
+   "expected": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ],
+    [
+     "7797",
+     "One Genre",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "1.00",
+     "0.6107",
+     "1",
+     "3.9"
+    ]
+   ],
+   "got": [
+    [
+     "7710",
+     "Late Jazz Hop",
+     "4817",
+     "Low Tide Signal",
+     "jazz",
+     "0.60",
+     "0.4619",
+     "1",
+     "3.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.70",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.70",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.30",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7711",
+     "Porch and Pedal",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.30",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4828",
+     "Afterimage Club",
+     "pop",
+     "0.50",
+     "0.5261",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4820",
+     "Second Weather",
+     "pop",
+     "0.50",
+     "0.5158",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4821",
+     "Cathedral Static",
+     "classical",
+     "0.20",
+     "0.4998",
+     "4",
+     "16.2"
+    ],
+    [
+     "7712",
+     "Neon Waltz",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.20",
+     "0.4114",
+     "4",
+     "16.2"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4821",
+     "Cathedral Static",
+     "metal",
+     "0.50",
+     "0.5700",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4827",
+     "Stahlwerk",
+     "metal",
+     "0.50",
+     "0.4784",
+     "3",
+     "13.5"
+    ],
+    [
+     "7713",
+     "Iron Choir",
+     "4819",
+     "Glass Meridian",
+     "classical",
+     "0.34",
+     "0.5310",
+     "3",
+     "13.5"
+    ],
+    [
+     "7714",
+     "Harbour Dub",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "0.60",
+     "0.6107",
+     "1",
+     "3.9"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4826",
+     "Plaza at Noon",
+     "disco",
+     "0.34",
+     "0.5503",
+     "2",
+     "7.0"
+    ],
+    [
+     "7715",
+     "Glitterball Drift",
+     "4828",
+     "Afterimage Club",
+     "disco",
+     "0.34",
+     "0.5417",
+     "2",
+     "7.0"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "0.25",
+     "0.4989",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4818",
+     "Copper Lanterns",
+     "blues",
+     "0.25",
+     "0.4628",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4823",
+     "Dust on the Dial",
+     "country",
+     "0.20",
+     "0.5065",
+     "4",
+     "12.6"
+    ],
+    [
+     "7716",
+     "Rust Belt Radio",
+     "4824",
+     "Harbour Lights Waltz",
+     "country",
+     "0.20",
+     "0.4276",
+     "4",
+     "12.6"
+    ],
+    [
+     "7717",
+     "Blue Hour",
+     "4829",
+     "Tapeworm Blues",
+     "blues",
+     "1.00",
+     "0.5220",
+     "1",
+     "3.2"
+    ],
+    [
+     "7797",
+     "One Genre",
+     "4825",
+     "Marigold Dub",
+     "reggae",
+     "1.00",
+     "0.6107",
+     "1",
+     "3.9"
+    ]
+   ],
+   "doc": "A station holds only recordings whose top genre is in its blend, as placed by its own model version.\nWhy: a new station with a one-genre blend and the widest window isolates the blend and model rules.\nExpect: station 7797 (model 4, window 0 to 1, blend genre 8 only) holds just 4825 (model 4 places it in genre 8;\nmodel 1 also does, but model 1 is not this station's model): 1 recording, 4825's duration in minutes.",
+   "test": "test_m5_only_blend_genres_and_its_own_model_count",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M6",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4819",
+      "model_id": "5",
+      "genre_id": "1",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-07-01 09:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "results",
+    "scored_by",
+    "last_scored_on",
+    "days_out_of_date"
+   ],
+   "expected": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "109"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ]
+   ],
+   "got": [
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "109"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ]
+   ],
+   "doc": "A recording scored by the version now in service no longer needs recomputing, whatever its older results.\nWhy: only the newest result matters; the sample's oldest stale recording (4819) is rescored here.\nExpect: beardown_3sec (model 5) scores 4819 on 2026-07-01: 4819 leaves the list, which keeps the other 8.",
+   "test": "test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M6",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4819",
+      "model_id": "5",
+      "genre_id": "1",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-06-23 00:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4821",
+      "model_id": "5",
+      "genre_id": "6",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-06-22 23:59:59"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "results",
+    "scored_by",
+    "last_scored_on",
+    "days_out_of_date"
+   ],
+   "expected": [
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "3",
+     "beardown, beardown_rrm_cfg12, beardown_3sec",
+     "2026-06-22 23:59:59",
+     "1"
+    ]
+   ],
+   "got": [
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "3",
+     "beardown, beardown_rrm_cfg12, beardown_3sec",
+     "2026-06-22 23:59:59",
+     "1"
+    ]
+   ],
+   "doc": "A result scored at midnight on the deployment day is up to date; one second earlier is not.\nWhy: deployed_on is a date, scored_on a moment; the comparison puts the deployment at 00:00:00 of that day.\nExpect: 4819 rescored by model 5 at 2026-06-23 00:00:00 leaves the list; 4821 rescored at 2026-06-22 23:59:59\nstays, 1 day out of date, now scored by 3 versions.",
+   "test": "test_m6_deployment_day_is_the_boundary",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M6",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "scoring_model",
+     "row": {
+      "model_id": "6",
+      "version_label": "beardown_next",
+      "fusion_type": "concat",
+      "embedding_dimension": "384",
+      "segment_length": "3",
+      "training_corpus": "GTZAN",
+      "holdout_accuracy": "0.8000",
+      "deployed_on": "2026-08-01"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "results",
+    "scored_by",
+    "last_scored_on",
+    "days_out_of_date"
+   ],
+   "expected": [
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-01 10:35:49",
+     "153"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "148"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "130"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "130"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "123"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "97"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "86"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "62"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "53"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "2",
+     "beardown_rrm, beardown_3sec",
+     "2026-06-26 05:51:40",
+     "36"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "beardown, beardown_rrm_cfg12, beardown_rrm, beardown_3sec",
+     "2026-07-01 09:14:52",
+     "31"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "2",
+     "beardown_rrm, beardown_3sec",
+     "2026-07-03 17:38:51",
+     "29"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "beardown_rrm_cfg12, beardown_3sec",
+     "2026-07-15 10:06:28",
+     "17"
+    ]
+   ],
+   "got": [
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-01 10:35:49",
+     "153"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "148"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "130"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "130"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "123"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "97"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "86"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "62"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "53"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "2",
+     "beardown_rrm, beardown_3sec",
+     "2026-06-26 05:51:40",
+     "36"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "beardown, beardown_rrm_cfg12, beardown_rrm, beardown_3sec",
+     "2026-07-01 09:14:52",
+     "31"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "2",
+     "beardown_rrm, beardown_3sec",
+     "2026-07-03 17:38:51",
+     "29"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "beardown_rrm_cfg12, beardown_3sec",
+     "2026-07-15 10:06:28",
+     "17"
+    ]
+   ],
+   "doc": "Deploying a new version makes every released, scored recording due for recomputing, and equal ages order\nby track_id.\nWhy: in the sample the newest version already scored 4 recordings; a version deployed after every result\nleaves none up to date.\nExpect: version 6 deployed 2026-08-01: all 13 scored recordings are listed, the days counted from 2026-08-01.",
+   "test": "test_m6_new_deployment_makes_every_recording_stale",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M6",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4831",
+      "model_id": "1",
+      "genre_id": "0",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-01-30 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "results",
+    "scored_by",
+    "last_scored_on",
+    "days_out_of_date"
+   ],
+   "expected": [
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-01 10:35:49",
+     "114"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "109"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ]
+   ],
+   "got": [
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-01 10:35:49",
+     "114"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "beardown, beardown_rrm_cfg12",
+     "2026-03-06 16:35:42",
+     "109"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-24 15:58:35",
+     "91"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "beardown_rrm",
+     "2026-03-24 17:19:44",
+     "91"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-03-31 19:48:26",
+     "84"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-04-26 10:47:01",
+     "58"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-07 22:13:19",
+     "47"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "2",
+     "beardown, beardown_rrm",
+     "2026-05-31 03:30:19",
+     "23"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "beardown_rrm_cfg12, beardown_rrm",
+     "2026-06-09 19:02:52",
+     "14"
+    ]
+   ],
+   "doc": "A rejected recording is not queued for recomputing, however old its result.\nWhy: none of the sample's scored results belongs to a rejected recording.\nExpect: rejected 4831 scored by model 1 in January: not listed; the 9 sample rows are unchanged.",
+   "test": "test_m6_rejected_recording_is_never_rescored",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M7",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "2",
+      "top_probability": "0.4000",
+      "posterior_entropy": "0.6000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "0",
+      "probability": "0.0286"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "1",
+      "probability": "0.0286"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "2",
+      "probability": "0.4000"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "3",
+      "probability": "0.2000"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "4",
+      "probability": "0.0286"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "5",
+      "probability": "0.2000"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "6",
+      "probability": "0.0286"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "7",
+      "probability": "0.0286"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "8",
+      "probability": "0.0286"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "9",
+      "probability": "0.0286"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "model_id",
+    "top_genre",
+    "top_probability",
+    "runner_up_genre",
+    "runner_up_probability",
+    "margin",
+    "segment_variance"
+   ],
+   "expected": [
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "country",
+     "0.4000",
+     "disco",
+     "0.2000",
+     "0.2000",
+     "0.0100"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "got": [
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "1",
+     "country",
+     "0.4000",
+     "disco",
+     "0.2000",
+     "0.2000",
+     "0.0100"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "doc": "When two genres share the runner-up probability, the lower genre_id is the runner-up, and the result\nappears once.\nWhy: no sample distribution has a tie for second place; without the rule the result would appear twice.\nExpect: model 1 scores 4824 as country (2, 0.4000) with disco (3) and jazz (5) both at 0.2000: one row,\nrunner-up disco, margin 0.2000.",
+   "test": "test_m7_tie_for_second_place_takes_the_lower_genre_id",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M7",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "7",
+      "top_probability": "0.4000",
+      "posterior_entropy": "0.7000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "0",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "1",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "2",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "3",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "4",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "5",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "6",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "7",
+      "probability": "0.4000"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "8",
+      "probability": "0.0250"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "genre_probability",
+     "row": {
+      "track_id": "4824",
+      "model_id": "2",
+      "genre_id": "9",
+      "probability": "0.4000"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "model_id",
+    "top_genre",
+    "top_probability",
+    "runner_up_genre",
+    "runner_up_probability",
+    "margin",
+    "segment_variance"
+   ],
+   "expected": [
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "2",
+     "pop",
+     "0.4000",
+     "rock",
+     "0.4000",
+     "0.0000",
+     "0.0100"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "got": [
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "2",
+     "pop",
+     "0.4000",
+     "rock",
+     "0.4000",
+     "0.0000",
+     "0.0100"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "doc": "When two genres share the top probability, the other one is the runner-up and the margin is 0: the\nrecording sits exactly between them, and is listed first.\nWhy: the sample has no tied top genre; margin 0 is the strongest \"between genres\" case.\nExpect: model 2 scores 4824 with pop (7) and rock (9) both at 0.4000 and pop as its top genre: runner-up rock,\nmargin 0.0000, first row.",
+   "test": "test_m7_top_tie_is_exactly_between_genres",
+   "outcome": "passed"
+  },
+  {
+   "tag": "M7",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "track_score",
+     "row": {
+      "track_id": "4824",
+      "model_id": "1",
+      "genre_id": "2",
+      "top_probability": "0.5000",
+      "posterior_entropy": "0.5000",
+      "model_divergence": "0.0100",
+      "segment_variance": "0.0100",
+      "scored_on": "2026-09-01 12:00:00"
+     }
+    }
+   ],
+   "columns": [
+    "track_id",
+    "title",
+    "model_id",
+    "top_genre",
+    "top_probability",
+    "runner_up_genre",
+    "runner_up_probability",
+    "margin",
+    "segment_variance"
+   ],
+   "expected": [
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "got": [
+    [
+     "4820",
+     "Second Weather",
+     "2",
+     "pop",
+     "0.4357",
+     "disco",
+     "0.4304",
+     "0.0053",
+     "0.0057"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "2",
+     "pop",
+     "0.4461",
+     "disco",
+     "0.4273",
+     "0.0188",
+     "0.0054"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "4",
+     "metal",
+     "0.4514",
+     "rock",
+     "0.3636",
+     "0.0878",
+     "0.0072"
+    ],
+    [
+     "4820",
+     "Second Weather",
+     "4",
+     "pop",
+     "0.4671",
+     "disco",
+     "0.3764",
+     "0.0907",
+     "0.0256"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "4",
+     "blues",
+     "0.5077",
+     "jazz",
+     "0.4133",
+     "0.0944",
+     "0.0109"
+    ],
+    [
+     "4818",
+     "Copper Lanterns",
+     "1",
+     "jazz",
+     "0.4819",
+     "blues",
+     "0.3774",
+     "0.1045",
+     "0.0111"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "4",
+     "disco",
+     "0.4338",
+     "reggae",
+     "0.3212",
+     "0.1126",
+     "0.0180"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "1",
+     "classical",
+     "0.4890",
+     "pop",
+     "0.3745",
+     "0.1145",
+     "0.0105"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "2",
+     "blues",
+     "0.4947",
+     "rock",
+     "0.3777",
+     "0.1170",
+     "0.0265"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "1",
+     "metal",
+     "0.4799",
+     "classical",
+     "0.3612",
+     "0.1187",
+     "0.0081"
+    ],
+    [
+     "4826",
+     "Plaza at Noon",
+     "5",
+     "disco",
+     "0.4943",
+     "reggae",
+     "0.3632",
+     "0.1311",
+     "0.0193"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "2",
+     "country",
+     "0.5153",
+     "rock",
+     "0.3570",
+     "0.1583",
+     "0.0128"
+    ],
+    [
+     "4819",
+     "Glass Meridian",
+     "2",
+     "classical",
+     "0.5562",
+     "pop",
+     "0.3888",
+     "0.1674",
+     "0.0233"
+    ],
+    [
+     "4829",
+     "Tapeworm Blues",
+     "4",
+     "blues",
+     "0.5363",
+     "rock",
+     "0.3526",
+     "0.1837",
+     "0.0036"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "1",
+     "jazz",
+     "0.5438",
+     "hiphop",
+     "0.3426",
+     "0.2012",
+     "0.0243"
+    ],
+    [
+     "4828",
+     "Afterimage Club",
+     "5",
+     "disco",
+     "0.5516",
+     "pop",
+     "0.3023",
+     "0.2493",
+     "0.0246"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "1",
+     "reggae",
+     "0.4964",
+     "hiphop",
+     "0.2332",
+     "0.2632",
+     "0.0273"
+    ],
+    [
+     "4821",
+     "Cathedral Static",
+     "2",
+     "classical",
+     "0.5556",
+     "metal",
+     "0.2865",
+     "0.2691",
+     "0.0288"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "5",
+     "jazz",
+     "0.5800",
+     "hiphop",
+     "0.2843",
+     "0.2957",
+     "0.0051"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "4",
+     "jazz",
+     "0.6002",
+     "hiphop",
+     "0.2859",
+     "0.3143",
+     "0.0289"
+    ],
+    [
+     "4817",
+     "Low Tide Signal",
+     "2",
+     "jazz",
+     "0.6131",
+     "hiphop",
+     "0.2898",
+     "0.3233",
+     "0.0058"
+    ],
+    [
+     "4823",
+     "Dust on the Dial",
+     "4",
+     "country",
+     "0.6131",
+     "rock",
+     "0.2525",
+     "0.3606",
+     "0.0179"
+    ],
+    [
+     "4825",
+     "Marigold Dub",
+     "4",
+     "reggae",
+     "0.5743",
+     "hiphop",
+     "0.1940",
+     "0.3803",
+     "0.0246"
+    ],
+    [
+     "4827",
+     "Stahlwerk",
+     "1",
+     "metal",
+     "0.6295",
+     "rock",
+     "0.2481",
+     "0.3814",
+     "0.0117"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "5",
+     "classical",
+     "0.6804",
+     "jazz",
+     "0.1499",
+     "0.5305",
+     "0.0121"
+    ],
+    [
+     "4822",
+     "Hymn for a Server Room",
+     "4",
+     "classical",
+     "0.7354",
+     "jazz",
+     "0.1269",
+     "0.6085",
+     "0.0276"
+    ],
+    [
+     "4824",
+     "Harbour Lights Waltz",
+     "4",
+     "country",
+     "0.7401",
+     "blues",
+     "0.1002",
+     "0.6399",
+     "0.0089"
+    ]
+   ],
+   "doc": "A scoring result with no probability rows has no runner-up, so it is left out rather than shown half empty.\nWhy: rule I2 says every result has its ten probabilities, but the database alone does not stop a result being\nwritten first; the INNER JOIN to the derived table drops it.\nExpect: model 1 scores 4824 with no genre_probability rows: 4824 is listed only for model 4, as before.",
+   "test": "test_m7_result_without_a_distribution_is_absent",
+   "outcome": "passed"
+  }
+ ]
+};

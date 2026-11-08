@@ -10,7 +10,11 @@ from a folder holding the test kit plus the two files downloaded from the site:
     data.csv                     Project 1 sample data, bulk view (site: Home > Project 1 data)
     database_implementation.sql  Task 1 (site: Project 2 > database_implementation)
     single_table.sql             Task 2 (site: Project 2 > single_table)
+    multiple_table.sql           Task 3 (site: Project 2 > multiple_table)
+    routines.sql                 Task 4 (site: Project 2 > routines)
     use_cases.json               the use cases (comes with the test kit)
+
+test_implementation.py needs only data.csv and database_implementation.sql.
 
 Connection: CROSSFADE_DB_USER (root), CROSSFADE_DB_PASSWORD, CROSSFADE_DB_HOST (127.0.0.1),
 CROSSFADE_DB_PORT (3306), or the matching --db-* options.
@@ -31,6 +35,8 @@ def pytest_addoption(parser):
     g.addoption("--data", help="bulk data.csv (Project 1 sample data)")
     g.addoption("--impl", help="database_implementation.sql")
     g.addoption("--sql", help="single_table.sql")
+    g.addoption("--msql", help="multiple_table.sql")
+    g.addoption("--rsql", help="routines.sql")
     g.addoption("--use-cases", dest="use_cases", help="use_cases.json")
     g.addoption("--fresh", action="store_true",
                 help="rebuild `crossfade` from database_implementation.sql before testing (default: test the database as it is)")
@@ -42,6 +48,8 @@ CANDIDATES = {
     "data": ("CROSSFADE_DATA", "data.csv", "project1/data_export/data.csv"),
     "impl": ("CROSSFADE_IMPL", "database_implementation.sql", "project2/deliverables/database_implementation.sql"),
     "sql": ("CROSSFADE_SQL", "single_table.sql", "project2/deliverables/single_table.sql"),
+    "msql": ("CROSSFADE_MSQL", "multiple_table.sql", "project2/deliverables/multiple_table.sql"),
+    "rsql": ("CROSSFADE_RSQL", "routines.sql", "project2/deliverables/routines.sql"),
     "use_cases": ("CROSSFADE_USE_CASES", "use_cases.json", "project2/data/use_cases.json"),
 }
 
@@ -93,6 +101,8 @@ def split_sql(text):
     comment, stmt = [], []
     while i < n:
         c = text[i]
+        if re.match(r"DELIMITER\b", text[i:i + 9], re.I) and (i == 0 or text[i - 1] == "\n"):
+            raise ValueError("DELIMITER is not supported by split_sql")
         if text.startswith("/*", i):
             j = text.index("*/", i + 2) + 2
             if "".join(stmt).strip():
@@ -127,6 +137,128 @@ def split_sql(text):
     return out
 
 
+def split_script(text):
+    """Split a script that may change its delimiter (DELIMITER $$, as routines.sql does) into
+    [(comment, statement)], like split_sql. Each statement is returned without its delimiter, ready to send to
+    MySQL on its own: the server never sees DELIMITER, which is a command of the mysql client and Workbench."""
+    out, i, n, delim = [], 0, len(text), ";"
+    comment, stmt, notes = [], [], []
+    while i < n:
+        c = text[i]
+        if (i == 0 or text[i - 1] == "\n") and re.match(r"DELIMITER[ \t]+(\S+)", text[i:i + 30], re.I) \
+                and not "".join(stmt).strip():
+            m = re.match(r"DELIMITER[ \t]+(\S+)[^\n]*", text[i:], re.I)
+            delim, i = m.group(1), i + m.end()
+            continue
+        if text.startswith("/*", i):
+            j = text.index("*/", i + 2) + 2
+            if "".join(stmt).strip():
+                stmt.append(text[i:j])
+            else:
+                comment.append(text[i + 2:j - 2])
+            i = j
+        elif text.startswith("--", i) and (i + 2 >= n or text[i + 2] in " \t\r\n"):
+            j = text.find("\n", i); j = n if j < 0 else j
+            if "".join(stmt).strip():
+                stmt.append(text[i:j])          # kept: a routine body's comments are part of its definition
+            else:
+                notes.append(text[i + 2:j].strip())     # a -- line just before a statement labels it
+            i = j
+        elif c in "'\"`":
+            j = i + 1
+            while j < n:
+                if text[j] == "\\": j += 2; continue
+                if text[j] == c:
+                    if j + 1 < n and text[j + 1] == c: j += 2; continue
+                    break
+                j += 1
+            stmt.append(text[i:j + 1]); i = j + 1
+        elif text.startswith(delim, i):
+            st = "".join(stmt).strip()
+            if st:
+                out.append((comment[-1].strip() if comment else " ".join(notes), st))
+            comment, stmt, notes, i = [], [], [], i + len(delim)
+        else:
+            stmt.append(c); i += 1
+    st = "".join(stmt).strip()
+    if st:
+        out.append((comment[-1].strip() if comment else " ".join(notes), st))
+    return out
+
+
+def blank_code(text):
+    """SQL with comments (-- and /* */) removed and the contents of string literals blanked."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text.startswith("--", i) and (i + 2 >= n or text[i + 2] in " \t\r\n"):
+            j = text.find("\n", i); i = n if j < 0 else j
+        elif text.startswith("/*", i):
+            i = text.index("*/", i + 2) + 2; out.append(" ")
+        elif text[i] in "'\"":
+            q, j = text[i], i + 1
+            while j < n:
+                if text[j] == "\\": j += 2; continue
+                if text[j] == q:
+                    if j + 1 < n and text[j + 1] == q: j += 2; continue
+                    break
+                j += 1
+            out.append(q + q); i = j + 1
+        else:
+            out.append(text[i]); i += 1
+    return "".join(out)
+
+
+class Routine:
+    """One routine of routines.sql: its purpose comment and its CREATE statement (the DROP ... IF EXISTS
+    between them is the comment's first statement, so the comment is carried over to the CREATE)."""
+    def __init__(self, comment, sql):
+        self.comment, self.sql = comment, sql
+        m = re.search(r"\[([FP]\d+)\]\s*(\w+)?", comment)
+        self.tag = m.group(1) if m else None
+        self.name = (m.group(2) or "").lower() if m else ""
+        m = re.match(r"\s*CREATE\s+(?:DEFINER\s*=\s*\S+\s+)?(FUNCTION|PROCEDURE)\s+(?:`?(\w+)`?\.)?`?(\w+)`?", sql, re.I)
+        self.kind = m.group(1).upper() if m else None
+        self.schema = (m.group(2) or "").lower() if m else ""
+        self.created = m.group(3).lower() if m else ""
+        field = lambda k: (re.search(k + r":\s*([^\n]+)", comment) or [None, ""])[1].strip()
+        self.use_cases = re.findall(r"UC-\d+", field("Use cases?"))
+        self.requirement = field("Requirements")
+        self.uses = [x.strip() for x in field("Uses").split(",") if x.strip()]
+        self.tables = [x.strip().lower() for x in field("Tables").split(",") if x.strip()]
+        self.params = [x.strip() for x in re.split(r",(?![^()]*\))", field("Parameters")) if x.strip()]   # DECIMAL(5,5) keeps its comma
+        self.returns = field("Returns")
+        self.errors = field("Errors")
+        self.example = field("Example")
+        m = re.search(r"Business need:\s*(.+?)(?:\n\s*What it does:|$)", comment, re.S)
+        self.need = re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
+        m = re.search(r"What it does:\s*(.+?)(?:\n\s*Requirements:|$)", comment, re.S)
+        self.does = [re.sub(r"\s+", " ", b).strip() for b in re.split(r"\n\s*-\s+", "\n" + m.group(1)) if b.strip()] if m else []
+
+    @property
+    def body(self):
+        """The routine's BEGIN ... END, with comments removed and string literals blanked ('' each), read in one
+        pass so an apostrophe inside a comment is never taken for the start of a string."""
+        code = blank_code(self.sql)
+        return code[code.upper().find("BEGIN"):] if "BEGIN" in code.upper() else code
+
+    def __repr__(self):
+        return self.tag or self.sql[:30]
+
+
+def parse_routines(path):
+    """The routines of routines.sql in file order, plus the statements that are not routines (the DROPs and the
+    "Try it" block) as [(comment, statement)]."""
+    routines, other, pending = [], [], ""
+    for comment, st in split_script(path.read_text(encoding="utf-8")):
+        if re.search(r"\[[FP]\d+\]", comment):
+            pending = comment
+        if re.match(r"\s*CREATE\s+(?:DEFINER\s*=\s*\S+\s+)?(FUNCTION|PROCEDURE)\b", st, re.I):
+            routines.append(Routine(pending if not re.search(r"\[[FP]\d+\]", comment) else comment, st)); pending = ""
+        else:
+            other.append((comment, st))
+    return routines, other
+
+
 def strip_literals(sql):
     """The statement with string literals blanked, so words inside quotes are never mistaken for SQL."""
     return re.sub(r"'(?:[^'\\]|\\.|'')*'", "''", sql)
@@ -135,9 +267,17 @@ def strip_literals(sql):
 class Query:
     def __init__(self, comment, sql):
         self.comment, self.sql = comment, sql
-        m = re.search(r"\[([SE]\d+)\]\s*([A-Z_]+)?", comment)
+        m = re.search(r"\[([SEM]\d+)\]\s*([A-Z_]+\b)?", comment)
         self.tag = m.group(1) if m else None
         self.table = m.group(2).lower() if m and m.group(2) else None
+        m = re.search(r"\[M\d+\]\s*([^\n]+)", comment)
+        self.title = m.group(1).strip() if m else ""
+        m = re.search(r"Tables:\s*([^\n]+)", comment)                     # multiple_table.sql
+        self.tables = [x.strip().lower() for x in m.group(1).split(",") if x.strip()] if m else []
+        m = re.search(r"One row per:\s*([^\n]+)", comment)
+        self.grain = [x.strip().lower() for x in m.group(1).split(",") if x.strip()] if m else []
+        m = re.search(r"Requirements:\s*(3\.[1-5])\b", comment)
+        self.requirement3 = m.group(1) if m else None
         m = re.search(r"Use cases?:\s*([^\n]+)", comment)
         self.use_cases = re.findall(r"UC-\d+", m.group(1)) if m else []
         m = re.search(r"Business question:\s*(.+?)(?:\n\s*-|\n\s*Requirements:|$)", comment, re.S)
@@ -167,6 +307,14 @@ def parse_queries(path):
 # ----------------------------------------------------------------------------- collection: one test per query
 # single_table.sql holds the queries ([S1]...) and, last, the statements that must fail ([E1]...).
 def pytest_generate_tests(metafunc):
+    if "routine" in metafunc.fixturenames:                   # routines.sql: one test per [F#] / [P#] routine
+        rs = [r for r in parse_routines(find_file(metafunc.config, "rsql"))[0] if r.tag]
+        metafunc.parametrize("routine", rs, ids=[r.tag for r in rs])
+    if "mquery" in metafunc.fixturenames:                    # multiple_table.sql: one test per [M#] query
+        ms = [q for q in parse_queries(find_file(metafunc.config, "msql")) if q.tag and q.tag.startswith("M")]
+        metafunc.parametrize("mquery", ms, ids=[q.tag for q in ms])
+    if not {"query", "error_case"} & set(metafunc.fixturenames):
+        return                      # only the single_table.sql tests need single_table.sql
     stmts = parse_queries(find_file(metafunc.config, "sql"))
     if "query" in metafunc.fixturenames:
         qs = [s for s in stmts if not s.is_error]
@@ -206,9 +354,18 @@ def build_database(config, impl_path):
         con.close()
 
 
+class _Paths(dict):
+    """File paths, each looked up the first time a test asks for it, so a test file only needs its own inputs."""
+    def __init__(self, config):
+        super().__init__(); self.config = config
+    def __missing__(self, key):
+        self[key] = find_file(self.config, key)
+        return self[key]
+
+
 @pytest.fixture(scope="session")
 def paths(pytestconfig):
-    return {k: find_file(pytestconfig, k) for k in CANDIDATES}
+    return _Paths(pytestconfig)
 
 
 @pytest.fixture(scope="session")
@@ -267,28 +424,51 @@ def run(con, sql):
 
 
 # ----------------------------------------------------------------------------- report header and snapshot
+NEEDED_BY = {"data": "every test file", "impl": "every test file", "sql": "test_single_table.py",
+             "msql": "test_multiple_table.py", "rsql": "test_routines.py", "use_cases": "the query test files"}
+
+
 def pytest_report_header(config):
     lines = []
     for k in CANDIDATES:
         try:
             lines.append(f"crossfade {k:<10} {find_file(config, k)}")
-        except pytest.UsageError as e:
-            lines.append(f"crossfade {k:<10} MISSING: {e}")
-    lines.append("crossfade mode       " + ("--fresh: rebuild the database first" if config.getoption("fresh")
-                                            else "test the existing `crossfade` database"))
+        except pytest.UsageError:
+            lines.append(f"crossfade {k:<10} not here (needed only by {NEEDED_BY[k]})")
+    modes = []
+    if (HERE / "test_implementation.py").exists():
+        modes.append("test_implementation.py: drops and rebuilds `crossfade` from the script (twice)")
+    for f in ("test_single_table.py", "test_multiple_table.py", "test_routines.py"):
+        if (HERE / f).exists():
+            modes.append(f"{f + ':':<24}" + ("--fresh: rebuild `crossfade` first, then test" if config.getoption("fresh")
+                                            else "tests the existing `crossfade` database"))
+    for i, m in enumerate(modes):
+        lines.append(("crossfade mode       " if i == 0 else "                     ") + m)
     return lines
 
 
-SNAPSHOT = {"queries": {}, "outcomes": {}, "cases": {}}
+SNAPSHOT = {"queries": {}, "outcomes": {}, "cases": {}}             # single_table.sql ([S#], [E#])
+SNAPSHOT_M = {"queries": {}, "cases": {}}                          # multiple_table.sql ([M#])
+SNAPSHOT_R = {"queries": {}, "cases": {}, "demo": []}              # routines.sql ([F#], [P#])
+
+
+def _snap(tag):
+    tag = str(tag or "")
+    return SNAPSHOT_M if tag.startswith("M") else SNAPSHOT_R if tag[:1] in ("F", "P") else SNAPSHOT
 
 
 def record(tag, **kw):
-    SNAPSHOT["queries"].setdefault(tag, {}).update(kw)
+    _snap(tag)["queries"].setdefault(tag, {}).update(kw)
 
 
 def record_case(name, case):
     """A behaviour case: tag, inputs, expected and actual rows, docstring (see test_single_table.py)."""
-    SNAPSHOT["cases"][name] = case
+    _snap(case.get("tag"))["cases"][name] = case
+
+
+def record_demo(steps):
+    """What the "Try it" block of routines.sql returned, statement by statement."""
+    SNAPSHOT_R["demo"] = steps
 
 
 def pytest_runtest_logreport(report):
@@ -296,27 +476,92 @@ def pytest_runtest_logreport(report):
         SNAPSHOT["outcomes"][report.nodeid] = report.outcome
 
 
+IMPL = {"load": {}, "tables": {}}          # filled by test_implementation.py
+
+
+def record_impl(section, key, value):
+    """Facts from test_implementation.py for the site's results snapshot (implementation_results.js)."""
+    IMPL.setdefault(section, {})[key] = value
+
+
+def _results_dir(cfg):
+    return pathlib.Path(cfg.getoption("results")) if cfg.getoption("results") else \
+        (REPO / "project2" / "data" if REPO else pathlib.Path.cwd() / "results")
+
+
+def _write_snapshot(out, stem, var, doc):
+    out.mkdir(parents=True, exist_ok=True)
+    js = json.dumps(doc, indent=1, default=str, ensure_ascii=False)
+    (out / f"{stem}.json").write_text(js, encoding="utf-8")
+    (out / f"{stem}.js").write_text(
+        "/* Written by project2/tests (pytest) at the end of a run. Do not edit. */\nwindow." + var + " = " + js + ";\n",
+        encoding="utf-8")
+    print(f"\nresults snapshot: {out / (stem + '.json')}")
+
+
 def pytest_sessionfinish(session, exitstatus):
+    cfg = session.config
+    now = datetime.datetime.now().isoformat(timespec="seconds")
+    out = _results_dir(cfg)
+
+    # database_implementation.sql (test_implementation.py)
+    impl = {k: o for k, o in SNAPSHOT["outcomes"].items() if "test_implementation.py" in k}
+    if impl:
+        groups = {}
+        for nodeid, outcome in impl.items():
+            name = nodeid.split("::")[-1]
+            m = re.match(r"test_(\w+?)(?:\[(.*)\])?$", name)
+            groups.setdefault(m.group(1) if m else name, []).append({"test": name, "param": m.group(2) if m else None,
+                                                                      "outcome": outcome})
+        _write_snapshot(out, "implementation_results", "P2_IMPL", {
+            "file": "database_implementation.sql", "generated": now,
+            "passed": sum(1 for o in impl.values() if o == "passed"),
+            "failed": sum(1 for o in impl.values() if o != "passed"),
+            "groups": groups, "load": IMPL["load"], "tables": IMPL["tables"]})
+
+    # multiple_table.sql (test_multiple_table.py)
+    multi = {k: o for k, o in SNAPSHOT["outcomes"].items() if "test_multiple_table.py" in k}
+    if multi and SNAPSHOT_M["queries"]:
+        tests = {}
+        for nodeid, outcome in multi.items():
+            m = re.search(r"\[(M\d+)\]", nodeid)
+            tests.setdefault(m.group(1) if m else "file", []).append({"test": nodeid.split("::")[-1], "outcome": outcome})
+        _write_snapshot(out, "multiple_table_results", "P2_MULTIPLE", {
+            "file": "multiple_table.sql", "generated": now,
+            "passed": sum(1 for o in multi.values() if o == "passed"),
+            "failed": sum(1 for o in multi.values() if o != "passed"),
+            "queries": SNAPSHOT_M["queries"], "tests": tests,
+            "cases": [dict(c, test=n, outcome=next((o for k, o in multi.items() if k.endswith("::" + n)), "not run"))
+                      for n, c in SNAPSHOT_M["cases"].items()]})
+
+    # routines.sql (test_routines.py)
+    rout = {k: o for k, o in SNAPSHOT["outcomes"].items() if "test_routines.py" in k}
+    if rout and SNAPSHOT_R["queries"]:
+        tests = {}
+        for nodeid, outcome in rout.items():
+            m = re.search(r"\[([FP]\d+)\]", nodeid) or re.match(r".*::test_([fp]\d+)_", nodeid)
+            tests.setdefault(m.group(1).upper() if m else "file", []).append({"test": nodeid.split("::")[-1], "outcome": outcome})
+        _write_snapshot(out, "routines_results", "P2_ROUTINES", {
+            "file": "routines.sql", "generated": now,
+            "passed": sum(1 for o in rout.values() if o == "passed"),
+            "failed": sum(1 for o in rout.values() if o != "passed"),
+            "queries": SNAPSHOT_R["queries"], "tests": tests, "demo": SNAPSHOT_R["demo"],
+            "cases": [dict(c, test=n, outcome=next((o for k, o in rout.items() if k.endswith("::" + n)), "not run"))
+                      for n, c in SNAPSHOT_R["cases"].items()]})
+
+    # single_table.sql (test_single_table.py)
     if not SNAPSHOT["queries"]:
         return
-    cfg = session.config
-    out = pathlib.Path(cfg.getoption("results")) if cfg.getoption("results") else \
-        (REPO / "project2" / "data" if REPO else pathlib.Path.cwd() / "results")
-    out.mkdir(parents=True, exist_ok=True)
+    single = {k: o for k, o in SNAPSHOT["outcomes"].items() if "test_single_table.py" in k}
     tests = {}
-    for nodeid, outcome in SNAPSHOT["outcomes"].items():
+    for nodeid, outcome in single.items():
         m = re.search(r"\[([SE]\d+)\]", nodeid)
         key = m.group(1) if m else "file"
         tests.setdefault(key, []).append({"test": nodeid.split("::")[-1], "outcome": outcome})
-    doc = {"file": "single_table.sql", "generated": datetime.datetime.now().isoformat(timespec="seconds"),
-           "passed": sum(1 for o in SNAPSHOT["outcomes"].values() if o == "passed"),
-           "failed": sum(1 for o in SNAPSHOT["outcomes"].values() if o != "passed"),
-           "queries": SNAPSHOT["queries"], "tests": tests,
-           "cases": [dict(c, test=n, outcome=next((o for k, o in SNAPSHOT["outcomes"].items() if k.endswith("::" + n)), "not run"))
-                     for n, c in SNAPSHOT["cases"].items()]}
-    js = json.dumps(doc, indent=1, default=str, ensure_ascii=False)
-    (out / "single_table_results.json").write_text(js, encoding="utf-8")
-    (out / "single_table_results.js").write_text(
-        "/* Written by project2/tests (pytest) at the end of a run. Do not edit. */\nwindow.P2_SINGLE = " + js + ";\n",
-        encoding="utf-8")
-    print(f"\nresults snapshot: {out / 'single_table_results.json'}")
+    _write_snapshot(out, "single_table_results", "P2_SINGLE", {
+        "file": "single_table.sql", "generated": now,
+        "passed": sum(1 for o in single.values() if o == "passed"),
+        "failed": sum(1 for o in single.values() if o != "passed"),
+        "queries": SNAPSHOT["queries"], "tests": tests,
+        "cases": [dict(c, test=n, outcome=next((o for k, o in single.items() if k.endswith("::" + n)), "not run"))
+                  for n, c in SNAPSHOT["cases"].items()]})

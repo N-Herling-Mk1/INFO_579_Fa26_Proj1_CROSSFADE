@@ -1,0 +1,449 @@
+{
+ "mutants": [
+  {
+   "mutant": "m1-listener-left-join",
+   "query": "M1",
+   "mistake": "listener joined with LEFT OUTER JOIN (3.1 asks for INNER JOIN on all three tables)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_meets_its_requirement[M1]"
+   ]
+  },
+  {
+   "mutant": "m1-average-of-ratios",
+   "query": "M1",
+   "mistake": "share heard as the average of per-play ratios, not total heard / total length",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M1]",
+    "test_m1_listener_with_no_plays_is_absent",
+    "test_m1_abandoned_skip_lowers_the_share_heard"
+   ]
+  },
+  {
+   "mutant": "m1-least-engaged-first",
+   "query": "M1",
+   "mistake": "least engaged listeners first",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M1]",
+    "test_m1_listener_with_no_plays_is_absent",
+    "test_m1_abandoned_skip_lowers_the_share_heard"
+   ]
+  },
+  {
+   "mutant": "m1-tie-break-dropped",
+   "query": "M1",
+   "mistake": "the listener_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M1]"
+   ]
+  },
+  {
+   "mutant": "m1-tables-line-wrong",
+   "query": "M1",
+   "mistake": "track left off the comment's Tables line",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_reads_declared_tables[M1]"
+   ]
+  },
+  {
+   "mutant": "m2-play-inner-join",
+   "query": "M2",
+   "mistake": "play joined with INNER JOIN: artists with no plays drop out of the royalty run",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M2]",
+    "test_m2_artist_with_uploads_but_no_plays_is_owed_zero",
+    "test_m2_short_play_is_counted_but_does_not_qualify"
+   ]
+  },
+  {
+   "mutant": "m2-ifnull-dropped",
+   "query": "M2",
+   "mistake": "IFNULL removed: an artist with no plays is owed NULL instead of 0",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M2]",
+    "test_m2_artist_with_uploads_but_no_plays_is_owed_zero",
+    "test_m2_short_play_is_counted_but_does_not_qualify"
+   ]
+  },
+  {
+   "mutant": "m2-count-star",
+   "query": "M2",
+   "mistake": "COUNT(*) instead of COUNT(p.track_id): an artist with no plays shows 1 play",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M2]",
+    "test_m2_artist_with_uploads_but_no_plays_is_owed_zero",
+    "test_m2_short_play_is_counted_but_does_not_qualify"
+   ]
+  },
+  {
+   "mutant": "m2-thirty-seconds-excluded",
+   "query": "M2",
+   "mistake": "a play of exactly 30 seconds does not qualify (> instead of >=)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_m2_short_play_is_counted_but_does_not_qualify"
+   ]
+  },
+  {
+   "mutant": "m2-left-join-without-outer",
+   "query": "M2",
+   "mistake": "LEFT JOIN written without OUTER (the course asks for the full join type)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_join_types_explicit[M2]"
+   ]
+  },
+  {
+   "mutant": "m2-undeclared-column",
+   "query": "M2",
+   "mistake": "a column the use cases do not declare is read (artist.country)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_columns_match_use_cases[M2]"
+   ]
+  },
+  {
+   "mutant": "m3-union-all",
+   "query": "M3",
+   "mistake": "UNION ALL: a listener who plays a station twice is counted twice",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M3]",
+    "test_m3_listener_playing_anothers_station_shares_it",
+    "test_m3_unplayed_station_still_reaches_its_creator"
+   ]
+  },
+  {
+   "mutant": "m3-creator-only-is-shared",
+   "query": "M3",
+   "mistake": "a station reaching only its creator labelled shared (>= 1 instead of > 1)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[M3]",
+    "test_m3_listener_playing_anothers_station_shares_it",
+    "test_m3_unplayed_station_still_reaches_its_creator"
+   ]
+  },
+  {
+   "mutant": "m3-bare-join",
+   "query": "M3",
+   "mistake": "a bare JOIN with no join type",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_join_types_explicit[M3]"
+   ]
+  },
+  {
+   "mutant": "m3-tie-break-dropped",
+   "query": "M3",
+   "mistake": "the station_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M3]"
+   ]
+  },
+  {
+   "mutant": "m3-grain-wrong",
+   "query": "M3",
+   "mistake": "the comment says one row per creator (a creator can have two stations)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M3]"
+   ]
+  },
+  {
+   "mutant": "m4-scores-not-genres",
+   "query": "M4",
+   "mistake": "two scores of any genre counted as a disagreement (COUNT(*) instead of COUNT(DISTINCT genre_id))",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_result_matches_oracle[M4]",
+    "test_m4_new_disagreeing_score_adds_the_recording",
+    "test_m4_third_version_raises_the_highest_divergence",
+    "test_m4_agreeing_new_score_adds_nothing"
+   ]
+  },
+  {
+   "mutant": "m4-not-in",
+   "query": "M4",
+   "mistake": "NOT IN: the recordings the models agree on",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_result_matches_oracle[M4]",
+    "test_m4_new_disagreeing_score_adds_the_recording",
+    "test_m4_third_version_raises_the_highest_divergence",
+    "test_m4_agreeing_new_score_adds_nothing"
+   ]
+  },
+  {
+   "mutant": "m4-lowest-divergence",
+   "query": "M4",
+   "mistake": "the lowest divergence instead of the highest",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_m4_third_version_raises_the_highest_divergence"
+   ]
+  },
+  {
+   "mutant": "m4-tie-break-dropped",
+   "query": "M4",
+   "mistake": "the track_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M4]"
+   ]
+  },
+  {
+   "mutant": "m4-claims-union",
+   "query": "M4",
+   "mistake": "the comment claims requirement 3.3 (a set operation) instead of 3.4",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_meets_its_requirement[M4]",
+    "test_each_requirement_is_met"
+   ]
+  },
+  {
+   "mutant": "m5-window-edges-excluded",
+   "query": "M5",
+   "mistake": "the window's edges left out (> and < instead of BETWEEN)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_m5_window_edges_are_inside"
+   ]
+  },
+  {
+   "mutant": "m5-status-filter-dropped",
+   "query": "M5",
+   "mistake": "rejected recordings allowed on stations (ingest status not checked)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_m5_rejected_recording_is_never_streamed",
+    "test_declared_columns_are_read"
+   ]
+  },
+  {
+   "mutant": "m5-any-model",
+   "query": "M5",
+   "mistake": "scores from every model version used, not the station's own",
+   "caught": true,
+   "failed": 6,
+   "first_failures": [
+    "test_result_matches_oracle[M5]",
+    "test_result_is_deterministic[M5]",
+    "test_m5_window_edges_are_inside",
+    "test_m5_rejected_recording_is_never_streamed"
+   ]
+  },
+  {
+   "mutant": "m5-blend-genre-ignored",
+   "query": "M5",
+   "mistake": "top genre not matched to the blend (any blend row joins)",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_result_matches_oracle[M5]",
+    "test_result_is_deterministic[M5]",
+    "test_m5_window_edges_are_inside",
+    "test_m5_rejected_recording_is_never_streamed"
+   ]
+  },
+  {
+   "mutant": "m5-weight-ascending",
+   "query": "M5",
+   "mistake": "lowest blend weight first",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[M5]",
+    "test_m5_window_edges_are_inside",
+    "test_m5_rejected_recording_is_never_streamed",
+    "test_m5_only_blend_genres_and_its_own_model_count"
+   ]
+  },
+  {
+   "mutant": "m5-tie-break-dropped",
+   "query": "M5",
+   "mistake": "the track_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M5]"
+   ]
+  },
+  {
+   "mutant": "m5-minutes-unrounded",
+   "query": "M5",
+   "mistake": "station running time not rounded",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[M5]",
+    "test_m5_window_edges_are_inside",
+    "test_m5_rejected_recording_is_never_streamed",
+    "test_m5_only_blend_genres_and_its_own_model_count"
+   ]
+  },
+  {
+   "mutant": "m6-deployment-day-stale",
+   "query": "M6",
+   "mistake": "a result scored at midnight on the deployment day counted as out of date (<= instead of <)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_m6_deployment_day_is_the_boundary"
+   ]
+  },
+  {
+   "mutant": "m6-oldest-result",
+   "query": "M6",
+   "mistake": "the oldest result judged instead of the newest: rescored recordings stay listed",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[M6]",
+    "test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date",
+    "test_m6_deployment_day_is_the_boundary",
+    "test_m6_rejected_recording_is_never_rescored"
+   ]
+  },
+  {
+   "mutant": "m6-rejected-included",
+   "query": "M6",
+   "mistake": "rejected recordings queued for rescoring (release status not checked)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_m6_rejected_recording_is_never_rescored",
+    "test_declared_columns_are_read"
+   ]
+  },
+  {
+   "mutant": "m6-days-from-first-deployment",
+   "query": "M6",
+   "mistake": "days counted from the first deployment instead of the one in service",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_result_matches_oracle[M6]",
+    "test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date",
+    "test_m6_deployment_day_is_the_boundary",
+    "test_m6_new_deployment_makes_every_recording_stale"
+   ]
+  },
+  {
+   "mutant": "m6-versions-alphabetical",
+   "query": "M6",
+   "mistake": "the versions listed alphabetically instead of oldest first",
+   "caught": true,
+   "failed": 5,
+   "first_failures": [
+    "test_result_matches_oracle[M6]",
+    "test_m6_rescore_by_the_model_in_service_brings_a_recording_up_to_date",
+    "test_m6_deployment_day_is_the_boundary",
+    "test_m6_new_deployment_makes_every_recording_stale"
+   ]
+  },
+  {
+   "mutant": "m6-tie-break-dropped",
+   "query": "M6",
+   "mistake": "the track_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M6]"
+   ]
+  },
+  {
+   "mutant": "m7-second-place-includes-top",
+   "query": "M7",
+   "mistake": "the top genre allowed as its own runner-up: every margin is 0",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[M7]",
+    "test_m7_tie_for_second_place_takes_the_lower_genre_id",
+    "test_m7_top_tie_is_exactly_between_genres",
+    "test_m7_result_without_a_distribution_is_absent"
+   ]
+  },
+  {
+   "mutant": "m7-higher-genre-on-tie",
+   "query": "M7",
+   "mistake": "a tie for second place goes to the higher genre_id",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_m7_tie_for_second_place_takes_the_lower_genre_id"
+   ]
+  },
+  {
+   "mutant": "m7-largest-margin-first",
+   "query": "M7",
+   "mistake": "the most clearly placed recordings first",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[M7]",
+    "test_m7_tie_for_second_place_takes_the_lower_genre_id",
+    "test_m7_top_tie_is_exactly_between_genres",
+    "test_m7_result_without_a_distribution_is_absent"
+   ]
+  },
+  {
+   "mutant": "m7-tie-break-dropped",
+   "query": "M7",
+   "mistake": "the model_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[M7]"
+   ]
+  },
+  {
+   "mutant": "m7-runner-up-optional",
+   "query": "M7",
+   "mistake": "results with no distribution kept, half empty (runner_up and its genre joined LEFT OUTER)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_m7_result_without_a_distribution_is_absent"
+   ]
+  }
+ ],
+ "caught": 39,
+ "total": 39,
+ "not_applicable": [],
+ "real_file": "========================= 1 failed, 79 passed in 0.39s =========================",
+ "already_failing": []
+}

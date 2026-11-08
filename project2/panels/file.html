@@ -85,7 +85,7 @@
   if (f.results) {
     var sc = document.createElement("script");
     sc.src = "../data/" + f.results + "?t=" + Date.now();
-    sc.onload = function () { if (window.P2_SINGLE) showResults(window.P2_SINGLE); };
+    sc.onload = function () { var R = window[f.resultsVar || "P2_SINGLE"]; if (R) showResults(R); };
     document.head.appendChild(sc);
   }
   function esc(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
@@ -110,12 +110,15 @@
           '<p class="note">Run inside a transaction that is rolled back; the test also checks <code>' + esc(q.table) + "</code> is unchanged. Source: the end of <code>single_table.sql</code>, marked EXPECTED TO FAIL.</p></div>";
         return;
       }
-      h += '<div class="res-q"><div class="res-head"><b>[' + tag + "] " + esc(q.table || "") + "</b> " +
+      h += '<div class="res-q"><div class="res-head"><b>[' + tag + "] " + esc(q.table || q.title || "") + "</b> " +
         (q.use_cases || []).map(function (u) { return '<span class="chip">' + u + "</span>"; }).join("") +
         (q.declared || []).map(function (r) { return '<span class="chip g">(' + r + ")</span>"; }).join("") +
+        (q.requirement ? '<span class="chip g">' + esc(q.requirement) + "</span>" : "") +
         '<span class="mark ' + (bad ? "partial" : "done") + '">' + (ts.length - bad) + "/" + ts.length + " tests</span></div>" +
         '<p class="res-question">' + esc(q.question || "") + "</p>" +
-        (q.columns ? '<p class="note">reads: ' + q.columns.map(function (c) { return "<code>" + c + "</code>"; }).join(" ") + "</p>" : "");
+        (Array.isArray(q.columns) ? '<p class="note">reads: ' + q.columns.map(function (c) { return "<code>" + c + "</code>"; }).join(" ") + "</p>"
+          : q.columns ? '<p class="note">reads: ' + Object.keys(q.columns).map(function (t) {
+              return "<code>" + t + "</code> (" + q.columns[t].map(function (c) { return "<code>" + c + "</code>"; }).join(" ") + ")"; }).join(" &middot; ") + "</p>" : "");
       if (q.columns_out && q.rows) {
         h += '<div class="tablewrap res-table"><table class="grid"><thead><tr>' + q.columns_out.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") +
           "</tr></thead><tbody>" + q.rows.map(function (r) {

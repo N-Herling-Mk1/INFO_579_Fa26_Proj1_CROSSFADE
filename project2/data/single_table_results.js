@@ -1,8 +1,8 @@
 /* Written by project2/tests (pytest) at the end of a run. Do not edit. */
 window.P2_SINGLE = {
  "file": "single_table.sql",
- "generated": "2026-11-06T13:45:36",
- "passed": 66,
+ "generated": "2026-11-07T23:20:08",
+ "passed": 67,
  "failed": 0,
  "queries": {
   "S1": {
@@ -573,7 +573,7 @@ window.P2_SINGLE = {
     "accuracy_pct",
     "deployed_on"
    ],
-   "sql": "SELECT version_label,\n       CONCAT(fusion_type, ' / ', embedding_dimension, 'd / ', segment_length, 's / ', training_corpus) AS architecture,\n       ROUND(holdout_accuracy * 100, 2) AS accuracy_pct,\n       deployed_on\nFROM crossfade.scoring_model\nORDER BY holdout_accuracy DESC,\n         deployed_on DESC\nLIMIT 1",
+   "sql": "SELECT version_label,\n       CONCAT(fusion_type, ' / ', embedding_dimension, 'd / ', segment_length, 's / ', training_corpus) AS architecture,\n       ROUND(holdout_accuracy * 100, 2) AS accuracy_pct,\n       deployed_on\nFROM crossfade.scoring_model\nORDER BY holdout_accuracy DESC,\n         deployed_on DESC,\n         model_id\nLIMIT 1",
    "detected": [
     "a",
     "c",
@@ -584,6 +584,7 @@ window.P2_SINGLE = {
     "embedding_dimension",
     "fusion_type",
     "holdout_accuracy",
+    "model_id",
     "segment_length",
     "training_corpus",
     "version_label"
@@ -1079,6 +1080,10 @@ window.P2_SINGLE = {
    },
    {
     "test": "test_s5_accuracy_tie_prefers_the_newer_version",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_s5_full_tie_goes_to_the_lower_model_id",
     "outcome": "passed"
    },
    {
@@ -2005,6 +2010,64 @@ window.P2_SINGLE = {
    ],
    "doc": "On equal holdout accuracy the more recently deployed version becomes the default.\nWhy: the sample's top version has no tie, so the deployed_on tie-break is never used for the default.\nExpect: tie_newer (accuracy 0.7887 like beardown_3sec, but deployed later, 2026-09-01) is the one default.",
    "test": "test_s5_accuracy_tie_prefers_the_newer_version",
+   "outcome": "passed"
+  },
+  {
+   "tag": "S5",
+   "inputs": [
+    {
+     "kind": "insert",
+     "table": "scoring_model",
+     "row": {
+      "model_id": "7",
+      "version_label": "tie_high",
+      "fusion_type": "concat",
+      "embedding_dimension": "384",
+      "segment_length": "3",
+      "training_corpus": "GTZAN",
+      "holdout_accuracy": "0.9000",
+      "deployed_on": "2026-09-01"
+     }
+    },
+    {
+     "kind": "insert",
+     "table": "scoring_model",
+     "row": {
+      "model_id": "6",
+      "version_label": "tie_low",
+      "fusion_type": "concat",
+      "embedding_dimension": "384",
+      "segment_length": "3",
+      "training_corpus": "GTZAN",
+      "holdout_accuracy": "0.9000",
+      "deployed_on": "2026-09-01"
+     }
+    }
+   ],
+   "columns": [
+    "version_label",
+    "architecture",
+    "accuracy_pct",
+    "deployed_on"
+   ],
+   "expected": [
+    [
+     "tie_low",
+     "concat / 384d / 3s / GTZAN",
+     "90.00",
+     "2026-09-01"
+    ]
+   ],
+   "got": [
+    [
+     "tie_low",
+     "concat / 384d / 3s / GTZAN",
+     "90.00",
+     "2026-09-01"
+    ]
+   ],
+   "doc": "Two versions tied on both accuracy and deployment date: the lower model_id is the default, every time.\nWhy: without a last tie-break, LIMIT 1 would return whichever tied row MySQL found first.\nExpect: tie_low (model_id 6) wins over tie_high (model_id 7); both at 0.9000, both deployed 2026-09-01, above\nevery sample version. tie_high is inserted first, so insertion order cannot be what decides.",
+   "test": "test_s5_full_tie_goes_to_the_lower_model_id",
    "outcome": "passed"
   },
   {

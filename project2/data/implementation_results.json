@@ -1,0 +1,1298 @@
+{
+ "file": "database_implementation.sql",
+ "generated": "2026-11-07T23:20:08",
+ "passed": 228,
+ "failed": 0,
+ "groups": {
+  "load_first_run": [
+   {
+    "test": "test_load_first_run",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "load_second_run": [
+   {
+    "test": "test_load_second_run",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "load_no_warnings": [
+   {
+    "test": "test_load_no_warnings",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "load_every_statement_commented": [
+   {
+    "test": "test_load_every_statement_commented",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "load_never_switches_checks_off": [
+   {
+    "test": "test_load_never_switches_checks_off",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "load_inventory": [
+   {
+    "test": "test_load_inventory",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "schema_tables": [
+   {
+    "test": "test_schema_tables",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "schema_columns": [
+   {
+    "test": "test_schema_columns[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_columns[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "schema_primary_key": [
+   {
+    "test": "test_schema_primary_key[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_primary_key[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "schema_foreign_key": [
+   {
+    "test": "test_schema_foreign_key[fk_track_artist]",
+    "param": "fk_track_artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_station_listener]",
+    "param": "fk_station_listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_station_scoring_model]",
+    "param": "fk_station_scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_track_score_track]",
+    "param": "fk_track_score_track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_track_score_scoring_model]",
+    "param": "fk_track_score_scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_track_score_genre]",
+    "param": "fk_track_score_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_genre_probability_track_score]",
+    "param": "fk_genre_probability_track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_genre_probability_genre]",
+    "param": "fk_genre_probability_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_station_blend_station]",
+    "param": "fk_station_blend_station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_station_blend_genre]",
+    "param": "fk_station_blend_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_play_listener]",
+    "param": "fk_play_listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_play_track]",
+    "param": "fk_play_track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_foreign_key[fk_play_station]",
+    "param": "fk_play_station",
+    "outcome": "passed"
+   }
+  ],
+  "schema_no_extra_foreign_keys": [
+   {
+    "test": "test_schema_no_extra_foreign_keys",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "schema_unique_key": [
+   {
+    "test": "test_schema_unique_key[uq_genre_name]",
+    "param": "uq_genre_name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_unique_key[uq_artist_stage_name]",
+    "param": "uq_artist_stage_name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_unique_key[uq_listener_email]",
+    "param": "uq_listener_email",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_unique_key[uq_scoring_model_version_label]",
+    "param": "uq_scoring_model_version_label",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_schema_unique_key[uq_track_audio_checksum]",
+    "param": "uq_track_audio_checksum",
+    "outcome": "passed"
+   }
+  ],
+  "schema_constraint_names": [
+   {
+    "test": "test_schema_constraint_names",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "read_one_row": [
+   {
+    "test": "test_read_one_row[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_read_one_row[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "data_row_count": [
+   {
+    "test": "test_data_row_count[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_row_count[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "data_every_cell": [
+   {
+    "test": "test_data_every_cell[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_every_cell[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "data_integrity_rule": [
+   {
+    "test": "test_data_integrity_rule[I1-blend-weights-sum-to-one]",
+    "param": "I1-blend-weights-sum-to-one",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I1-every-station-has-a-blend]",
+    "param": "I1-every-station-has-a-blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I2-ten-probabilities-summing-to-one]",
+    "param": "I2-ten-probabilities-summing-to-one",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I3-top-genre-agrees-with-probabilities]",
+    "param": "I3-top-genre-agrees-with-probabilities",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I3-every-score-has-its-top-genre-row]",
+    "param": "I3-every-score-has-its-top-genre-row",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I4-minimum-ambiguity-not-above-maximum]",
+    "param": "I4-minimum-ambiguity-not-above-maximum",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I5-scored-only-with-a-score]",
+    "param": "I5-scored-only-with-a-score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I7-completed-means-whole-track]",
+    "param": "I7-completed-means-whole-track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_integrity_rule[I7-royalty-is-payout-rate-from-30-seconds]",
+    "param": "I7-royalty-is-payout-rate-from-30-seconds",
+    "outcome": "passed"
+   }
+  ],
+  "data_no_orphans": [
+   {
+    "test": "test_data_no_orphans[fk_track_artist]",
+    "param": "fk_track_artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_station_listener]",
+    "param": "fk_station_listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_station_scoring_model]",
+    "param": "fk_station_scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_track_score_track]",
+    "param": "fk_track_score_track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_track_score_scoring_model]",
+    "param": "fk_track_score_scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_track_score_genre]",
+    "param": "fk_track_score_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_genre_probability_track_score]",
+    "param": "fk_genre_probability_track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_genre_probability_genre]",
+    "param": "fk_genre_probability_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_station_blend_station]",
+    "param": "fk_station_blend_station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_station_blend_genre]",
+    "param": "fk_station_blend_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_play_listener]",
+    "param": "fk_play_listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_play_track]",
+    "param": "fk_play_track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_data_no_orphans[fk_play_station]",
+    "param": "fk_play_station",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_valid_row_accepted": [
+   {
+    "test": "test_enforce_valid_row_accepted[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_valid_row_accepted[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_duplicate_primary_key": [
+   {
+    "test": "test_enforce_duplicate_primary_key[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[scoring_model]",
+    "param": "scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[track]",
+    "param": "track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[station]",
+    "param": "station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[track_score]",
+    "param": "track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[genre_probability]",
+    "param": "genre_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[station_blend]",
+    "param": "station_blend",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_primary_key[play]",
+    "param": "play",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_duplicate_unique": [
+   {
+    "test": "test_enforce_duplicate_unique[uq_genre_name]",
+    "param": "uq_genre_name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_unique[uq_artist_stage_name]",
+    "param": "uq_artist_stage_name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_unique[uq_listener_email]",
+    "param": "uq_listener_email",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_unique[uq_scoring_model_version_label]",
+    "param": "uq_scoring_model_version_label",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_duplicate_unique[uq_track_audio_checksum]",
+    "param": "uq_track_audio_checksum",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_orphan_refused": [
+   {
+    "test": "test_enforce_orphan_refused[fk_track_artist]",
+    "param": "fk_track_artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_station_listener]",
+    "param": "fk_station_listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_station_scoring_model]",
+    "param": "fk_station_scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_track_score_track]",
+    "param": "fk_track_score_track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_track_score_scoring_model]",
+    "param": "fk_track_score_scoring_model",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_track_score_genre]",
+    "param": "fk_track_score_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_genre_probability_track_score]",
+    "param": "fk_genre_probability_track_score",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_genre_probability_genre]",
+    "param": "fk_genre_probability_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_station_blend_station]",
+    "param": "fk_station_blend_station",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_station_blend_genre]",
+    "param": "fk_station_blend_genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_play_listener]",
+    "param": "fk_play_listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_play_track]",
+    "param": "fk_play_track",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_orphan_refused[fk_play_station]",
+    "param": "fk_play_station",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_not_null": [
+   {
+    "test": "test_enforce_not_null[genre-genre_id]",
+    "param": "genre-genre_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[genre-name]",
+    "param": "genre-name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[artist-artist_id]",
+    "param": "artist-artist_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[artist-stage_name]",
+    "param": "artist-stage_name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[artist-joined_date]",
+    "param": "artist-joined_date",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[artist-payout_rate]",
+    "param": "artist-payout_rate",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[artist-verified]",
+    "param": "artist-verified",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[listener-listener_id]",
+    "param": "listener-listener_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[listener-email]",
+    "param": "listener-email",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[listener-display_name]",
+    "param": "listener-display_name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[listener-plan_tier]",
+    "param": "listener-plan_tier",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[listener-signup_date]",
+    "param": "listener-signup_date",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-model_id]",
+    "param": "scoring_model-model_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-version_label]",
+    "param": "scoring_model-version_label",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-fusion_type]",
+    "param": "scoring_model-fusion_type",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-embedding_dimension]",
+    "param": "scoring_model-embedding_dimension",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-segment_length]",
+    "param": "scoring_model-segment_length",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-training_corpus]",
+    "param": "scoring_model-training_corpus",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-holdout_accuracy]",
+    "param": "scoring_model-holdout_accuracy",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[scoring_model-deployed_on]",
+    "param": "scoring_model-deployed_on",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-track_id]",
+    "param": "track-track_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-artist_id]",
+    "param": "track-artist_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-title]",
+    "param": "track-title",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-duration]",
+    "param": "track-duration",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-release_date]",
+    "param": "track-release_date",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-audio_checksum]",
+    "param": "track-audio_checksum",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track-ingest_status]",
+    "param": "track-ingest_status",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-station_id]",
+    "param": "station-station_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-listener_id]",
+    "param": "station-listener_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-model_id]",
+    "param": "station-model_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-name]",
+    "param": "station-name",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-minimum_ambiguity]",
+    "param": "station-minimum_ambiguity",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-maximum_ambiguity]",
+    "param": "station-maximum_ambiguity",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station-created_on]",
+    "param": "station-created_on",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track_score-track_id]",
+    "param": "track_score-track_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track_score-model_id]",
+    "param": "track_score-model_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track_score-genre_id]",
+    "param": "track_score-genre_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track_score-top_probability]",
+    "param": "track_score-top_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track_score-posterior_entropy]",
+    "param": "track_score-posterior_entropy",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[track_score-scored_on]",
+    "param": "track_score-scored_on",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[genre_probability-track_id]",
+    "param": "genre_probability-track_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[genre_probability-model_id]",
+    "param": "genre_probability-model_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[genre_probability-genre_id]",
+    "param": "genre_probability-genre_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[genre_probability-probability]",
+    "param": "genre_probability-probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station_blend-station_id]",
+    "param": "station_blend-station_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station_blend-genre_id]",
+    "param": "station_blend-genre_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[station_blend-weight]",
+    "param": "station_blend-weight",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[play-listener_id]",
+    "param": "play-listener_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[play-track_id]",
+    "param": "play-track_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[play-played_at]",
+    "param": "play-played_at",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[play-seconds_played]",
+    "param": "play-seconds_played",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[play-completed]",
+    "param": "play-completed",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_not_null[play-royalty_amount]",
+    "param": "play-royalty_amount",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_null_allowed": [
+   {
+    "test": "test_enforce_null_allowed[genre-description]",
+    "param": "genre-description",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_null_allowed[artist-country]",
+    "param": "artist-country",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_null_allowed[track_score-model_divergence]",
+    "param": "track_score-model_divergence",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_null_allowed[track_score-segment_variance]",
+    "param": "track_score-segment_variance",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_null_allowed[play-station_id]",
+    "param": "play-station_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_null_allowed[play-reaction]",
+    "param": "play-reaction",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_check": [
+   {
+    "test": "test_enforce_check[ck_genre_id]",
+    "param": "ck_genre_id",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_artist_payout_rate]",
+    "param": "ck_artist_payout_rate",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_listener_email]",
+    "param": "ck_listener_email",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_scoring_model_holdout_accuracy]",
+    "param": "ck_scoring_model_holdout_accuracy",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_scoring_model_embedding_dimension]",
+    "param": "ck_scoring_model_embedding_dimension",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_scoring_model_segment_length]",
+    "param": "ck_scoring_model_segment_length",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_track_duration]",
+    "param": "ck_track_duration",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_station_minimum_ambiguity]",
+    "param": "ck_station_minimum_ambiguity",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_station_maximum_ambiguity]",
+    "param": "ck_station_maximum_ambiguity",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_station_ambiguity_window]",
+    "param": "ck_station_ambiguity_window",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_track_score_top_probability]",
+    "param": "ck_track_score_top_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_track_score_posterior_entropy]",
+    "param": "ck_track_score_posterior_entropy",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_track_score_model_divergence]",
+    "param": "ck_track_score_model_divergence",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_track_score_segment_variance]",
+    "param": "ck_track_score_segment_variance",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_genre_probability_probability]",
+    "param": "ck_genre_probability_probability",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_station_blend_weight]",
+    "param": "ck_station_blend_weight",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_check[ck_play_royalty_amount]",
+    "param": "ck_play_royalty_amount",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_type_limit": [
+   {
+    "test": "test_enforce_type_limit[artist-stage_name-too-long]",
+    "param": "artist-stage_name-too-long",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[artist-country-too-long]",
+    "param": "artist-country-too-long",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[track-audio_checksum-too-long]",
+    "param": "track-audio_checksum-too-long",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[artist-artist_id-negative]",
+    "param": "artist-artist_id-negative",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[track-duration-out-of-range]",
+    "param": "track-duration-out-of-range",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[artist-payout_rate-out-of-range]",
+    "param": "artist-payout_rate-out-of-range",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[track-ingest_status-not-in-enum]",
+    "param": "track-ingest_status-not-in-enum",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[play-reaction-not-in-enum]",
+    "param": "play-reaction-not-in-enum",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_type_limit[listener-signup_date-not-a-date]",
+    "param": "listener-signup_date-not-a-date",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_delete_cascades_probabilities": [
+   {
+    "test": "test_enforce_delete_cascades_probabilities",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "enforce_delete_station_cascades_blend_and_keeps_plays": [
+   {
+    "test": "test_enforce_delete_station_cascades_blend_and_keeps_plays",
+    "param": null,
+    "outcome": "passed"
+   }
+  ],
+  "enforce_delete_parent_refused": [
+   {
+    "test": "test_enforce_delete_parent_refused[artist]",
+    "param": "artist",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_delete_parent_refused[genre]",
+    "param": "genre",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_delete_parent_refused[listener]",
+    "param": "listener",
+    "outcome": "passed"
+   },
+   {
+    "test": "test_enforce_delete_parent_refused[track]",
+    "param": "track",
+    "outcome": "passed"
+   }
+  ],
+  "enforce_rollback_leaves_data": [
+   {
+    "test": "test_enforce_rollback_leaves_data",
+    "param": null,
+    "outcome": "passed"
+   }
+  ]
+ },
+ "load": {
+  "statements": 22,
+  "server": {
+   "version": "8.0.46-0ubuntu0.24.04.4",
+   "sql_mode": "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+  },
+  "runs": [
+   {
+    "run": 1,
+    "seconds": 0.172,
+    "warnings": [],
+    "error": null
+   },
+   {
+    "run": 2,
+    "seconds": 0.162,
+    "warnings": [],
+    "error": null
+   }
+  ],
+  "warnings": [],
+  "inventory": {
+   "created": {
+    "genre": 1,
+    "artist": 1,
+    "listener": 1,
+    "scoring_model": 1,
+    "track": 1,
+    "station": 1,
+    "track_score": 1,
+    "genre_probability": 1,
+    "station_blend": 1,
+    "play": 1
+   },
+   "inserts": {
+    "genre": 1,
+    "artist": 1,
+    "listener": 1,
+    "scoring_model": 1,
+    "track": 1,
+    "station": 1,
+    "track_score": 1,
+    "genre_probability": 1,
+    "station_blend": 1,
+    "play": 1
+   }
+  }
+ },
+ "tables": {
+  "genre": {
+   "rows": 10,
+   "csv_rows": 10
+  },
+  "artist": {
+   "rows": 8,
+   "csv_rows": 8
+  },
+  "listener": {
+   "rows": 8,
+   "csv_rows": 8
+  },
+  "scoring_model": {
+   "rows": 5,
+   "csv_rows": 5
+  },
+  "track": {
+   "rows": 15,
+   "csv_rows": 15
+  },
+  "station": {
+   "rows": 8,
+   "csv_rows": 8
+  },
+  "track_score": {
+   "rows": 27,
+   "csv_rows": 27
+  },
+  "genre_probability": {
+   "rows": 270,
+   "csv_rows": 270
+  },
+  "station_blend": {
+   "rows": 19,
+   "csv_rows": 19
+  },
+  "play": {
+   "rows": 31,
+   "csv_rows": 31
+  }
+ }
+}

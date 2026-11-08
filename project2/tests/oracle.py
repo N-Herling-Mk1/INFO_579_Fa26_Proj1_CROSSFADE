@@ -97,7 +97,7 @@ def s4(t):
 def s5(t):
     cols = ["version_label", "architecture", "accuracy_pct", "deployed_on"]
     rows = sorted(t["scoring_model"]["rows"],
-                  key=lambda m: (-D(m["holdout_accuracy"]), -day(m["deployed_on"]).toordinal()))
+                  key=lambda m: (-D(m["holdout_accuracy"]), -day(m["deployed_on"]).toordinal(), int(m["model_id"])))
     out = []
     for m in rows[:1]:                                         # the one default
         out.append((m["version_label"],

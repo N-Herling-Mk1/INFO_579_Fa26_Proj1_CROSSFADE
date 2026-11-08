@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vetting and tests</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="../../assets/site.css?v=cb25b6e1">
+<script src="../data/vetting.js"></script>
+<style>
+  /* Vetting and tests: one page per deliverable (?f=implementation | single | multiple | routines).
+     Content: project2/data/vetting.js (build_vetting.py); last run: project2/data/<results>.js (pytest). */
+  .vt-run { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 18px; padding: 10px 14px;
+    border: 1px solid var(--rule); border-radius: 4px; background: #f7fafc; font: 14px var(--mono); color: var(--ink-2); }
+  .vt-run b { font-weight: 600; color: var(--ink); }
+  .vt-big { font: 800 22px/1 var(--display); color: #2e8b57; }
+  .vt-big.bad { color: var(--ares); }
+  /* top row: one big download button (left), the coverage map (right) */
+  .vt-top { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 18px; align-items: start; max-width: 1140px; margin: 0 0 8px; }
+  .vt-get { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+    padding: 22px 18px 18px; border-radius: 10px; text-decoration: none; color: #fff; overflow: hidden;
+    background: linear-gradient(160deg, #0fa3dc 0%, #0a8fc4 45%, #076d97 100%);
+    box-shadow: 0 10px 26px -12px rgba(10,143,196,.85), inset 0 1px 0 rgba(255,255,255,.25); transition: transform .15s, box-shadow .15s; }
+  .vt-get:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -12px rgba(10,143,196,.95), inset 0 1px 0 rgba(255,255,255,.3); }
+  .vt-get:active { transform: translateY(0); }
+  .vt-get:focus-visible { outline: 3px solid #0f1b26; outline-offset: 3px; }
+  .vt-get svg { width: 118px; height: 104px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
+  .vt-get svg .v { transition: transform .25s ease; }
+  .vt-get:hover svg .v { transform: translateY(6px); }
+  .vt-get .t { font: 800 17px/1.15 var(--display); letter-spacing: .04em; }
+  .vt-get .f { font: 13px var(--mono); opacity: .92; }
+  .vt-get .s { font-size: 13px; line-height: 1.4; opacity: .9; }
+  .vt-get .meta { margin-top: 4px; padding: 3px 10px; border-radius: 12px; background: rgba(255,255,255,.16); font: 12px var(--mono); }
+  .vt-get-list { margin: 10px 0 0; padding: 0; list-style: none; font: 12.5px/1.6 var(--mono); color: var(--ink-2); }
+  .vt-get-list li::before { content: "\2713  "; color: #2e8b57; }
+  .vt-covhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 6px; }
+  .vt-covhead h2 { margin: 0; }
+  .vt-covhead span { font-size: 13px; color: var(--ink-2); }
+  /* the three sources -> the tests <- the database */
+  .vt-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 1100px; margin: 6px 0 4px; }
+  .vt-src { padding: 12px 14px; border: 1px solid var(--rule); border-top: 3px solid var(--cyan); border-radius: 4px; background: #fff; }
+  .vt-src h3 { margin: 0 0 2px; font-size: 15px; }
+  .vt-src .from { font: 12.5px var(--mono); color: var(--ink-2); margin: 0 0 6px; }
+  .vt-src p { margin: 0; font-size: 14px; line-height: 1.5; }
+  .vt-arrow { max-width: 1100px; text-align: center; font: 13px var(--mono); color: var(--ink-2); margin: 6px 0 2px; }
+  .vt-arrow b { color: var(--ink); }
+  table.vt { border-collapse: collapse; width: 100%; max-width: 1100px; font-size: 14.5px; }
+  table.vt th { font: 600 13px var(--body); color: var(--ink-2); background: #f3f7fa; text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+  table.vt td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  table.vt td.m { font: 13.5px var(--mono); white-space: nowrap; }
+  table.vt td.n { font-family: var(--mono); text-align: right; white-space: nowrap; }
+  /* coverage map */
+  .vt-mapwrap { overflow-x: auto; max-width: 1100px; border: 1px solid var(--rule); border-radius: 4px; }
+  table.vt-map { border-collapse: collapse; font: 12.5px var(--mono); }
+  table.vt-map th { font: 600 11.5px var(--body); color: var(--ink-2); padding: 6px 4px; border-bottom: 1px solid var(--rule); background: #f7fafc; }
+  table.vt-map thead th:not(:first-child) { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; height: 150px; vertical-align: bottom; white-space: nowrap; }
+  table.vt-map tbody th { text-align: left; padding: 4px 10px; white-space: nowrap; font: 13px var(--mono); color: var(--ink); background: #fff; border-right: 1px solid var(--rule); }
+  table.vt-map tbody th i { font-style: normal; font-size: 11px; color: var(--ink-2); margin-left: 4px; }
+  table.vt-map td { width: 34px; height: 30px; text-align: center; border: 1px solid #fff; }
+  table.vt-map td.ok { background: color-mix(in srgb, #2e8b57 calc(18% + var(--k, 0) * 9%), #fff); color: #154d2f; }
+  table.vt-map td.bad { background: #f9d3cc; color: #8a1f0e; font-weight: 700; }
+  table.vt-map td.na { background: #f4f6f8; color: #b6c0c9; }
+  table.vt-map tfoot td { font-weight: 700; color: var(--ink-2); background: #f7fafc; }
+  table.vt-map td.mk { background: #e6f4fa; color: var(--cyan); font-weight: 700; }
+  table.vt-map thead th.mkh { color: var(--cyan); }
+  .vt-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 0; font-size: 13px; color: var(--ink-2); }
+  .vt-legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
+  .vt-legend .l-ok::before { background: #9ccfb2; } .vt-legend .l-bad::before { background: #f9d3cc; } .vt-legend .l-na::before { background: #f4f6f8; border: 1px solid #dde3e8; }
+  /* could miss */
+  .vt-miss { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; max-width: 1100px; }
+  .vt-miss > div { padding: 12px 14px; border: 1px solid #efd7a8; border-left: 4px solid var(--amber); border-radius: 4px; background: #fffaf0; }
+  .vt-miss h3 { margin: 0 0 6px; font-size: 15px; }
+  .vt-miss p { margin: 0 0 6px; font-size: 14px; line-height: 1.5; }
+  .vt-miss .cover { margin: 0; font-size: 13px; color: var(--ink-2); }
+  .vt-miss .cover::before { content: "Covered instead: "; font-weight: 600; color: var(--ink); }
+  .vt-find { max-width: 1100px; border-left: 4px solid var(--ares); background: #fdeeeb; padding: 12px 16px; border-radius: 0 4px 4px 0; }
+  .vt-find p { margin: 0 0 6px; } .vt-find p:last-child { margin: 0; }
+  /* how to run */
+  ol.vt-steps { max-width: 900px; padding-left: 22px; }
+  ol.vt-steps li { margin: 0 0 14px; }
+  ol.vt-steps li b { display: block; margin-bottom: 2px; }
+  ol.vt-steps pre { margin: 6px 0 0; background: #0f1b26; color: #d8f3ff; padding: 10px 12px; border-radius: 4px; overflow-x: auto; font: 13px/1.5 var(--mono); }
+  .vt-whole { columns: 2; max-width: 900px; padding-left: 18px; font-size: 14px; }
+  .vt-plan { max-width: 72ch; }
+  @media (max-width: 900px) { .vt-flow, .vt-top { grid-template-columns: minmax(0, 1fr); } .vt-whole { columns: 1; } }
+</style>
+</head>
+<body>
+<div class="panel wide" style="max-width:1180px">
+  <p class="group-line" id="kicker"></p>
+  <h1 id="name"></h1>
+  <p class="lede" id="lede"></p>
+  <div id="body"></div>
+</div>
+<script>
+(function () {
+  var V = window.P2_VET || {};
+  var id = new URLSearchParams(location.search).get("f") || "implementation";
+  var f = V[id] || V.implementation;
+  function esc(v) { return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function code(t) { return esc(t).replace(/`([^`]+)`/g, "<code>$1</code>"); }
+  document.title = "Vetting · " + f.file;
+  document.getElementById("kicker").textContent = "Vetting & tests · " + f.task;
+  document.getElementById("name").textContent = f.file;
+  document.getElementById("lede").textContent = f.title + ". " + f.lede;
+  var body = document.getElementById("body");
+
+  if (f.status !== "tested") {
+    body.innerHTML = '<div class="callout pending vt-plan"><p><b>' + (f.status === "next" ? "Next." : "Planned.") + "</b> " +
+      esc(f.lede) + "</p><p>Each page covers the test files, how to run them locally, what they cover and what they could miss.</p></div>";
+    return;
+  }
+
+  /* latest run */
+  var sc = document.createElement("script");
+  sc.src = "../data/" + f.results + "?t=" + Date.now();
+  sc.onload = function () { draw(window[f.resultsVar]); };
+  sc.onerror = function () { draw(null); };
+  document.head.appendChild(sc);
+
+  function draw(R) {
+    /* coverage map */
+    function coverage() {
+    var C = f.coverage, tot = {}, h = "";
+    h += '<div class="vt-covhead"><h2 id="coverage">Coverage map</h2><span>' + esc(C.caption || "") + ' &middot; last run &middot; darker = more tests</span></div><div class="vt-mapwrap"><table class="vt-map"><thead><tr><th></th>' +
+      C.columns.map(function (c) { return "<th" + (c.mark ? ' class="mkh"' : "") + ">" + esc(c.label) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      C.rows.map(function (r) {
+        var t = r.key;
+        return "<tr><th>" + esc(r.label) + (r.sub ? "<i>" + esc(r.sub) + "</i>" : "") + "</th>" + C.columns.map(function (c) {
+          var v = C.cells[t][c.key] || [0, 0], n = v[0], p = v[1];
+          tot[c.key] = (tot[c.key] || 0) + n;
+          if (c.mark) return n ? '<td class="mk" title="' + esc(r.label) + ": " + esc(c.label) + ' met">\u2713</td>' : '<td class="na">&ndash;</td>';
+          if (!n) return '<td class="na" title="' + esc(r.label) + ": no " + esc(c.label) + ' test">&ndash;</td>';
+          return '<td class="' + (p === n ? "ok" : "bad") + '" style="--k:' + Math.min(n, 8) + '" title="' + esc(r.label) + " · " + esc(c.label) + ": " + p + "/" + n +
+            ' passed">' + (p === n ? n : p + "/" + n) + "</td>";
+        }).join("") + "</tr>";
+      }).join("") + "</tbody><tfoot><tr><th>tests</th>" + C.columns.map(function (c) { return "<td>" + (tot[c.key] || 0) + (c.mark ? "\u2713" : "") + "</td>"; }).join("") +
+      "</tr></tfoot></table></div>" +
+      '<div class="vt-legend"><span class="l-ok">all passed (number = tests)</span><span class="l-bad">a test failed (passed/total)</span><span class="l-na">no test applies</span></div>' +
+      '<p class="note" style="margin-top:10px">Whole-file tests, not tied to one ' + ({ single: "query", multiple: "query", routines: "routine" }[id] || "table") + ': ' + C.whole.map(function (w) {
+        return (w.outcome === "passed" ? "✓ " : "✗ ") + "<code>" + esc(w.test.replace(/^test_/, "")) + "</code>";
+      }).join(" &nbsp;") + ".</p>";
+    return h;
+    }
+
+    var h = "";
+    if (R) {
+      var srv = (R.load && R.load.server) || {}, runs = (R.load && R.load.runs) || [];
+      h += '<div class="vt-run"><span class="vt-big' + (R.failed ? " bad" : "") + '">' + R.passed + "/" + (R.passed + R.failed) + "</span>" +
+        "<span>tests passed" + (R.failed ? ", <b>" + R.failed + " failed</b>" : "") + "</span>" +
+        "<span>last run <b>" + esc(R.generated.replace("T", " ")) + "</b></span>" +
+        (srv.version ? "<span>MySQL <b>" + esc(srv.version) + "</b></span>" : "") +
+        (runs.length ? "<span>script: <b>" + R.load.statements + "</b> statements, run twice in " +
+          runs.map(function (r) { return r.seconds + " s"; }).join(" + ") + "</span>" : "") + "</div>";
+    }
+
+    /* top row: the one download (left) and the coverage map (right) */
+    var B = f.bundle, kb = B.bytes ? Math.round(B.bytes / 1024) + " KB" : "";
+    h += '<div class="vt-top"><div><a class="vt-get" id="downloads" href="' + B.href + '" download title="' + esc(B.file) + '">' +
+      '<svg viewBox="0 0 120 104" aria-hidden="true"><g class="v"><path d="M10 14 L60 70 L110 14" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g>' +
+      '<path d="M18 94 H102" stroke="rgba(255,255,255,.75)" stroke-width="8" stroke-linecap="round"/></svg>' +
+      '<span class="t">Download the tests</span><span class="f">' + esc(B.file) + '</span><span class="s">' + esc(B.role) + "</span>" +
+      '<span class="meta">' + [kb, B.contents ? B.contents.length + " files" : ""].filter(Boolean).join(" · ") + "</span></a>" +
+      (B.contents ? '<ul class="vt-get-list">' + B.contents.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" : "") +
+      "</div><div>" + coverage() + "</div></div>";
+
+    /* sources */
+    h += '<h2 id="sources">What the tests compare against</h2>' +
+      '<p class="prose">None of the expected answers come from the file under test, so a mistake in the file cannot also be in the answer key.</p>' +
+      '<div class="vt-flow">' + f.sources.map(function (s) {
+        return '<div class="vt-src"><h3>' + esc(s.name) + '</h3><p class="from">' + esc(s.from) + "</p><p>" + esc(s.how) + "</p></div>";
+      }).join("") + "</div>" +
+      '<p class="vt-arrow">&darr; compared with &darr;<br>' + (f.flowTo || "") + '</p>';
+
+    /* files */
+    h += '<h2 id="files">The test files</h2><table class="vt"><thead><tr><th>File</th><th>Role</th></tr></thead><tbody>' +
+      f.files.map(function (x) { return '<tr><td class="m"><a href="' + x.href + '" download>' + esc(x.file) + "</a></td><td>" + esc(x.role) + "</td></tr>"; }).join("") +
+      "</tbody></table>";
+
+    /* groups */
+    h += '<h2 id="groups">What each group proves</h2><table class="vt"><thead><tr><th>Group</th><th style="text-align:right">Tests</th><th>Result</th><th>What it proves</th></tr></thead><tbody>' +
+      f.groups.map(function (g) {
+        var ok = g.passed === g.tests;
+        return '<tr><td class="m">' + esc(g.group) + '</td><td class="n">' + g.tests + '</td><td><span class="mark ' + (ok ? "done" : "partial") + '">' +
+          g.passed + "/" + g.tests + "</span></td><td>" + esc(g.text) + "</td></tr>";
+      }).join("") + "</tbody></table>";
+
+    /* could miss */
+    h += '<h2 id="misses">What the tests could miss</h2><p class="prose">Passing means the file agrees with its sources and refuses what they forbid. It does not mean any of the following.</p>' +
+      '<div class="vt-miss">' + f.misses.map(function (m) {
+        return "<div><h3>" + esc(m.title) + "</h3><p>" + esc(m.what) + '</p><p class="cover">' + esc(m.cover) + "</p></div>";
+      }).join("") + "</div>";
+
+    /* testing the tests */
+    var M = f.mutants;
+    if (M) {
+      h += '<h2 id="mutants">Testing the tests</h2><p class="prose"><code>' + esc(f.mutator) + '</code> copies the file, makes one ' +
+        'deliberate mistake, and runs every test against the copy. A test suite that passes a broken file proves nothing, so each ' +
+        'mistake must make a test fail that passes on the real file. <b>' + M.caught + " of " + M.total + "</b> were caught.</p>" +
+        '<table class="vt"><thead><tr><th>Deliberate mistake</th><th>Caught</th><th>First tests that failed</th></tr></thead><tbody>' +
+        M.mutants.map(function (m) {
+          return "<tr><td>" + esc(m.mistake) + '</td><td><span class="mark ' + (m.caught ? "done" : "partial") + '">' +
+            (m.caught ? "caught \u00b7 " + m.failed + " failed" : "missed") + "</span></td><td>" +
+            m.first_failures.slice(0, 3).map(function (t) { return "<code>" + esc(t.replace(/^test_/, "")) + "</code>"; }).join(" ") + "</td></tr>";
+        }).join("") + "</tbody></table>";
+    }
+
+    /* findings */
+    if (f.findings && f.findings.length) {
+      h += '<h2 id="findings">Findings</h2><div class="vt-find">' + f.findings.map(function (x) {
+        return "<p><b>" + esc(x.title) + ".</b> " + esc(x.text) + "</p>";
+      }).join("") + "</div>";
+    }
+
+    /* how to run */
+    h += '<h2 id="run">How to run it locally</h2><ol class="vt-steps">' + f.run.map(function (s) {
+      return "<li><b>" + esc(s.title) + "</b>" + esc(s.text) + (s.code ? "<pre>" + esc(s.code) + "</pre>" : "") + "</li>";
+    }).join("") + "</ol>" +
+      '<p class="note">The same steps, the coverage and the gaps are in <a href="../docs/' + esc(f.pdf) + '" download>' + esc(f.pdf) + '</a>.</p>';
+
+    body.innerHTML = h;
+  }
+})();
+</script>
+</body>
+</html>

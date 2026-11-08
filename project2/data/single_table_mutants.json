@@ -1,0 +1,263 @@
+{
+ "mutants": [
+  {
+   "mutant": "s1-hold-reasons-swapped",
+   "query": "S1",
+   "mistake": "the two HOLD reasons tested in the other order (an artist failing both gets the wrong reason)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[S1]",
+    "test_s1_verified_artist_without_country_is_held",
+    "test_s1_equal_rates_break_ties_on_artist_id"
+   ]
+  },
+  {
+   "mutant": "s1-tie-break-dropped",
+   "query": "S1",
+   "mistake": "the artist_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[S1]"
+   ]
+  },
+  {
+   "mutant": "s1-payable-first-dropped",
+   "query": "S1",
+   "mistake": "payable artists no longer listed first",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[S1]",
+    "test_s1_verified_artist_without_country_is_held",
+    "test_s1_equal_rates_break_ties_on_artist_id"
+   ]
+  },
+  {
+   "mutant": "s1-report-date-moved",
+   "query": "S1",
+   "mistake": "a different report date (2026-10-01) in days under licence",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_result_matches_oracle[S1]",
+    "test_s1_verified_artist_without_country_is_held",
+    "test_s1_equal_rates_break_ties_on_artist_id"
+   ]
+  },
+  {
+   "mutant": "s2-scored-filter-dropped",
+   "query": "S2",
+   "mistake": "unscored and rejected recordings allowed on the shelf",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[S2]",
+    "test_s2_unscored_new_release_stays_off_the_shelf",
+    "test_s2_same_day_releases_order_by_track_id",
+    "test_s2_shelf_never_holds_more_than_five"
+   ]
+  },
+  {
+   "mutant": "s2-limit-six",
+   "query": "S2",
+   "mistake": "six recordings on the shelf instead of five",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[S2]",
+    "test_s2_unscored_new_release_stays_off_the_shelf",
+    "test_s2_same_day_releases_order_by_track_id",
+    "test_s2_shelf_never_holds_more_than_five"
+   ]
+  },
+  {
+   "mutant": "s2-seconds-unpadded",
+   "query": "S2",
+   "mistake": "run time without the zero pad (3:7 instead of 3:07)",
+   "caught": true,
+   "failed": 4,
+   "first_failures": [
+    "test_result_matches_oracle[S2]",
+    "test_s2_unscored_new_release_stays_off_the_shelf",
+    "test_s2_same_day_releases_order_by_track_id",
+    "test_s2_shelf_never_holds_more_than_five"
+   ]
+  },
+  {
+   "mutant": "s2-tie-break-dropped",
+   "query": "S2",
+   "mistake": "the track_id tie-break left out of ORDER BY",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[S2]"
+   ]
+  },
+  {
+   "mutant": "s3-if-inverted",
+   "query": "S3",
+   "mistake": "the composer status reversed (READY when the description is missing)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_result_matches_oracle[S3]",
+    "test_s3_genre_without_description_is_hidden"
+   ]
+  },
+  {
+   "mutant": "s3-select-star",
+   "query": "S3",
+   "mistake": "SELECT * instead of the named columns",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_read_only_select[S3]",
+    "test_result_matches_oracle[S3]",
+    "test_s3_genre_without_description_is_hidden"
+   ]
+  },
+  {
+   "mutant": "s4-tiers-ascending",
+   "query": "S4",
+   "mistake": "plan tiers listed cheapest first",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_result_matches_oracle[S4]",
+    "test_s4_tier_with_no_listeners_is_absent"
+   ]
+  },
+  {
+   "mutant": "s4-average-unrounded",
+   "query": "S4",
+   "mistake": "average tenure not rounded",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_result_matches_oracle[S4]",
+    "test_s4_tier_with_no_listeners_is_absent"
+   ]
+  },
+  {
+   "mutant": "s4-column-renamed",
+   "query": "S4",
+   "mistake": "an output column renamed (listener_count)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_matches_oracle[S4]"
+   ]
+  },
+  {
+   "mutant": "s5-tie-goes-to-older",
+   "query": "S5",
+   "mistake": "an accuracy tie goes to the older deployment",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_s5_accuracy_tie_prefers_the_newer_version"
+   ]
+  },
+  {
+   "mutant": "s5-last-tie-break-dropped",
+   "query": "S5",
+   "mistake": "the model_id tie-break left out (a full tie on accuracy and date picks either row)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_result_is_deterministic[S5]"
+   ]
+  },
+  {
+   "mutant": "s5-second-table",
+   "query": "S5",
+   "mistake": "a second table read (a subquery on station)",
+   "caught": true,
+   "failed": 3,
+   "first_failures": [
+    "test_reads_exactly_one_table[S5]",
+    "test_s5_accuracy_tie_prefers_the_newer_version",
+    "test_s5_full_tie_goes_to_the_lower_model_id"
+   ]
+  },
+  {
+   "mutant": "s5-use-cases-line-removed",
+   "query": "S5",
+   "mistake": "the Use cases line removed from the comment",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_comment_contract[S5]",
+    "test_columns_match_use_cases[S5]"
+   ]
+  },
+  {
+   "mutant": "s6-half-counts-as-wide",
+   "query": "S6",
+   "mistake": "a window of exactly 0.50 counted as wide (>= instead of >)",
+   "caught": true,
+   "failed": 2,
+   "first_failures": [
+    "test_result_matches_oracle[S6]",
+    "test_s6_window_of_exactly_half_is_not_wide"
+   ]
+  },
+  {
+   "mutant": "s6-undeclared-column",
+   "query": "S6",
+   "mistake": "a column the use cases do not declare is read (listener_id)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_columns_match_use_cases[S6]"
+   ]
+  },
+  {
+   "mutant": "s7-due-today-on-time",
+   "query": "S7",
+   "mistake": "a release due on the report date counted as on time (< instead of <=)",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_s7_release_due_on_the_report_date_is_late"
+   ]
+  },
+  {
+   "mutant": "s2-limit-undeclared",
+   "query": "S2",
+   "mistake": "LIMIT used but (d) not declared in Requirements",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_requirements_match_declared[S2]"
+   ]
+  },
+  {
+   "mutant": "e1-not-refused",
+   "query": "E1",
+   "mistake": "the re-upload computes a different checksum, so MySQL accepts it",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_expected_error_is_raised[E1]"
+   ]
+  },
+  {
+   "mutant": "e1-moved-first",
+   "query": "E1",
+   "mistake": "the expected-to-fail statement placed before the queries",
+   "caught": true,
+   "failed": 1,
+   "first_failures": [
+    "test_tags_are_unique_and_in_order"
+   ]
+  }
+ ],
+ "caught": 23,
+ "total": 23,
+ "not_applicable": [],
+ "real_file": "========================= 1 failed, 66 passed in 0.19s =========================",
+ "already_failing": []
+}

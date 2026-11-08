@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubric</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=cb25b6e1">
+<script src="../data/deliverables.js"></script>
+<script src="../data/implementation_results.js"></script>
+<script src="../data/single_table_results.js"></script>
+<script src="../data/multiple_table_results.js"></script>
+<script src="../data/routines_results.js"></script>
+<style>
+  .rb-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; max-width: 1100px; margin: 0 0 26px; }
+  .rb-sum a { display: block; padding: 12px 14px; border: 1px solid var(--rule); border-top: 3px solid var(--rule); border-radius: 4px;
+    background: #fff; color: var(--ink); text-decoration: none; }
+  .rb-sum a.all { border-top-color: #2e8b57; } .rb-sum a.some { border-top-color: var(--ares); }
+  .rb-sum a:hover, .rb-sum a:focus-visible { border-color: var(--cyan); outline: none; }
+  .rb-sum .f { font: 13px var(--mono); color: var(--ink-2); }
+  .rb-sum .n { font: 800 26px/1.15 var(--display); }
+  .rb-sum .all .n { color: #2e8b57; } .rb-sum .some .n { color: var(--ares); }
+  .rb-sum .w { font-size: 13px; color: var(--ink-2); }
+
+  .rb-task { max-width: 1100px; margin: 0 0 30px; scroll-margin-top: 12px; }
+  .rb-task h2 { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .rb-task h2 code { font-size: .8em; color: var(--ink-2); }
+  .rb-task .brief { margin: -4px 0 10px; font-size: 14px; color: var(--ink-2); max-width: 90ch; }
+  .rb-task .brief q { font-style: italic; }
+  .rb-task .fresh { font: 12.5px var(--mono); color: var(--ink-2); margin: 6px 0 0; }
+
+  table.rb { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--rule); border-radius: 4px; }
+  table.rb th { font: 600 13px var(--body); color: var(--ink-2); background: #f3f7fa; text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+  table.rb td { padding: 9px 10px; border-bottom: 1px solid #e6edf2; vertical-align: top; }
+  table.rb tr:last-child td { border-bottom: 0; }
+  table.rb td.no { font: 600 14px var(--mono); white-space: nowrap; color: var(--ink-2); width: 1%; }
+  table.rb td.req q { quotes: "\201C" "\201D"; }
+  table.rb td.req .why { display: block; margin-top: 3px; font-size: 13px; color: var(--ink-2); }
+  table.rb td.by { font: 13px var(--mono); white-space: nowrap; }
+  table.rb td.ev { font-size: 13px; color: var(--ink-2); }
+  table.rb td.ev a { color: var(--cyan); }
+  table.rb td.mk { width: 1%; text-align: center; }
+  .tg { display: inline-block; margin: 0 4px 3px 0; padding: 1px 7px; border: 1px solid var(--rule); border-radius: 10px; background: #f7fafc;
+    font: 12.5px var(--mono); color: var(--ink); text-decoration: none; }
+  a.tg:hover { border-color: var(--cyan); }
+  .ck { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+    font: 700 16px/1 var(--body); }
+  .ck.ok { background: #e3f3ea; color: #2e8b57; box-shadow: inset 0 0 0 1.5px #2e8b57; }
+  .ck.bad { background: #fdeeeb; color: var(--ares); box-shadow: inset 0 0 0 1.5px var(--ares); }
+  .ck.rev { background: #f4f6f8; color: #7b8a97; box-shadow: inset 0 0 0 1.5px #b8c4ce; font-size: 14px; }
+  tr.is-bad td.req { color: var(--ares); }
+  .rb-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; margin: 0 0 22px; font-size: 13.5px; color: var(--ink-2); }
+  .rb-legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .rb-legend .ck { width: 22px; height: 22px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>Rubric</h1>
+  <p class="group-line">INFO 579 &middot; Project 2 &middot; SQL Database &middot; due <span id="due"></span></p>
+  <p class="lede">Every condition in the assignment brief, split by the file it applies to, quoted word for word. Each
+    one is checked against the last test run of that file: which query or routine meets it, and whether its tests pass.</p>
+  <div class="rb-legend">
+    <span><i class="ck ok" aria-hidden="true">&#10003;</i> met: claimed by the file, and every test behind it passed</span>
+    <span><i class="ck bad" aria-hidden="true">&#10007;</i> not met: missing, not tested yet, or a test failed</span>
+    <span><i class="ck rev" aria-hidden="true">?</i> a judgement for the grader; no test can decide it</span>
+  </div>
+  <div class="rb-sum" id="sum"></div>
+  <div id="tasks"></div>
+  <p class="note">Source: the <a href="../../index.html#p2/brief" target="_top">assignment brief</a> (info579_project02.pdf).
+    The evidence is the results snapshot each test file writes (<code>project2/data/*_results.js</code>); rerun
+    <code>python -m pytest project2/tests</code> to refresh it.</p>
+</div>
+<script>
+(function () {
+  var P = window.P2 || {};
+  document.getElementById("due").textContent = P.due || "";
+  var IMPL = window.P2_IMPL, S = window.P2_SINGLE, M = window.P2_MULTIPLE, R = window.P2_ROUTINES;
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var top = function (route, text) { return '<a href="../../index.html#' + route + '" target="_top">' + text + "</a>"; };
+
+  /* ---- reading a results snapshot */
+  function allTests(r) {                                   // [{test, outcome}] of a query-file snapshot
+    if (!r || !r.tests) return [];
+    return Object.keys(r.tests).reduce(function (a, k) { return a.concat(r.tests[k]); }, []);
+  }
+  function implTests(prefix) {                             // database_implementation groups starting with prefix
+    if (!IMPL) return [];
+    return Object.keys(IMPL.groups).filter(function (g) { return g.indexOf(prefix) === 0; })
+      .reduce(function (a, g) { return a.concat(IMPL.groups[g]); }, []);
+  }
+  function named(r, re) { return allTests(r).filter(function (t) { return re.test(t.test); }); }
+  function tagTests(r, tag) { return (r && r.tests && r.tests[tag]) || []; }
+  function passed(ts) { return ts.filter(function (t) { return t.outcome === "passed"; }).length; }
+  function ev(ts, what) { return passed(ts) + "/" + ts.length + " " + what; }
+  function green(ts) { return ts.length > 0 && passed(ts) === ts.length; }
+  function chip(tag, route) { return route ? '<a class="tg" href="../../index.html#' + route + '" target="_top">' + esc(tag) + "</a>" : '<span class="tg">' + esc(tag) + "</span>"; }
+  function sortTags(a, b) { return a[0] === b[0] ? +a.slice(1) - +b.slice(1) : a < b ? -1 : 1; }
+  function tags(r, re) { return r && r.queries ? Object.keys(r.queries).filter(function (t) { return re.test(t); }).sort(sortTags) : []; }
+
+  /* ---- one requirement row: {no, text, why, by, evidence, state: ok | bad | rev} */
+  function row(x) {
+    var mark = { ok: ["ok", "&#10003;", "met"], bad: ["bad", "&#10007;", "not met"], rev: ["rev", "?", "for the grader"] }[x.state];
+    return '<tr class="is-' + x.state + '"><td class="no">' + x.no + '</td><td class="req"><q>' + esc(x.text) + "</q>" +
+      (x.why ? '<span class="why">' + x.why + "</span>" : "") + '</td><td class="by">' + (x.by || "&ndash;") +
+      '</td><td class="ev">' + (x.evidence || "") + '</td><td class="mk"><span class="ck ' + mark[0] + '" title="' + mark[2] +
+      '" aria-label="' + mark[2] + '">' + mark[1] + "</span></td></tr>";
+  }
+  function notTested(file, route) {
+    return { by: "", evidence: "no test results for " + file + " yet (" + top(route, "vetting page") + ")", state: "bad" };
+  }
+
+  /* ================================================================ the brief, file by file */
+  var TASKS = [];
+
+  /* ---- Task 1: database_implementation.sql */
+  TASKS.push({ id: "implementation", file: "database_implementation.sql", task: "Task 1", R: IMPL, vet: "p2/vet-implementation",
+    brief: "Develop the SQL statements to create the tables of your database and insert the sample data.",
+    rows: function () {
+      if (!IMPL) return [Object.assign({ no: "1", text: "Develop the SQL statements to create the tables of your database and insert the sample data." }, notTested("database_implementation.sql", "p2/vet-implementation"))];
+      var nT = Object.keys(IMPL.tables || {}).length;
+      var schema = implTests("schema_"), data = implTests("data_").concat(implTests("read_")), load = implTests("load_first_run").concat(implTests("load_second_run")),
+          comm = implTests("load_every_statement_commented");
+      return [
+        { no: "1a", text: "Develop the SQL statements to create the tables of your database",
+          why: "Every table, column, key, foreign key and constraint of the Project 1 physical model, checked against MySQL's catalogue.",
+          by: nT + " tables", evidence: ev(schema, "schema tests"), state: green(schema) ? "ok" : "bad" },
+        { no: "1b", text: "and insert the sample data.",
+          why: "Every row and every cell of the Project 1 sample data (data.csv), and every integrity rule it satisfies.",
+          by: Object.keys(IMPL.tables || {}).reduce(function (n, t) { return n + (IMPL.tables[t].rows || 0); }, 0) + " rows", evidence: ev(data, "data tests"), state: green(data) ? "ok" : "bad" },
+        { no: "1c", text: "You must present the statements in a single sql script named database_implementation.sql.",
+          why: "The one script builds the database from nothing, and runs again cleanly.",
+          by: "<code>database_implementation.sql</code>", evidence: ev(load, "load tests (first run, second run)"), state: green(load) ? "ok" : "bad" },
+        { no: "1d", text: "must be preceded by a comment explaining its purpose.",
+          why: "From the brief's rule for every statement, query and routine.", by: "every statement",
+          evidence: ev(comm, "comment test"), state: green(comm) ? "ok" : "bad" }
+      ];
+    } });
+
+  /* ---- Task 2: single_table.sql */
+  var SINGLE_REQ = [["a", "At least one of the queries must use single row functions."],
+                    ["b", "At least one of the queries must use aggregate functions."],
+                    ["c", "At least one of the queries must sort the results according to some criteria."],
+                    ["d", "At least one of the queries must return just the first N results."],
+                    ["e", "At least one of the queries must use a selection control function."]];
+  TASKS.push({ id: "single", file: "single_table.sql", task: "Task 2", R: S, vet: "p2/vet-single",
+    brief: "Develop a variety of SQL queries following the requirements for single table queries. You must present the queries in a single sql script named single_table.sql.",
+    rows: function () {
+      if (!S) return [Object.assign({ no: "2.1", text: "Write queries to retrieve data from each non-associative table individually." }, notTested("single_table.sql", "p2/vet-single"))];
+      var qs = tags(S, /^S\d+$/), every = named(S, /^test_every_non_associative_table_is_queried/),
+          tables = qs.map(function (t) { return S.queries[t].table; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+      var out = [{ no: "2.1", text: "Write queries to retrieve data from each non-associative table individually.",
+        why: "One table per query; together they cover " + tables.length + " non-associative tables: " + tables.map(function (t) { return "<code>" + t + "</code>"; }).join(", ") + ".",
+        by: qs.map(function (t) { return chip(t, "p2/single"); }).join(""), evidence: ev(every, "coverage test") + ", " + ev(named(S, /^test_result_matches_oracle/), "results match the oracle"),
+        state: green(every) ? "ok" : "bad" }];
+      SINGLE_REQ.forEach(function (r) {
+        var by = qs.filter(function (t) { return (S.queries[t].detected || []).indexOf(r[0]) >= 0; });
+        var ts = by.reduce(function (a, t) { return a.concat(tagTests(S, t)); }, []);
+        out.push({ no: "2.1." + r[0], text: r[1], by: by.map(function (t) { return chip(t, "p2/single"); }).join(""),
+          why: "Detected in the SQL itself, not just claimed in the comment.",
+          evidence: by.length ? ev(ts, "tests of those queries") : "no query does this", state: by.length && green(ts) ? "ok" : "bad" });
+      });
+      var comm = named(S, /^test_comment_contract/);
+      out.push({ no: "2.2", text: "must be preceded by a comment explaining its purpose.", by: qs.length + " queries",
+        why: "Use cases, business need, business question, requirements met and output columns.", evidence: ev(comm, "comment tests"), state: green(comm) ? "ok" : "bad" });
+      return out;
+    } });
+
+  /* ---- Task 3: multiple_table.sql */
+  var MULTI_REQ = [["3.1", "Write a query involving an associative table and two other related tables. You must use the INNER JOIN to connect with all three tables."],
+                   ["3.2", "Write a query including two or more tables and using the LEFT OUTER JOIN."],
+                   ["3.3", "Write a query including some kind of set operation."],
+                   ["3.4", "Write a query including a subquery and some multi-row operation."],
+                   ["3.5", "Write a query including a derived table using the WITH statement."]];
+  TASKS.push({ id: "multiple", file: "multiple_table.sql", task: "Task 3", R: M, vet: "p2/vet-multiple",
+    brief: "Develop a variety of SQL queries following the requirements for multiple table queries. You must present the queries in a single sql script named multiple_table.sql.",
+    rows: function () {
+      if (!M) return [Object.assign({ no: "3.1", text: MULTI_REQ[0][1] }, notTested("multiple_table.sql", "p2/vet-multiple"))];
+      var qs = tags(M, /^M\d+$/);
+      var out = MULTI_REQ.map(function (r) {
+        var by = qs.filter(function (t) { return M.queries[t].requirement === r[0] && M.queries[t].detected; });
+        var ts = by.reduce(function (a, t) { return a.concat(tagTests(M, t)); }, []);
+        return { no: r[0], text: r[1], by: by.map(function (t) { return chip(t, "p2/multiple"); }).join(""),
+          why: by.length ? "Found in the SQL: " + by.map(function (t) { return esc(String(M.queries[t].detected).replace(/[\[\]']/g, "")); }).join("; ") + "." : "",
+          evidence: by.length ? ev(ts, "tests of " + by.join(", ")) : "no query does this", state: by.length && green(ts) ? "ok" : "bad" };
+      });
+      var comm = named(M, /^test_comment_contract/), joins = named(M, /^test_join_types_explicit/);
+      out.push({ no: "3.6", text: "must be preceded by a comment explaining its purpose.", by: qs.length + " queries",
+        why: "Use cases, business need, business question, requirement, tables, one row per, output columns.", evidence: ev(comm, "comment tests"), state: green(comm) ? "ok" : "bad" });
+      out.push({ no: "3.7", text: "Every join names its type (course rule, Unit 9).", by: qs.length + " queries",
+        why: "Not in the brief: the course marks bare JOIN and comma joins wrong.", evidence: ev(joins, "join-type tests"), state: green(joins) ? "ok" : "bad" });
+      return out;
+    } });
+
+  /* ---- Task 4: routines.sql */
+  TASKS.push({ id: "routines", file: "routines.sql", task: "Task 4", R: R, vet: "p2/vet-routines",
+    brief: "Implement 2 procedures and 1 function or 1 procedure and 2 functions that make use of the data in your database. The 3 routines must be presented in a single sq file named routines.sql.",
+    rows: function () {
+      if (!R) return [Object.assign({ no: "4.1", text: "Implement 2 procedures and 1 function or 1 procedure and 2 functions" }, notTested("routines.sql", "p2/vet-routines"))];
+      var rs = tags(R, /^[FP]\d+$/), kinds = rs.map(function (t) { return R.queries[t].kind; });
+      var nP = kinds.filter(function (k) { return k === "PROCEDURE"; }).length, nF = kinds.filter(function (k) { return k === "FUNCTION"; }).length;
+      var mix = named(R, /^test_brief_routine_mix/), reads = named(R, /^test_reads_declared_tables/),
+          beh = named(R, /^test_[fp]\d+_/), file = named(R, /^test_script_reruns/), comm = named(R, /^test_comment_contract/);
+      var by = rs.map(function (t) { return chip(t + " " + (R.queries[t].name || ""), "p2/routines"); }).join("");
+      var tabs = rs.reduce(function (a, t) { return a.concat(R.queries[t].tables || []); }, []).filter(function (v, i, a) { return a.indexOf(v) === i; });
+      return [
+        { no: "4.1", text: "Implement 2 procedures and 1 function or 1 procedure and 2 functions", by: by,
+          why: nP + " procedure" + (nP === 1 ? "" : "s") + " and " + nF + " function" + (nF === 1 ? "" : "s") + ", as MySQL's catalogue holds them.",
+          evidence: ev(mix, "mix test") + ", " + ev(named(R, /^test_created_as_declared/), "catalogue tests"), state: green(mix) ? "ok" : "bad" },
+        { no: "4.2", text: "that make use of the data in your database.", by: tabs.map(function (t) { return "<code>" + t + "</code>"; }).join(" "),
+          why: "Each routine reads or writes the CROSSFADE tables, and is run against them.",
+          evidence: ev(reads, "table tests") + ", " + ev(beh, "behaviour cases"), state: green(reads) && green(beh) ? "ok" : "bad" },
+        { no: "4.3", text: "The 3 routines must be presented in a single sq file named routines.sql.", by: "<code>routines.sql</code>",
+          why: "The one script re-creates all three, and can be run again.", evidence: ev(file, "script test"),
+          state: rs.length === 3 && green(file) ? "ok" : "bad" },
+        { no: "4.4", text: "must be preceded by a comment explaining its purpose.", by: rs.length + " routines",
+          why: "Use cases, business need, what it does, Unit 9 features, tables, parameters, errors, example.", evidence: ev(comm, "comment tests"), state: green(comm) ? "ok" : "bad" }
+      ];
+    } });
+
+  /* ---- every file: the brief's general conditions */
+  function general() {
+    var comm = implTests("load_every_statement_commented").concat(named(S, /^test_comment_contract/), named(M, /^test_comment_contract/), named(R, /^test_comment_contract/));
+    var cols = named(S, /^test_columns_match_use_cases/).concat(named(M, /^test_columns_match_use_cases/), named(R, /^test_columns_are_declared/));
+    var star = named(S, /^test_read_only_select/).concat(named(M, /^test_read_only_select/));
+    var missing = [["single_table.sql", S], ["multiple_table.sql", M], ["routines.sql", R]].filter(function (x) { return !x[1]; }).map(function (x) { return x[0]; });
+    return [
+      { no: "G1", text: "Every statement, query and routine should be justified within the logic of your business plan",
+        why: "Each names the use cases it answers (quoted from the requirements analysis) and the business need behind it; the columns it reads are the ones those use cases need." +
+             (missing.length ? " Not yet tested: " + missing.join(", ") + "." : ""),
+        by: top("p2/usecases", "use cases"), evidence: ev(comm, "comment tests") + ", " + ev(cols, "column tests"),
+        state: !missing.length && green(comm) && green(cols) ? "ok" : "bad" },
+      { no: "G2", text: "and must be preceded by a comment explaining its purpose.", by: "all four files",
+        evidence: ev(comm, "comment tests"), state: !missing.length && green(comm) ? "ok" : "bad" },
+      { no: "G3", text: "Avoid trivial and generic solutions.",
+        why: "No test can judge this. What the tests do show: no SELECT *, every query answers a stated business question, and every result is checked against an independent answer.",
+        by: "", evidence: ev(star, "no-SELECT-* tests"), state: "rev" },
+      { no: "G4", text: "Compress all the deliverables into a single zip file.", why: "The file name must follow the format: project02_groupcode.zip",
+        by: "<code>" + esc(P.zip || "project02_groupcode.zip") + "</code>", evidence: '<span id="zipev">checking&hellip;</span>', state: "bad", id: "zip" },
+      { no: "G5", text: "Upload the file to the assignment of project 1 Dropbox in D2L.",
+        why: "Quoted as written (the brief says project 1); done by hand, by the due date. Late submission will receive at most 70% of the maximum grade.",
+        by: "D2L", evidence: "", state: "rev" }
+    ];
+  }
+
+  /* ================================================================ draw */
+  var html = "", sum = [];
+  function block(id, title, file, brief, rows, fresh) {
+    var met = rows.filter(function (x) { return x.state === "ok"; }).length, counted = rows.filter(function (x) { return x.state !== "rev"; }).length;
+    sum.push({ id: id, title: title, file: file, met: met, counted: counted });
+    html += '<section class="rb-task" id="' + id + '"><h2>' + title + (file ? " <code>" + file + "</code>" : "") + "</h2>" +
+      (brief ? '<p class="brief">Brief: <q>' + esc(brief) + "</q></p>" : "") +
+      '<table class="rb"><thead><tr><th>#</th><th>Requirement</th><th>Met by</th><th>Evidence</th><th>Mark</th></tr></thead><tbody>' +
+      rows.map(row).join("") + "</tbody></table>" + (fresh || "") + "</section>";
+  }
+  TASKS.forEach(function (t) {
+    var fresh = t.R ? '<p class="fresh">last test run ' + esc((t.R.generated || "").replace("T", " ")) + ": " + t.R.passed + " passed, " + t.R.failed + " failed &middot; " +
+      top(t.vet, "what the tests cover and could miss") + "</p>" : "";
+    block(t.id, t.task + " &middot; 25%", t.file, t.brief, t.rows(), fresh);
+  });
+  var G = general();
+  block("general", "Every file", "", "Every statement, query and routine should be justified within the logic of your business plan and must be preceded by a comment explaining its purpose. Avoid trivial and generic solutions.", G, "");
+  document.getElementById("tasks").innerHTML = html;
+  function drawSum() {
+    document.getElementById("sum").innerHTML = sum.map(function (s) {
+      return '<a href="#' + s.id + '" class="' + (s.met === s.counted ? "all" : "some") + '"><div class="f">' + (s.file || "every file") + '</div><div class="n">' +
+        s.met + "/" + s.counted + '</div><div class="w">requirements met</div></a>';
+    }).join("");
+  }
+  drawSum();
+
+  /* the zip: met once it is in project2/deliverables/ (checked live, so the page is right as soon as it is added) */
+  var zipRow = document.querySelectorAll("#general tbody tr")[3];
+  fetch("../deliverables/" + encodeURIComponent(P.zip || ""), { method: "HEAD", cache: "no-store" }).then(function (r) {
+    var ok = r.ok;
+    document.getElementById("zipev").textContent = ok ? "in project2/deliverables/" : "not built yet (not in project2/deliverables/)";
+    if (ok) {
+      zipRow.className = "is-ok";
+      zipRow.querySelector(".ck").className = "ck ok"; zipRow.querySelector(".ck").innerHTML = "&#10003;";
+      zipRow.querySelector(".ck").title = "met";
+      sum[sum.length - 1].met++; drawSum();
+    }
+  }).catch(function () { document.getElementById("zipev").textContent = "not built yet"; });
+})();
+</script>
+</body>
+</html>

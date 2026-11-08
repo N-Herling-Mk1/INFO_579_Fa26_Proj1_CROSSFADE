@@ -39,7 +39,7 @@ add one line to `SECTIONS` in the script at the bottom of `index.html`.
 index.html       the site shell (top bar, rail, iframe, router)
 home/            front-page panels: overview, Project 1 package, Project 1 data (bulk / per table), Project 2 brief
 assets/          site.css (panels), shell.css (index.html chrome), splash.css (home/overview.html), panel.js,
-                 logo, favicons, social card (og_card.png), CROSSFADE artwork
+                 logo, favicons, social card (og_crossfade_card.jpg), CROSSFADE artwork
 tools/           stamp_assets.py: tags every link to site.css / shell.css / splash.css / panel.js with a content hash
                  export_p1_data.py: data.xlsx -> project1/data_export/ (data.csv + one CSV per table + zip)
 assets/vendor/   jszip.min.js (JSZip 3.10.1, MIT): builds the Project 1 submission zip in the browser
@@ -87,4 +87,4 @@ Run `python tools/stamp_assets.py`. It tags each page's links as `site.css?v=<ha
 
 ## Social preview
 
-`assets/images/og_card.png` (1280 x 640) is the link card. Pages carry Open Graph tags pointing at it. GitHub's own repo card is set separately: Settings → General → Social preview → Upload an image.
+`assets/images/og_crossfade_card.jpg` (1200 x 630, the size Facebook, LinkedIn, X, Slack and Discord crop to) is the link card. Every top-level page carries Open Graph and X (Twitter) tags pointing at it. GitHub's own repo card is set separately: Settings → General → Social preview → Upload an image, with `assets/images/github_social_preview.png` (1280 x 640, GitHub's size).
