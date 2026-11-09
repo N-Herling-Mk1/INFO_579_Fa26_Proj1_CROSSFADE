@@ -63,7 +63,7 @@ window.P2_VET = {
    "file": "crossfade_impl_tests.zip",
    "role": "the tests, both input files and the guide, in one folder that runs as-is",
    "href": "../tests/crossfade_impl_tests.zip",
-   "bytes": 48725,
+   "bytes": 163514,
    "contents": [
     "test_implementation.py",
     "conftest.py",
@@ -72,6 +72,8 @@ window.P2_VET = {
     "database_implementation.sql",
     "data.csv",
     "test_implementation_guide.pdf",
+    "rubric_database_implementation.md",
+    "use_case_reference.pdf",
     "README.txt"
    ]
   },
@@ -1239,7 +1241,7 @@ window.P2_VET = {
    "caught": 19,
    "total": 19,
    "not_applicable": [],
-   "real_script": "============================= 228 passed in 0.62s =============================="
+   "real_script": "============================= 228 passed in 0.74s =============================="
   }
  },
  "single": {
@@ -1320,7 +1322,7 @@ window.P2_VET = {
    "file": "crossfade_single_tests.zip",
    "role": "the tests, the oracle, every input file and both guides, in one folder that runs as-is",
    "href": "../tests/crossfade_single_tests.zip",
-   "bytes": 175262,
+   "bytes": 178309,
    "contents": [
     "test_single_table.py",
     "oracle.py",
@@ -1333,6 +1335,7 @@ window.P2_VET = {
     "use_cases.json",
     "test_single_table_guide.pdf",
     "use_case_reference.pdf",
+    "rubric_single_table.md",
     "README.txt"
    ]
   },
@@ -2067,7 +2070,7 @@ window.P2_VET = {
    },
    {
     "title": "Write the queries yourself",
-    "text": "The starter kit (Project 2 → single_table → Download starter kit) is the same folder with every comment kept and every query removed. Run the tests at any point: unwritten queries are reported by name.",
+    "text": "The starter kit, project2/tests/crossfade_p2_starter_kit.zip in the repo (not offered for download on the site), is the same folder with every comment kept and every query removed. Run the tests at any point: unwritten queries are reported by name.",
     "code": null
    }
   ],
@@ -2368,7 +2371,7 @@ window.P2_VET = {
    "caught": 26,
    "total": 26,
    "not_applicable": [],
-   "real_file": "========================= 1 failed, 70 passed in 0.34s =========================",
+   "real_file": "========================= 1 failed, 70 passed in 0.20s =========================",
    "already_failing": []
   }
  },
@@ -2450,7 +2453,7 @@ window.P2_VET = {
    "file": "crossfade_multiple_tests.zip",
    "role": "the tests, the oracle, every input file and the guide, in one folder that runs as-is",
    "href": "../tests/crossfade_multiple_tests.zip",
-   "bytes": 69001,
+   "bytes": 184791,
    "contents": [
     "test_multiple_table.py",
     "oracle_multiple.py",
@@ -2463,6 +2466,8 @@ window.P2_VET = {
     "data.csv",
     "use_cases.json",
     "test_multiple_table_guide.pdf",
+    "rubric_multiple_table.md",
+    "use_case_reference.pdf",
     "README.txt"
    ]
   },
@@ -3129,7 +3134,7 @@ window.P2_VET = {
    },
    {
     "title": "Write the queries yourself",
-    "text": "The starter kit (Project 2 → single_table → Download starter kit) holds multiple_table.sql with every comment kept and every query removed. Run the tests at any point: unwritten queries are reported by name.",
+    "text": "The starter kit, project2/tests/crossfade_p2_starter_kit.zip in the repo (not offered for download on the site), holds multiple_table.sql with every comment kept and every query removed. Run the tests at any point: unwritten queries are reported by name.",
     "code": null
    }
   ],
@@ -3579,7 +3584,7 @@ window.P2_VET = {
    "caught": 39,
    "total": 39,
    "not_applicable": [],
-   "real_file": "========================= 1 failed, 79 passed in 0.38s =========================",
+   "real_file": "========================= 1 failed, 79 passed in 0.36s =========================",
    "already_failing": []
   }
  },
@@ -3600,6 +3605,11 @@ window.P2_VET = {
     "file": "routines.sql",
     "role": "the file under test (Task 4)",
     "href": "../deliverables/routines.sql"
+   },
+   {
+    "file": "routines_example_usage.sql",
+    "role": "example usage, not a deliverable: calls each routine once and rolls back",
+    "href": "../examples/routines_example_usage.sql"
    },
    {
     "file": "test_routines.py",
@@ -3656,7 +3666,7 @@ window.P2_VET = {
    "file": "crossfade_routines_tests.zip",
    "role": "the tests, the oracle, every input file and the guide, in one folder that runs as-is",
    "href": "../tests/crossfade_routines_tests.zip",
-   "bytes": 62758,
+   "bytes": 179856,
    "contents": [
     "test_routines.py",
     "oracle_routines.py",
@@ -3664,10 +3674,13 @@ window.P2_VET = {
     "pytest.ini",
     "requirements.txt",
     "routines.sql",
+    "routines_example_usage.sql",
     "database_implementation.sql",
     "data.csv",
     "use_cases.json",
     "test_routines_guide.pdf",
+    "rubric_routines.md",
+    "use_case_reference.pdf",
     "README.txt"
    ]
   },
@@ -3715,7 +3728,7 @@ window.P2_VET = {
     "group": "coverage",
     "tests": 8,
     "passed": 8,
-    "text": "The file as a whole: the brief's mix (2 procedures + 1 function, or 1 + 2); tags F1.., P1.. in order; every use case with routine columns served, and every declared column touched by a routine serving it; the RA's rule that procedures take no derived values as input; no transaction control inside a routine; and the script itself: it re-creates the routines when run again, and its Try it block leaves the data unchanged and returns what its comments promise."
+    "text": "The file as a whole: the brief's mix (2 procedures + 1 function, or 1 + 2); tags F1.., P1.. in order; every use case with routine columns served, and every declared column touched by a routine serving it; the RA's rule that procedures take no derived values as input; no transaction control inside a routine; and the script itself: it re-creates the routines when run again and only creates them; the example usage script (project2/examples/routines_example_usage.sql, not a deliverable) leaves the data unchanged and returns what its comments promise."
    }
   ],
   "coverage": {
@@ -3956,7 +3969,7 @@ window.P2_VET = {
      "outcome": "passed"
     },
     {
-     "test": "test_try_it_block_gives_the_documented_answers",
+     "test": "test_example_usage_gives_the_documented_answers",
      "outcome": "passed"
     }
    ],
@@ -4047,7 +4060,7 @@ window.P2_VET = {
      "first_failures": [
       "test_f1_thirty_seconds_is_the_boundary",
       "test_f1_follows_a_rate_change",
-      "test_try_it_block_gives_the_documented_answers"
+      "test_example_usage_gives_the_documented_answers"
      ]
     },
     {
@@ -4103,7 +4116,7 @@ window.P2_VET = {
      "first_failures": [
       "test_p1_records_an_abandoned_skip",
       "test_p1_ledger_survives_a_rate_change",
-      "test_try_it_block_gives_the_documented_answers"
+      "test_example_usage_gives_the_documented_answers"
      ]
     },
     {
@@ -4262,7 +4275,7 @@ window.P2_VET = {
    "caught": 20,
    "total": 20,
    "not_applicable": [],
-   "real_file": "========================= 1 failed, 49 passed in 0.83s =========================",
+   "real_file": "========================= 1 failed, 49 passed in 0.85s =========================",
    "already_failing": []
   }
  }

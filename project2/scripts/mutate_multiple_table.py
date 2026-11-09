@@ -62,7 +62,7 @@ EDITS = [
     ("m4-tie-break-dropped", "M4", "the track_id tie-break left out of ORDER BY",
      "ORDER BY highest_divergence DESC,\n         t.track_id;", "ORDER BY highest_divergence DESC;"),
     ("m4-claims-union", "M4", "the comment claims requirement 3.3 (a set operation) instead of 3.4",
-     "Requirements: 3.4 subquery", "Requirements: 3.3 subquery"),
+     "Requirements: 3.4  (brief", "Requirements: 3.3  (brief"),
     # M5 filling each station (3.5)
     ("m5-window-edges-excluded", "M5", "the window's edges left out (> and < instead of BETWEEN)",
      "s.posterior_entropy BETWEEN st.minimum_ambiguity AND st.maximum_ambiguity",

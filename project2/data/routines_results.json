@@ -1,6 +1,6 @@
 {
  "file": "routines.sql",
- "generated": "2026-11-08T13:24:10",
+ "generated": "2026-11-08T20:01:18",
  "passed": 50,
  "failed": 0,
  "queries": {
@@ -19,7 +19,7 @@
     "Returns NULL, not 0, when the recording does not exist: there is no rate to apply, and 0 would read as \"a short play\" (P1 refuses such a play first).",
     "NOT DETERMINISTIC: the same arguments can give a different answer after the artist's rate changes, which is why P1 stores the result (a snapshot)."
    ],
-   "requirement": "4 function",
+   "requirement": "4 function  (brief: Task 4, the 1 function of 2 procedures and 1 function)",
    "uses": [
     "DECLARE",
     "IF ... ELSEIF ... ELSE",
@@ -86,7 +86,7 @@
     "Does not catch the database's own refusals: a second report of the same play (same listener, recording and start time) is rejected by the primary key, \"which is what keeps a double-counted royalty out of the ledger\" (RA), and an unknown listener or station by its foreign key. The station may belong to another listener (rule I6: stations can be shared).",
     "Hands completed and royalty_amount back through OUT parameters."
    ],
-   "requirement": "4 procedure",
+   "requirement": "4 procedure  (brief: Task 4, procedure 1 of 2 procedures and 1 function)",
    "uses": [
     "DECLARE",
     "IF ... ELSEIF",
@@ -200,7 +200,7 @@
     "DECLARE EXIT HANDLER FOR 1062 catches that duplicate: nothing is inserted, and the OUT parameters name the recording already in the catalogue, with status 'duplicate'. If the 1062 came from the primary key instead (two uploads took the same new ID at the same moment), there is no recording with this checksum, and the handler re-raises the error (RESIGNAL) rather than report a duplicate that is not one.",
     "Every other refusal (a length of 0 seconds, a missing title) is the database's own, and is not caught."
    ],
-   "requirement": "4 procedure",
+   "requirement": "4 procedure  (brief: Task 4, procedure 2 of 2 procedures and 1 function)",
    "uses": [
     "DECLARE",
     "DECLARE EXIT HANDLER FOR 1062",
@@ -496,7 +496,7 @@
     "outcome": "passed"
    },
    {
-    "test": "test_try_it_block_gives_the_documented_answers",
+    "test": "test_example_usage_gives_the_documented_answers",
     "outcome": "passed"
    }
   ]
@@ -1497,16 +1497,16 @@
    ],
    "expected": [
     [
-     "2026-11-08 20:24:09",
+     "2026-11-09 03:01:17",
      "between",
-     "2026-11-08 20:24:09"
+     "2026-11-09 03:01:17"
     ]
    ],
    "got": [
     [
-     "2026-11-08 20:24:09",
-     "2026-11-08 20:24:09",
-     "2026-11-08 20:24:09"
+     "2026-11-09 03:01:17",
+     "2026-11-09 03:01:17",
+     "2026-11-09 03:01:17"
     ]
    ],
    "doc": "With no start time given, the play is recorded at the current UTC time, whatever the session's time zone.\nWhy: \"Played At is recorded in UTC\" (RA), so a daylight-saving change can never repeat a key. The session is\nput in Arizona time (UTC-7) first, so local time and UTC differ by seven hours.\nExpect: played_at falls between UTC_TIMESTAMP() just before and just after the call.",

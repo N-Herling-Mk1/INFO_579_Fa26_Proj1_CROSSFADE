@@ -13,8 +13,9 @@ Layers, as in the query test files:
                call runs inside a transaction that is rolled back.
   coverage     the file as a whole: the brief's mix (2 procedures + 1 function, or 1 + 2), every use case with
                routine columns served, the RA's "no derived values as input", no transaction control inside a
-               routine, and the script itself: it re-creates the routines when run again and its "Try it" block
-               leaves the data unchanged.
+               routine, and the script itself: it re-creates the routines when run again. When
+               routines_example_usage.sql is present (repo: project2/examples; example usage, not a deliverable),
+               it is run too: its results must match the oracle and it must leave the data unchanged.
 
 Run (from the repo root or the test-kit folder):
     python -m pytest project2/tests/test_routines.py -v      (repo)
@@ -68,8 +69,8 @@ def counts(db):
 
 
 def run_script(db, path):
-    """Run routines.sql statement by statement, as the mysql client would after reading its DELIMITER lines.
-    Returns what each statement of the "Try it" block returned."""
+    """Run a script statement by statement, as the mysql client would after reading its DELIMITER lines.
+    Returns what each statement that gives a result (or is a CALL) returned."""
     steps = []
     with db.cursor() as cur:
         for comment, st in split_script(path.read_text(encoding="utf-8")):
@@ -84,14 +85,26 @@ def run_script(db, path):
     return steps
 
 
+def example_path(pytestconfig):
+    """routines_example_usage.sql, or None when it is not around (the test kit ships without it)."""
+    try:
+        return find_file(pytestconfig, "rex")
+    except pytest.UsageError:
+        return None
+
+
 @pytest.fixture(scope="module")
 def installed(db, pytestconfig):
-    """routines.sql run once (it drops and re-creates the routines); the "Try it" block's results recorded."""
+    """routines.sql run once (it drops and re-creates the routines), then the example usage script if present,
+    its results recorded for the site."""
     before = counts(db)
-    steps = run_script(db, find_file(pytestconfig, "rsql"))
-    from conftest import record_demo
-    record_demo(steps)
-    return {"before": before, "after": counts(db), "steps": steps}
+    created = run_script(db, find_file(pytestconfig, "rsql"))
+    ex = example_path(pytestconfig)
+    steps = run_script(db, ex) if ex else []
+    if ex:
+        from conftest import record_demo
+        record_demo(steps)
+    return {"before": before, "after": counts(db), "created": created, "steps": steps, "example": ex}
 
 
 def catalogue(db, name):
@@ -172,7 +185,8 @@ def test_comment_contract(routine, use_cases, installed):
     assert not unknown, f"use cases not in use_cases.json: {unknown}"
     assert len(r.need) > 40, "comment states no business need (Business need: ...)"
     assert len(r.does) >= 2, "comment does not say what it does, step by step (What it does: - ...)"
-    assert r.requirement == KINDS[r.kind], f"Requirements: says {r.requirement!r}, expected {KINDS[r.kind]!r}"
+    assert re.match(re.escape(KINDS[r.kind]) + r"(\s|$)", r.requirement), \
+        f"Requirements: says {r.requirement!r}, expected it to start {KINDS[r.kind]!r}"
     assert r.uses, "comment lists no Unit 9 features (Uses: ...)"
     assert r.tables, "comment lists no tables (Tables: ...)"
     assert r.params, "comment lists no parameters (Parameters: IN name type, ...)"
@@ -752,16 +766,20 @@ def test_no_transaction_control_inside(routines):
 
 
 def test_script_reruns_and_leaves_data_unchanged(db, installed, pytestconfig):
-    """routines.sql can be run again (it drops and re-creates each routine), and its "Try it" block leaves the
-    data exactly as it was."""
-    assert installed["after"] == installed["before"], f"rows changed by the script: {installed}"
+    """routines.sql can be run again (it drops and re-creates each routine) and returns no result rows: it only
+    creates routines. Neither it nor the example usage script changes the data."""
+    assert installed["after"] == installed["before"], f"rows changed by the scripts: {installed}"
+    assert not [s for s in installed["created"] if s.get("rows") is not None or re.match(r"\s*CALL\b", s["sql"], re.I)], \
+        "routines.sql runs a query or a CALL; it should only create the routines (example calls go in the example script)"
     run_script(db, find_file(pytestconfig, "rsql"))
     assert counts(db) == installed["before"]
 
 
-def test_try_it_block_gives_the_documented_answers(installed, data):
-    """The "Try it" block returns what the comments promise: 0 and 0.00400 from play_royalty, completed 0 and
-    royalty 0.00400 from record_play, a duplicate named and a new upload numbered by upload_track."""
+def test_example_usage_gives_the_documented_answers(installed, data):
+    """routines_example_usage.sql returns what its comments promise: 0 and 0.00400 from play_royalty, completed 0
+    and royalty 0.00400 from record_play, a duplicate named and a new upload numbered by upload_track."""
+    if not installed["example"]:
+        pytest.skip("routines_example_usage.sql not found (example usage, not a deliverable)")
     rows = [s["rows"][0] for s in installed["steps"] if s.get("rows")]
     dup = next(r for r in data["track"]["rows"] if r["track_id"] == "4817")
     new_id = max(int(r["track_id"]) for r in data["track"]["rows"]) + 1

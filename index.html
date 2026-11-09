@@ -25,7 +25,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png">
 <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/site.css?v=3f1e8bb3">
-<link rel="stylesheet" href="assets/shell.css?v=849f8743">
+<link rel="stylesheet" href="assets/shell.css?v=1a7562a1">
 <script src="project1/data/site_data.js"></script>
 </head>
 <body class="shell-body" data-acc="home">
@@ -90,7 +90,7 @@
   <main class="stage" id="stage">
     <iframe id="main" title="CROSSFADE panel"></iframe>
     <div class="veil" id="veil" aria-hidden="true"><div class="vbar"></div><div class="vtxt">Deploying panel</div></div>
-    <!-- Boot overlay: real load milestones (shell, data, fonts, deliverables, panel) paced over the 4 s intro.
+    <!-- Boot overlay: real load milestones (shell, data, fonts, deliverables, panel) paced over the 3.2 s intro.
          At 100% it plays the three-tone ready chime; the browser allows sound only after a click or key, so until the
          visitor has given one it waits for Enter (a click anywhere or any key does the same). -->
     <div class="boot" id="boot" role="progressbar" aria-label="Loading CROSSFADE" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -141,7 +141,12 @@
       ["Files", [["implementation", "database_implementation", "project2/panels/file.html?f=implementation"],
                  ["single", "single_table", "project2/panels/file.html?f=single"],
                  ["multiple", "multiple_table", "project2/panels/file.html?f=multiple"],
-                 ["routines", "routines", "project2/panels/file.html?f=routines"]]],
+                 ["routines", "routines", "project2/panels/file.html?f=routines"],
+                 ["example-routines", "↳ routines example usage", "project2/panels/example.html"]]],
+      ["Requirement maps", [["map-implementation", "database_implementation", "project2/panels/reqmap.html?f=implementation"],
+                            ["map-single", "single_table", "project2/panels/reqmap.html?f=single"],
+                            ["map-multiple", "multiple_table", "project2/panels/reqmap.html?f=multiple"],
+                            ["map-routines", "routines", "project2/panels/reqmap.html?f=routines"]]],
       ["Vetting & tests", [["vet-implementation", "database_implementation", "project2/panels/vetting.html?f=implementation", null, "228 tests"],
                            ["vet-single", "single_table", "project2/panels/vetting.html?f=single", null, "71 tests"],
                            ["vet-multiple", "multiple_table", "project2/panels/vetting.html?f=multiple", null, "80 tests"],
@@ -295,7 +300,7 @@
   });
 
   /* ---- hide / show the rail. On load: the splash shows with the rail closed under the boot overlay
-     (bar + %), the menu button blinks for 4 s, the ready chime plays, then the rail opens and the top bar
+     (bar + %), the menu button blinks for 3.2 s, the ready chime plays, then the rail opens and the top bar
      settles to 80% of its height. */
   var tog = document.getElementById("rail-toggle"), bootT = null;
   /* every control is locked until the boot sequence is done: the top bar, the rail and the panel are inert
@@ -330,7 +335,7 @@
 
   /* ---- boot overlay: loading bar + %, then the ready chime */
   var Boot = (function () {
-    var BOOT_MS = 4000, t0 = performance.now(), shown = 0, raf = null;
+    var BOOT_MS = 3200, t0 = performance.now(), shown = 0, raf = null;
     var enter = document.getElementById("bt-enter"), hint = document.getElementById("bt-hint");
     var fill = document.getElementById("bt-fill"), pct = document.getElementById("bt-pct");
     var stepEl = document.getElementById("bt-step"), nEl = document.getElementById("bt-n");

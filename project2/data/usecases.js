@@ -2783,6 +2783,20 @@ window.UC = {
      "UC-02",
      "UC-14"
     ],
+    "play.royalty_amount": [
+     "UC-01",
+     "UC-14"
+    ],
+    "play.seconds_played": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.track_id": [
+     "UC-01",
+     "UC-13",
+     "UC-14"
+    ],
     "track.artist_id": [
      "UC-01",
      "UC-14",
@@ -2798,20 +2812,6 @@ window.UC = {
      "UC-13",
      "UC-14",
      "UC-15"
-    ],
-    "play.royalty_amount": [
-     "UC-01",
-     "UC-14"
-    ],
-    "play.seconds_played": [
-     "UC-01",
-     "UC-13",
-     "UC-14"
-    ],
-    "play.track_id": [
-     "UC-01",
-     "UC-13",
-     "UC-14"
     ],
     "artist.country": [
      "UC-02"
@@ -2877,18 +2877,6 @@ window.UC = {
     "listener.signup_date": [
      "UC-06"
     ],
-    "listener.display_name": [
-     "UC-07",
-     "UC-13"
-    ],
-    "play.listener_id": [
-     "UC-07",
-     "UC-13",
-     "UC-14"
-    ],
-    "play.station_id": [
-     "UC-07"
-    ],
     "station.listener_id": [
      "UC-07"
     ],
@@ -2899,6 +2887,23 @@ window.UC = {
     ],
     "station.station_id": [
      "UC-07",
+     "UC-08",
+     "UC-10",
+     "UC-12"
+    ],
+    "play.listener_id": [
+     "UC-07",
+     "UC-13",
+     "UC-14"
+    ],
+    "play.station_id": [
+     "UC-07"
+    ],
+    "listener.display_name": [
+     "UC-07",
+     "UC-13"
+    ],
+    "station.model_id": [
      "UC-08",
      "UC-10",
      "UC-12"
@@ -2930,11 +2935,6 @@ window.UC = {
      "UC-08",
      "UC-09"
     ],
-    "station.model_id": [
-     "UC-08",
-     "UC-10",
-     "UC-12"
-    ],
     "track_score.model_id": [
      "UC-09",
      "UC-11",
@@ -2948,6 +2948,17 @@ window.UC = {
      "UC-11",
      "UC-12"
     ],
+    "station.created_on": [
+     "UC-10"
+    ],
+    "station.maximum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
+    "station.minimum_ambiguity": [
+     "UC-10",
+     "UC-12"
+    ],
     "station_blend.genre_id": [
      "UC-10",
      "UC-12"
@@ -2957,17 +2968,6 @@ window.UC = {
      "UC-12"
     ],
     "station_blend.weight": [
-     "UC-10",
-     "UC-12"
-    ],
-    "station.created_on": [
-     "UC-10"
-    ],
-    "station.maximum_ambiguity": [
-     "UC-10",
-     "UC-12"
-    ],
-    "station.minimum_ambiguity": [
      "UC-10",
      "UC-12"
     ],

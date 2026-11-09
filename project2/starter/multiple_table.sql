@@ -24,6 +24,37 @@
 	M1 to M5, one each; M6 and M7 meet 3.1 and 3.5 a second time, because their
 	questions need that shape.
 
+	BRIEF REQUIREMENTS ADDRESSED (Task 3: "Develop a variety of SQL queries
+	following the requirements for multiple table queries"). The brief's wording
+	is quoted; "3.n" is Task 3, requirement n. The minimum is one query per
+	requirement: M1 to M5 meet it, one requirement each. M6 and M7 go beyond the
+	minimum (a second 3.1 and a second 3.5) because their questions need that
+	shape.
+	  3.1  "Write a query involving an associative table and two other related
+	       tables. You must use the INNER JOIN to connect with all three
+	       tables": M1 (play, listener, track), M6 (track_score, track,
+	       scoring_model)
+	  3.2  "Write a query including two or more tables and using the LEFT OUTER
+	       JOIN": M2 (artist, track, play)
+	  3.3  "Write a query including some kind of set operation": M3 (UNION)
+	  3.4  "Write a query including a subquery and some multi-row operation":
+	       M4 (IN with a subquery)
+	  3.5  "Write a query including a derived table using the WITH statement":
+	       M5 (eligible, station_length), M7 (second_place, runner_up)
+	  Each query's own comment repeats this: its Requirements field names the
+	  requirement it meets, quotes the brief, and shows the SQL that meets it.
+
+	THE BRIEF'S GENERAL RULES, and how this file meets them:
+	  "Every statement, query and routine should be justified within the logic of
+	  your business plan and must be preceded by a comment explaining its
+	  purpose": every query has its own comment directly above it; its
+	  Business need field gives the purpose and ties it to the business plan
+	  (the Project 1 requirements analysis, RA), and its Business question field
+	  justifies how the query is written, citing the RA.
+	  "Avoid trivial and generic solutions": each query answers a question
+	  CROSSFADE actually asks (a use case, UC-xx, from the RA), never a generic
+	  "show the whole table" listing.
+
 	***** How to Run *********
 	Run database_implementation.sql first, then this script. Each query reads only
 	the `crossfade` database, changes nothing, and can be run on its own.
@@ -36,7 +67,9 @@
 	                    analysis, RA) needs from this data
 	  Business question: the question the query answers, then why it is written
 	                    the way it is, citing the RA
-	  Requirements:     the brief's requirement (3.1-3.5) it meets
+	  Requirements:     the brief's requirement it meets (3.1-3.5, see the list
+	                    above), on one line; then indented lines quoting the
+	                    brief and naming the SQL that meets it
 	  Tables:           every table it reads
 	  One row per:      the column(s) that identify a result row; the ORDER BY
 	                    always includes them, so no two rows can tie
@@ -45,12 +78,6 @@
 	against an independent answer computed from the Project 1 data.
 
 	***** Re: Class notes and syntax *****
-	Brief requirements (Task 3), and where each is met:
-	  3.1 associative table + two related tables, INNER JOIN on all three ... M1, M6
-	  3.2 two or more tables with LEFT OUTER JOIN ........................... M2
-	  3.3 a set operation (UNION) ............................................ M3
-	  3.4 a subquery with a multi-row operation (IN) ......................... M4
-	  3.5 a derived table defined with WITH .................................. M5, M7
 	Every join names its type (INNER JOIN, LEFT OUTER JOIN), as the course
 	requires; there are no bare JOINs and no comma joins. Tables carry short
 	aliases (AS p, AS t) so every column says which table it comes from.
@@ -86,7 +113,11 @@
 	  recordings started, as a percentage: one number for how far a listener
 	  stays with what they start.
 	- Most engaged listeners first; listener_id breaks ties.
-	Requirements: 3.1 INNER JOIN: play (associative, Listener M:N Track) with listener and track
+	Requirements: 3.1  (brief: requirements for multiple table queries, item 1)
+	  "Write a query involving an associative table and two other related
+	  tables. You must use the INNER JOIN to connect with all three tables":
+	  play is the associative table (Listener M:N Track); INNER JOIN play to
+	  listener and INNER JOIN play to track connect all three
 	Tables: play, listener, track
 	One row per: listener_id
 	Output: listener_id, display_name, plays, completed_plays, saves, skips, pct_of_audio_heard
@@ -114,7 +145,10 @@
 	  plays are counted as plays but earn nothing.
 	- IFNULL turns the empty sum of an artist with no plays into 0.
 	- Highest amount first; artist_id breaks ties.
-	Requirements: 3.2 LEFT OUTER JOIN: artist to track to play
+	Requirements: 3.2  (brief: requirements for multiple table queries, item 2)
+	  "Write a query including two or more tables and using the LEFT OUTER
+	  JOIN": three tables, artist LEFT OUTER JOIN track LEFT OUTER JOIN play,
+	  so an artist with no uploads or no plays still gets a row
 	Tables: artist, track, play
 	One row per: artist_id
 	Output: artist_id, payee, plays, qualifying_plays, usd_owed
@@ -141,7 +175,9 @@
 	  is shared").
 	- CASE labels a station reaching more than its creator as shared.
 	- Widest reach first; station_id breaks ties.
-	Requirements: 3.3 set operation: UNION of station creators and station players
+	Requirements: 3.3  (brief: requirements for multiple table queries, item 3)
+	  "Write a query including some kind of set operation": UNION of station
+	  creators (station) and station players (play), with duplicates removed
 	Tables: station, play, listener
 	One row per: station_id
 	Output: station_id, station, created_by, listeners_reached, reach_status
@@ -169,7 +205,11 @@
 	- Two correlated subqueries add how many versions scored the recording and
 	  the highest divergence among them (RA: Model Divergence).
 	- Largest disagreement first; track_id breaks ties.
-	Requirements: 3.4 subquery with a multi-row operation: IN (SELECT ... GROUP BY ... HAVING)
+	Requirements: 3.4  (brief: requirements for multiple table queries, item 4)
+	  "Write a query including a subquery and some multi-row operation":
+	  an IN test against a subquery over track_score that groups by recording
+	  and filters with HAVING; the subquery returns many rows and IN tests
+	  each recording against all of them
 	Tables: track, track_score
 	One row per: track_id
 	Output: track_id, title, models_scoring, highest_divergence
@@ -210,7 +250,10 @@
 	  time in minutes (RA: Duration, "to estimate station running time").
 	- The final SELECT joins the two, so every recording carries its station's
 	  totals.
-	Requirements: 3.5 derived tables with WITH: eligible and station_length
+	Requirements: 3.5  (brief: requirements for multiple table queries, item 5)
+	  "Write a query including a derived table using the WITH statement":
+	  WITH defines two derived tables, eligible and station_length, and the
+	  final SELECT joins them
 	Tables: station, track_score, track, station_blend, genre
 	One row per: station_id, track_id
 	Output: station_id, station, track_id, title, top_genre, genre_weight, posterior_entropy, station_recordings, station_run_minutes
@@ -242,7 +285,12 @@
 	- GROUP_CONCAT lists the versions that scored the recording, oldest first.
 	  DATEDIFF gives how many days the newest result predates the deployment.
 	- Most out of date first; track_id breaks ties.
-	Requirements: 3.1 INNER JOIN: track_score (associative, Track M:N Scoring Model) with track and scoring_model
+	Requirements: 3.1  (brief: requirements for multiple table queries, item 1)
+	  "Write a query involving an associative table and two other related
+	  tables. You must use the INNER JOIN to connect with all three tables":
+	  track_score is the associative table (Track M:N Scoring Model); INNER
+	  JOIN track_score to track and INNER JOIN track_score to scoring_model
+	  connect all three
 	Tables: track_score, track, scoring_model
 	One row per: track_id
 	Output: track_id, title, results, scored_by, last_scored_on, days_out_of_date
@@ -274,7 +322,10 @@
 	  character partway through", the other way a recording can sit between
 	  genres.
 	- Smallest margin first; track_id, then model_id, break ties.
-	Requirements: 3.5 derived tables with WITH: second_place and runner_up
+	Requirements: 3.5  (brief: requirements for multiple table queries, item 5)
+	  "Write a query including a derived table using the WITH statement":
+	  WITH defines two derived tables, second_place and runner_up (runner_up
+	  reads second_place), and the final SELECT joins runner_up
 	Tables: genre_probability, track_score, track, genre
 	One row per: track_id, model_id
 	Output: track_id, title, model_id, top_genre, top_probability, runner_up_genre, runner_up_probability, margin, segment_variance

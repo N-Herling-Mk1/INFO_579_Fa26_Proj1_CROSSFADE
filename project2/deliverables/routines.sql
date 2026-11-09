@@ -17,11 +17,37 @@
 	                    for MySQL error 1062
 	The RA: "the procedures do not accept derived values as input" (Integrity rules).
 
+	BRIEF REQUIREMENTS ADDRESSED (Task 4). The brief's wording is quoted. Task 4
+	asks for exactly three routines, so this file meets it exactly: no more, no
+	fewer.
+	  4  "Implement 2 procedures and 1 function or 1 procedure and 2 functions
+	     that make use of the data in your database": the option taken is 2
+	     procedures and 1 function: F1 play_royalty (function), P1 record_play
+	     and P2 upload_track (procedures). F1 reads track and artist; P1 reads
+	     track and artist and writes play; P2 reads artist and track, and writes
+	     track.
+	  4  "The 3 routines must be presented in a single sq file named
+	     routines.sql": all three are in this file, and only these three.
+	  Each routine's own comment repeats this: its Requirements field says which
+	  of the three it is, quotes the brief, and names the data it uses.
+
+	THE BRIEF'S GENERAL RULES, and how this file meets them:
+	  "Every statement, query and routine should be justified within the logic of
+	  your business plan and must be preceded by a comment explaining its
+	  purpose": every routine has its own comment directly above it; its
+	  Business need field gives the purpose and ties it to the business plan
+	  (the Project 1 requirements analysis, RA), and its What it does field
+	  justifies each step, citing the RA.
+	  "Avoid trivial and generic solutions": each routine carries out one of the
+	  business's own events or rules (use cases UC-xx, rules from the RA), not
+	  a generic insert or lookup wrapper.
+
 	***** How to Run *********
 	Run database_implementation.sql first, then this whole script. It drops and
-	re-creates the three routines, so it can be run again at any time. The "Try it"
-	block at the end calls each routine inside a transaction and rolls it back, so
-	the sample data is left exactly as it was.
+	re-creates the three routines, so it can be run again at any time. It creates
+	the routines only; to see each one called on the sample data, run
+	project2/examples/routines_example_usage.sql afterwards (in the repo and on
+	the site, not part of the submission; it rolls back, leaving the data as it was).
 
 	***** NERD STUFF *********
 	Comments: each routine is preceded by a comment with the same fields:
@@ -29,8 +55,9 @@
 	  Use cases:        the use cases (UC-xx) it serves
 	  Business need:    what the business plan (the RA) needs it for
 	  What it does:     the steps, and why each is there, citing the RA
-	  Requirements:     4 function or 4 procedure (the brief: 2 procedures and 1
-	                    function, or 1 procedure and 2 functions)
+	  Requirements:     4 function or 4 procedure: which of Task 4's three
+	                    routines this is (see the list above); then indented
+	                    lines quoting the brief and naming the data it uses
 	  Uses:             the routine features it uses (Class notes below says which
 	                    come from Unit 9 and which go beyond the slides)
 	  Tables:           every table it reads or writes
@@ -50,18 +77,16 @@
 	CREATE statement. DECLARE (local variables and a handler), IF ... ELSEIF ...
 	ELSE, SIGNAL SQLSTATE '45000' (a user-defined error), DECLARE EXIT HANDLER
 	FOR 1062 (catch MySQL's duplicate-key error by its error code), IN / OUT
-	parameters, and READS SQL DATA for a function that reads tables. Unit 10:
-	START TRANSACTION and ROLLBACK (the "Try it" block).
+	parameters, and READS SQL DATA for a function that reads tables.
 	Beyond the slides: RESIGNAL (P2 re-raises a key clash that is not a
 	duplicate file); NOT DETERMINISTIC (F1; the slides show DETERMINISTIC, and NOT
 	DETERMINISTIC is MySQL's default, stated because the payout rate F1 reads can
 	change); MODIFIES SQL DATA (P1, P2); UTC_TIMESTAMP() (P1, the RA's UTC play
 	time); UNHEX(SHA2(...)) (P2's example call, to make a 32-byte checksum).
-	Branches: the "Try it" block reaches F1's 29- and 30-second branches, P1's
-	insert and P2's upload and duplicate paths. The guard branches, which refuse
-	bad input, are reached only by the tests: F1's NULL for an unknown recording,
-	P1's three SIGNALs, P2's unregistered-artist SIGNAL and its RESIGNAL for a
-	key clash that is not a duplicate file.
+	Branches: project2/tests/test_routines.py reaches every branch: F1's 29- and
+	30-second branches and its NULL for an unknown recording; P1's insert and its
+	three SIGNALs; P2's upload, its duplicate path, its unregistered-artist SIGNAL
+	and its RESIGNAL for a key clash that is not a duplicate file.
 */
 DELIMITER $$
 
@@ -84,7 +109,12 @@ DELIMITER $$
 	  apply, and 0 would read as "a short play" (P1 refuses such a play first).
 	- NOT DETERMINISTIC: the same arguments can give a different answer after the
 	  artist's rate changes, which is why P1 stores the result (a snapshot).
-	Requirements: 4 function
+	Requirements: 4 function  (brief: Task 4, the 1 function of 2 procedures and 1 function)
+	  "Implement 2 procedures and 1 function or 1 procedure and 2 functions
+	  that make use of the data in your database": reads track (the
+	  recording's length and artist) and artist (the payout rate)
+	  "The 3 routines must be presented in a single sq file named
+	  routines.sql": it is defined here, with F1, P1 and P2
 	Uses: DECLARE, IF ... ELSEIF ... ELSE, READS SQL DATA, NOT DETERMINISTIC
 	Tables: track, artist
 	Parameters: IN input_track_id INT UNSIGNED, IN input_seconds_played SMALLINT UNSIGNED
@@ -146,7 +176,12 @@ END$$
 	  an unknown listener or station by its foreign key. The station may belong to
 	  another listener (rule I6: stations can be shared).
 	- Hands completed and royalty_amount back through OUT parameters.
-	Requirements: 4 procedure
+	Requirements: 4 procedure  (brief: Task 4, procedure 1 of 2 procedures and 1 function)
+	  "Implement 2 procedures and 1 function or 1 procedure and 2 functions
+	  that make use of the data in your database": reads track and
+	  artist (through F1) and writes play
+	  "The 3 routines must be presented in a single sq file named
+	  routines.sql": it is defined here, with F1, P1 and P2
 	Uses: DECLARE, IF ... ELSEIF, SIGNAL SQLSTATE '45000', IN / OUT parameters, calls F1, MODIFIES SQL DATA
 	Tables: track, artist, play
 	Parameters: IN input_listener_id INT UNSIGNED, IN input_track_id INT UNSIGNED, IN input_station_id INT UNSIGNED, IN input_seconds_played SMALLINT UNSIGNED, IN input_reaction VARCHAR(7), IN input_played_at DATETIME, OUT output_completed TINYINT, OUT output_royalty_amount DECIMAL(5,5)
@@ -224,7 +259,12 @@ END$$
 	  report a duplicate that is not one.
 	- Every other refusal (a length of 0 seconds, a missing title) is the
 	  database's own, and is not caught.
-	Requirements: 4 procedure
+	Requirements: 4 procedure  (brief: Task 4, procedure 2 of 2 procedures and 1 function)
+	  "Implement 2 procedures and 1 function or 1 procedure and 2 functions
+	  that make use of the data in your database": reads artist (is the
+	  uploader registered?) and track (the duplicate), and writes track
+	  "The 3 routines must be presented in a single sq file named
+	  routines.sql": it is defined here, with F1, P1 and P2
 	Uses: DECLARE, DECLARE EXIT HANDLER FOR 1062, RESIGNAL, IF, SIGNAL SQLSTATE '45000', IN / OUT parameters, MODIFIES SQL DATA
 	Tables: artist, track
 	Parameters: IN input_artist_id MEDIUMINT UNSIGNED, IN input_title VARCHAR(128), IN input_duration SMALLINT UNSIGNED, IN input_release_date DATE, IN input_audio_checksum BINARY(32), OUT output_track_id INT UNSIGNED, OUT output_status VARCHAR(9), OUT output_message VARCHAR(128)
@@ -272,31 +312,3 @@ BEGIN
 END$$
 
 DELIMITER ;
-
-
-/*
-	Try it: each routine called once, inside a transaction that is rolled back, so
-	the sample data is unchanged. (A call that SIGNALs stops a script, so those are
-	left to the tests: project2/tests/test_routines.py.)
-*/
-START TRANSACTION;
-
--- F1: a 29-second play earns nothing; 30 seconds earns Velvet Static's rate.
-SELECT crossfade.play_royalty(4817, 29) AS royalty_29_seconds,
-       crossfade.play_royalty(4817, 30) AS royalty_30_seconds;
-
--- P1: dokafor skips Low Tide after 107 of its 214 seconds.
-CALL crossfade.record_play(20937, 4817, NULL, 107, 'skipped', '2026-11-01 20:15:00', @completed, @royalty);
-SELECT @completed AS completed, @royalty AS royalty_amount;
-
--- P2: Velvet Static uploads Low Tide's audio again (same checksum as track 4817).
-CALL crossfade.upload_track(1042, 'Low Tide (again)', 214, '2026-11-01',
-	(SELECT audio_checksum FROM crossfade.track WHERE track_id = 4817), @track_id, @status, @message);
-SELECT @track_id AS track_id, @status AS status, @message AS message;
-
--- P2: Kestrel Ave uploads a new recording.
-CALL crossfade.upload_track(1049, 'First Light', 201, '2026-12-01', UNHEX(SHA2('first light', 256)),
-	@track_id, @status, @message);
-SELECT @track_id AS track_id, @status AS status, @message AS message;
-
-ROLLBACK;

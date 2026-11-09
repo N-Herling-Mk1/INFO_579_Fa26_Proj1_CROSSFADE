@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>routines_example_usage.sql</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<style>
+  .ex-step { border: 1px solid var(--rule); border-left: 3px solid var(--cyan); padding: 12px 16px; margin: 0 0 14px; }
+  .ex-step h3 { font: 600 15px var(--body); margin: 0 0 8px; }
+  .ex-step .prose pre { margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <p class="group-line">Task 4 · example usage · not a deliverable</p>
+  <h1>routines_example_usage.sql</h1>
+  <p class="lede">Each routine in routines.sql called once on the sample data, inside a transaction that is rolled back.</p>
+  <div class="callout pending">
+    <p><b>Not part of the submission.</b> The brief asks for the three routines, and routines.sql holds exactly those.
+      These calls used to sit at the end of routines.sql; they are kept here, in
+      <code>project2/examples/</code>, so the deliverable is only what the brief asks for.</p>
+  </div>
+  <div class="toolbar">
+    <a class="btn primary" href="../examples/routines_example_usage.sql" download>Download routines_example_usage.sql</a>
+    <a class="btn" href="file.html?f=routines">routines.sql</a>
+    <a class="btn" href="reqmap.html?f=routines">routines requirement map</a>
+  </div>
+
+  <h2>How to run</h2>
+  <ol class="prose">
+    <li>Run <code>database_implementation.sql</code>, then <code>routines.sql</code>.</li>
+    <li>Run <code>routines_example_usage.sql</code>. It starts a transaction, makes each call, and rolls back, so the
+      sample data is left as it was and you can run it again.</li>
+    <li>Calls that are refused (a <code>SIGNAL</code>) would stop a script, so those are left to
+      <code>project2/tests/test_routines.py</code>.</li>
+  </ol>
+
+  <div id="results" hidden>
+    <h2>Each call and what it returned</h2>
+    <p class="note" id="res-note"></p>
+    <div id="steps"></div>
+  </div>
+
+  <h2>Script</h2>
+  <div class="prose"><pre><code id="script">Loading…</code></pre></div>
+</div>
+<script>
+(function () {
+  function esc(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  fetch("../examples/routines_example_usage.sql", { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : ""; })
+    .then(function (t) { document.getElementById("script").textContent = t || "(file not found)"; }).catch(function () {});
+  /* the last test run recorded what each statement returned (project2/tests/test_routines.py) */
+  var sc = document.createElement("script");
+  sc.src = "../data/routines_results.js?t=" + Date.now();
+  sc.onload = function () {
+    var R = window.P2_ROUTINES;
+    if (!R || !R.demo || !R.demo.length) return;
+    var boxes = [];
+    R.demo.forEach(function (s) {
+      if (/^\s*(START TRANSACTION|ROLLBACK)/i.test(s.sql)) return;
+      if (s.label || !boxes.length) boxes.push({ label: s.label, parts: [] });
+      boxes[boxes.length - 1].parts.push(s);
+    });
+    var h = boxes.map(function (b) {
+      return '<div class="ex-step"><h3>' + esc(b.label) + "</h3>" + b.parts.map(function (s) {
+        var out = '<div class="prose"><pre><code>' + esc(s.sql) + "</code></pre></div>";
+        if (s.columns) {
+          out += '<div class="tablewrap res-table"><table class="grid"><thead><tr>' +
+            s.columns.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+            s.rows.map(function (r) { return "<tr>" + r.map(function (v) {
+              return v === null ? '<td class="null">NULL</td>' : "<td>" + esc(v) + "</td>"; }).join("") + "</tr>"; }).join("") +
+            "</tbody></table></div>";
+        }
+        return out;
+      }).join("") + "</div>";
+    }).join("");
+    document.getElementById("steps").innerHTML = h;
+    document.getElementById("res-note").innerHTML = "From the test run of " + esc(R.generated.replace("T", " ")) +
+      "; <code>test_example_usage_gives_the_documented_answers</code> checks each result against an independent answer " +
+      "computed from the Project 1 data.";
+    document.getElementById("results").hidden = false;
+  };
+  document.head.appendChild(sc);
+})();
+</script>
+</body>
+</html>

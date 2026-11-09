@@ -59,7 +59,7 @@ EDITS = [
     ("s7-due-today-on-time", "S7", "a release due on the report date counted as on time (< instead of <=)",
      "WHEN MIN(release_date) <= '2026-09-30'", "WHEN MIN(release_date) < '2026-09-30'"),
     ("s2-limit-undeclared", "S2", "LIMIT used but (d) not declared in Requirements",
-     "Requirements: (a) CONCAT, LPAD, MOD, DATEDIFF  (c) ORDER BY  (d) LIMIT", "Requirements: (a) CONCAT, LPAD, MOD, DATEDIFF  (c) ORDER BY"),
+     "Requirements: 2.1, (a), (c), (d)  (brief", "Requirements: 2.1, (a), (c)  (brief"),
     ("e1-not-refused", "E1", "the re-upload computes a different checksum, so MySQL accepts it",
      "SELECT 9999, artist_id, CONCAT(title, ' (re-upload)'), duration, '2026-09-30', audio_checksum, 'awaiting scoring'",
      "SELECT 9999, artist_id, CONCAT(title, ' (re-upload)'), duration, '2026-09-30', UNHEX(SHA2('other file', 256)), 'awaiting scoring'"),

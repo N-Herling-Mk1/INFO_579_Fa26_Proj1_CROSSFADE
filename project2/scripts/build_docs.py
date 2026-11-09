@@ -127,11 +127,11 @@ def guide(res, rows):
             "(<font face='Courier'>--fresh</font>) build the database.", SMALL)]
 
     s += [P("2. Get the files", H2),
-          P("Site: <b>Project 2 &gt; Deliverables</b>, or <b>Project 2 &gt; single_table</b>. Download the <b>starter kit</b> "
-            "(<font face='Courier'>crossfade_p2_starter_kit.zip</font>). It holds everything except the SQL you write: "),
+          P("Repo: <font face='Courier'>project2/tests/crossfade_p2_starter_kit.zip</font> (the <b>starter kit</b>; the "
+            "site no longer offers it for download). It holds everything except the SQL you write: "),
           grid(["File", "What it is"],
                [["single_table.sql", "the file under test: blank in the starter kit (comments only). To test the answer key, "
-                                     "download single_table.sql from the site and put it here, replacing the blank one."],
+                                     "copy project2/deliverables/single_table.sql here, replacing the blank one."],
                 ["database_implementation.sql", "builds the crossfade database with the Project 1 sample data"],
                 ["data.csv", "the Project 1 sample data; the tests compute the expected answers from it"],
                 ["use_cases.json", "the use cases the queries answer"],

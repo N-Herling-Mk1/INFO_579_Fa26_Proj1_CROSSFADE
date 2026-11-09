@@ -295,6 +295,6 @@
  "caught": 26,
  "total": 26,
  "not_applicable": [],
- "real_file": "========================= 1 failed, 70 passed in 0.34s =========================",
+ "real_file": "========================= 1 failed, 70 passed in 0.20s =========================",
  "already_failing": []
 }

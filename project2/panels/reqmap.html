@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requirement map</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<script src="../data/reqmap.js"></script>
+<style>
+  .rm-bar { position: sticky; top: 0; z-index: 4; background: var(--paper); padding: 10px 0 10px; border-bottom: 1px solid var(--rule); }
+  .rm-legend { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rm-legend .lg { background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-left: 4px solid var(--c);
+    border-radius: 4px; padding: 3px 9px; font: 13px var(--body); cursor: pointer; }
+  .rm-legend .lg b { font-family: var(--mono); font-weight: 600; }
+  .rm-legend .lg em { font-style: normal; color: var(--ink-2); margin-left: 4px; font-family: var(--mono); }
+  .rm-legend .lg.act { background: color-mix(in srgb, var(--c) 18%, white); }
+  .rm-sum { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: flex-start; margin: 16px 0 18px; }
+  .rm-sum table { border-collapse: collapse; font: 13px/1.4 var(--mono); }
+  .rm-sum th, .rm-sum td { border: 1px solid var(--rule); padding: 4px 10px; text-align: center; }
+  .rm-sum thead th { border-bottom: 3px solid var(--c, var(--rule)); }
+  .rm-sum td.tb { text-align: left; color: var(--ink-2); }
+  .rm-sum td.on { background: color-mix(in srgb, var(--c) 22%, white); }
+  .rm-sum td.on a, .rm-sum th a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  .rm-sum td.off { color: #b8c4cf; }
+  .rm-sum tfoot th, .rm-sum tfoot td { background: #f6f9fb; }
+  .rm-notes { max-width: 430px; font-size: 14px; color: var(--ink-2); }
+  .rm-notes p { margin: 0 0 10px; } .rm-notes b { color: var(--ink); }
+  .rm-notes .ok { color: #1f7a3a; font-weight: 600; } .rm-notes .bad { color: var(--ares); font-weight: 600; }
+  .rm-code { background: #0f1317; border: 1px solid #2a323b; border-radius: 6px; padding: 8px 0; overflow-x: auto;
+    font: 12.5px/1.5 var(--mono); tab-size: 4; color: #d9dee4; }
+  .ln { display: flex; white-space: pre; padding-right: 16px; border-left: 3px solid transparent; }
+  .ln i { font-style: normal; color: #4a545e; width: 46px; text-align: right; padding-right: 12px; flex: none; user-select: none; }
+  .ln.k-comment code { color: #9aa79b; } .ln.k-code code { color: #e6eaee; }
+  .ln.req { border-left-color: var(--c); background: color-mix(in srgb, var(--c) 13%, transparent); }
+  .ln.req code { color: #e6eaee; }
+  .ln.reqfirst { background: #1d242c; } .ln.reqfirst code { color: #fff; font-weight: 600; }
+  .ln code { font: inherit; background: none; padding: 0; }
+  .ln .chip { all: unset; color: var(--c); font-weight: 700; cursor: pointer; }
+  .ln a.tl { color: #e6eaee; }
+  .hit { background: color-mix(in srgb, var(--c) 32%, transparent); box-shadow: inset 0 -2px 0 var(--c); border-radius: 2px; }
+  body.iso .hit:not(.on), body.iso .ln.req:not(.on) { opacity: .25; }
+  body.iso .ln.req:not(.on) { background: transparent; border-left-color: transparent; }
+  body.iso .hit.on { background: color-mix(in srgb, var(--c) 58%, transparent); }
+  .ln.flash { outline: 1px dashed #9aa7b2; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <p class="group-line" id="kicker">Requirement map</p>
+  <h1 id="name"></h1>
+  <p class="lede" id="brief"></p>
+  <div class="rm-bar">
+    <div class="rm-legend" id="legend"></div>
+    <p class="note" style="margin:6px 0 0">Each requirement has a colour: the line in the comment that claims it and the SQL that
+      meets it share it. Click a requirement to isolate it; click again to clear. Line numbers match the file.</p>
+  </div>
+  <div class="rm-sum"><div id="grid"></div><div class="rm-notes" id="notes"></div></div>
+  <div class="toolbar"><a class="btn" id="dl" download></a><a class="btn" id="src"></a></div>
+  <div class="rm-code" id="code"></div>
+</div>
+<script>
+(function () {
+  var M = window.P2_REQMAP || {};
+  var id = new URLSearchParams(location.search).get("f");
+  var d = M[id] || M.single;
+  if (!d) return;
+  document.title = d.file + " · requirement map";
+  document.getElementById("name").textContent = d.file;
+  document.getElementById("brief").textContent = d.brief;
+  document.getElementById("legend").innerHTML = d.legend;
+  document.getElementById("grid").innerHTML = d.grid;
+  document.getElementById("notes").innerHTML = d.notes;
+  document.getElementById("code").innerHTML = d.code;
+  var dl = document.getElementById("dl"); dl.href = "../deliverables/" + d.file; dl.textContent = "Download " + d.file;
+  var src = document.getElementById("src"); src.href = "file.html?f=" + (id || "single"); src.textContent = "Script page";
+  var css = Object.keys(d.colours).map(function (k) { return '[data-r="' + k + '"] { --c: ' + d.colours[k] + "; }"; }).join("\n");
+  var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+
+  var cur = null;
+  function iso(r) {
+    cur = (cur === r) ? null : r;
+    document.body.classList.toggle("iso", !!cur);
+    document.querySelectorAll(".hit, .ln.req").forEach(function (el) { el.classList.toggle("on", !!cur && el.dataset.r === cur); });
+    document.querySelectorAll(".lg").forEach(function (el) { el.classList.toggle("act", el.dataset.r === cur); });
+  }
+  document.querySelectorAll(".lg, .ln .chip").forEach(function (b) { b.addEventListener("click", function () { iso(b.dataset.r); }); });
+  /* in-page jumps scroll the panel and leave the site's back/forward history alone */
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest('a[href^="#blk-"]');
+    if (!a) return;
+    e.preventDefault();
+    var t = document.getElementById(a.getAttribute("href").slice(1));
+    if (!t) return;
+    var bar = document.querySelector(".rm-bar").offsetHeight;
+    window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - bar - 70, behavior: "smooth" });
+    t.classList.add("flash"); setTimeout(function () { t.classList.remove("flash"); }, 1600);
+  });
+})();
+</script>
+</body>
+</html>

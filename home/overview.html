@@ -305,12 +305,12 @@
     try { seen = sessionStorage.getItem("cf-hero-settled") === "1"; sessionStorage.setItem("cf-hero-settled", "1"); } catch (e) {}
     if (seen || still) { hero.style.transition = "none"; hero.classList.add("settled"); void hero.offsetWidth; hero.style.transition = ""; }
     else {
-      /* inside the shell: settle when its boot overlay finishes; on its own: after 4 s */
+      /* inside the shell: settle when its boot overlay finishes; on its own: after 3.2 s */
       var t0 = Date.now();
       (function wait() {
         var booting = false;
         try { var a = parent !== window && parent.document.getElementById("app"); booting = !!(a && a.classList.contains("booting")); } catch (e) {}
-        if (parent === window && Date.now() - t0 < 4000) booting = true;
+        if (parent === window && Date.now() - t0 < 3200) booting = true;
         if (booting && Date.now() - t0 < 60000) { setTimeout(wait, 150); return; }
         setTimeout(function () { hero.classList.add("settled"); }, 250);
       })();

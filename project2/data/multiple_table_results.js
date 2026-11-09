@@ -1,7 +1,7 @@
 /* Written by project2/tests (pytest) at the end of a run. Do not edit. */
 window.P2_MULTIPLE = {
  "file": "multiple_table.sql",
- "generated": "2026-11-08T13:24:10",
+ "generated": "2026-11-08T20:01:18",
  "passed": 80,
  "failed": 0,
  "queries": {
@@ -699,18 +699,18 @@ window.P2_MULTIPLE = {
      "title",
      "track_id"
     ],
-    "track_score": [
-     "genre_id",
-     "model_id",
-     "posterior_entropy",
-     "track_id"
-    ],
     "station": [
      "maximum_ambiguity",
      "minimum_ambiguity",
      "model_id",
      "name",
      "station_id"
+    ],
+    "track_score": [
+     "genre_id",
+     "model_id",
+     "posterior_entropy",
+     "track_id"
     ],
     "genre": [
      "genre_id",
@@ -1219,6 +1219,11 @@ window.P2_MULTIPLE = {
    "sql": "SELECT t.track_id,\n       t.title,\n       COUNT(*) AS results,\n       GROUP_CONCAT(m.version_label ORDER BY m.deployed_on, m.model_id SEPARATOR ', ') AS scored_by,\n       MAX(s.scored_on) AS last_scored_on,\n       DATEDIFF((SELECT MAX(n.deployed_on) FROM crossfade.scoring_model AS n), MAX(s.scored_on)) AS days_out_of_date\nFROM crossfade.track_score AS s\nINNER JOIN crossfade.track AS t ON t.track_id = s.track_id\nINNER JOIN crossfade.scoring_model AS m ON m.model_id = s.model_id\nWHERE t.ingest_status = 'scored'\nGROUP BY t.track_id, t.title\nHAVING MAX(s.scored_on) < (SELECT MAX(n.deployed_on) FROM crossfade.scoring_model AS n)\nORDER BY days_out_of_date DESC,\n         t.track_id",
    "detected": "track_score joined to ['scoring_model', 'track']",
    "columns": {
+    "scoring_model": [
+     "deployed_on",
+     "model_id",
+     "version_label"
+    ],
     "track": [
      "ingest_status",
      "title",
@@ -1228,11 +1233,6 @@ window.P2_MULTIPLE = {
      "model_id",
      "scored_on",
      "track_id"
-    ],
-    "scoring_model": [
-     "deployed_on",
-     "model_id",
-     "version_label"
     ]
    },
    "columns_out": [

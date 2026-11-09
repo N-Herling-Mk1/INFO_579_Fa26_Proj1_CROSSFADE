@@ -11,6 +11,39 @@
 	is queried, and track twice, so that every use case a single table can answer
 	is answered.
 
+	BRIEF REQUIREMENTS ADDRESSED (Task 2: "Develop a variety of SQL queries
+	following the requirements for single table queries"). The brief's wording is
+	quoted; "2.1" is Task 2, requirement 1, and (a)-(e) are its sub-requirements.
+	The minimum is one query per non-associative table for 2.1, and at least one
+	query for each of (a)-(e). Each is met; where more than one query is listed,
+	the extra queries go beyond the minimum.
+	  2.1  "Write queries to retrieve data from each non-associative table
+	       individually": artist S1, track S2 S7, genre S3, listener S4,
+	       scoring_model S5, station S6. Each query reads one table only.
+	  (a)  "At least one of the queries must use single row functions":
+	       S1 S2 S3 S4 S5 S6 S7
+	  (b)  "At least one of the queries must use aggregate functions":
+	       S3 S4 S6 S7
+	  (c)  "At least one of the queries must sort the results according to some
+	       criteria": S1 S2 S3 S4 S5 S6 S7
+	  (d)  "At least one of the queries must return just the first N results":
+	       S2 (LIMIT 5), S5 (LIMIT 1)
+	  (e)  "At least one of the queries must use a selection control function":
+	       S1 S3 S6 S7
+	  Each query's own comment repeats this: its Requirements field names the
+	  requirements it meets and shows the SQL that meets each one.
+
+	THE BRIEF'S GENERAL RULES, and how this file meets them:
+	  "Every statement, query and routine should be justified within the logic of
+	  your business plan and must be preceded by a comment explaining its
+	  purpose": every query has its own comment directly above it; its
+	  Business need field gives the purpose and ties it to the business plan
+	  (the Project 1 requirements analysis, RA), and its Business question field
+	  justifies how the query is written, citing the RA.
+	  "Avoid trivial and generic solutions": each query answers a question
+	  CROSSFADE actually asks (a use case, UC-xx, from the RA), never a generic
+	  "show the whole table" listing.
+
 	***** How to Run *********
 	Run database_implementation.sql first, then this script. Each query reads only
 	the `crossfade` database, changes nothing, and can be run on its own.
@@ -27,7 +60,9 @@
 	                    analysis, RA) needs from this data
 	  Business question: the question the query answers, then why it is written
 	                    the way it is, citing the RA
-	  Requirements:     the brief's requirements (a)-(e) it meets
+	  Requirements:     the brief's requirements it meets (2.1 and (a)-(e), see
+	                    the list above), on one line; then, indented, each
+	                    one quoted from the brief with the SQL that meets it
 	  Output:           its result columns, in order
 	project2/tests/test_single_table.py reads these fields and checks each query
 	against an independent answer computed from the Project 1 data.
@@ -36,12 +71,6 @@
 	error; it is not a brief requirement. The [E1] comment says how to run it.
 
 	***** Re: Class notes and syntax *****
-	Brief requirements (Task 2), and where each is met:
-	  (a) single-row functions ........ S1 S2 S3 S4 S5 S6 S7
-	  (b) aggregate functions ......... S3 S4 S6 S7
-	  (c) sorting ..................... S1 S2 S3 S4 S5 S6 S7
-	  (d) first N results ............. S2 S5
-	  (e) selection control (CASE, IF)  S1 S3 S6 S7
 	"Selection control" follows the Unit 8 slides: CASE and IF. Arithmetic uses the
 	Unit 6 operators (DIV, MOD).
 	Course material: CONCAT, LPAD, ROUND, DATEDIFF and the aggregates from Unit 6;
@@ -79,7 +108,15 @@
 	  the artist's licence took effect (RA: Joined Date).
 	- Ready artists first ('ready' sorts after 'held', so DESC), then by rate,
 	  highest first; artist_id breaks ties.
-	Requirements: (a) ROUND, DATEDIFF  (c) ORDER BY  (e) IF, CASE
+	Requirements: 2.1, (a), (c), (e)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the artist table, and only artist
+	  (a)  "use single row functions": ROUND (usd_per_1000_streams), DATEDIFF
+	       (days_under_licence)
+	  (c)  "sort the results according to some criteria": ORDER BY run_status
+	       DESC, payout_rate DESC, artist_id
+	  (e)  "use a selection control function": IF (licence_check,
+	       payment_country), CASE (run_status)
 	Output: artist_id, stage_name, usd_per_1000_streams, days_under_licence, licence_check, payment_country, run_status
 */
 SELECT artist_id,
@@ -111,7 +148,14 @@ ORDER BY run_status DESC,
 	  awaiting scoring, or rejected, must stay off the shelf.
 	- Playing time is shown as m:ss (whole minutes by DIV, seconds by MOD); ties on
 	  release date go to the lower track_id.
-	Requirements: (a) CONCAT, LPAD, MOD, DATEDIFF  (c) ORDER BY  (d) LIMIT
+	Requirements: 2.1, (a), (c), (d)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the track table, and only track
+	  (a)  "use single row functions": CONCAT, LPAD, MOD (run_time), DATEDIFF
+	       (days_since_release)
+	  (c)  "sort the results according to some criteria": ORDER BY release_date
+	       DESC, track_id
+	  (d)  "return just the first N results": LIMIT 5, the five newest
 	Output: track_id, title, run_time, release_date, days_since_release
 */
 SELECT track_id,
@@ -145,7 +189,16 @@ LIMIT 5;
 	  optional) shows NULL in both description columns.
 	- genre_id is the models' output class index (RA: Genre ID), so ordering by it
 	  lists the genres exactly as every probability vector does.
-	Requirements: (a) CHAR_LENGTH  (b) MAX  (c) ORDER BY  (e) IF
+	Requirements: 2.1, (a), (b), (c), (e)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the genre table, and only genre (the subquery reads genre too)
+	  (a)  "use single row functions": CHAR_LENGTH (label_chars,
+	       description_chars, chars_left_on_line)
+	  (b)  "use aggregate functions": MAX, in the subquery that finds the
+	       longest label
+	  (c)  "sort the results according to some criteria": ORDER BY genre_id,
+	       the model's class index
+	  (e)  "use a selection control function": IF (label_column)
 	Output: model_class_index, label, label_chars, label_column, description_chars, chars_left_on_line
 */
 SELECT genre_id AS model_class_index,
@@ -171,7 +224,14 @@ ORDER BY genre_id;
 	  picture.
 	- ORDER BY plan_tier DESC sorts by the ENUM's declared order (free < standard <
 	  premium), i.e. the most valuable tier first, not alphabetically.
-	Requirements: (a) ROUND, DATEDIFF  (b) COUNT, MIN, MAX, AVG  (c) ORDER BY
+	Requirements: 2.1, (a), (b), (c)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the listener table, and only listener
+	  (a)  "use single row functions": ROUND, DATEDIFF (avg_days_subscribed)
+	  (b)  "use aggregate functions": COUNT (listeners), MIN (first_signup),
+	       MAX (latest_signup), AVG (avg_days_subscribed), per plan_tier
+	  (c)  "sort the results according to some criteria": ORDER BY plan_tier
+	       DESC
 	Output: plan_tier, listeners, first_signup, latest_signup, avg_days_subscribed
 */
 SELECT plan_tier,
@@ -199,7 +259,14 @@ ORDER BY plan_tier DESC;
 	- On equal accuracy the newer deployment wins (deployed_on DESC): it began
 	  scoring incoming uploads most recently (RA: Deployed On). If both tie, the
 	  lower model_id wins, so LIMIT 1 always picks the same version.
-	Requirements: (a) CONCAT, ROUND  (c) ORDER BY  (d) LIMIT
+	Requirements: 2.1, (a), (c), (d)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the scoring_model table, and only scoring_model
+	  (a)  "use single row functions": CONCAT (architecture), ROUND
+	       (accuracy_pct)
+	  (c)  "sort the results according to some criteria": ORDER BY
+	       holdout_accuracy DESC, deployed_on DESC, model_id
+	  (d)  "return just the first N results": LIMIT 1, the one default version
 	Output: version_label, architecture, accuracy_pct, deployed_on
 */
 SELECT version_label,
@@ -228,7 +295,16 @@ LIMIT 1;
 	  maximum excludes ones no model can place. A window wider than 0.50, more than
 	  half the 0-1 scale, is counted as wide (a reporting band, not an RA rule).
 	- Most-used versions first; model_id breaks ties.
-	Requirements: (a) ROUND  (b) COUNT, AVG, SUM, MIN  (c) ORDER BY  (e) CASE
+	Requirements: 2.1, (a), (b), (c), (e)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the station table, and only station
+	  (a)  "use single row functions": ROUND (avg_window)
+	  (b)  "use aggregate functions": COUNT (stations), AVG (avg_window), SUM
+	       (wide_stations), MIN (oldest_station), per model_id
+	  (c)  "sort the results according to some criteria": ORDER BY stations
+	       DESC, model_id
+	  (e)  "use a selection control function": CASE, inside SUM, counts the
+	       wide stations (wide_stations)
 	Output: model_id, stations, avg_window, wide_stations, oldest_station
 */
 SELECT model_id,
@@ -260,7 +336,15 @@ ORDER BY stations DESC,
 	- The CASE says what each stage means for those releases: scored is streamable,
 	  rejected never will be, and an unscored recording whose release date has
 	  arrived is late.
-	Requirements: (a) DATEDIFF  (b) COUNT, MIN  (c) ORDER BY  (e) CASE
+	Requirements: 2.1, (a), (b), (c), (e)  (brief: requirements for single table queries)
+	  2.1  "retrieve data from each non-associative table individually":
+	       the track table, and only track
+	  (a)  "use single row functions": DATEDIFF (days_to_earliest_release)
+	  (b)  "use aggregate functions": COUNT (recordings), MIN
+	       (earliest_release), per ingest_status
+	  (c)  "sort the results according to some criteria": ORDER BY
+	       ingest_status, the pipeline order
+	  (e)  "use a selection control function": CASE (release_status)
 	Output: ingest_status, recordings, earliest_release, days_to_earliest_release, release_status
 */
 SELECT ingest_status,
@@ -280,6 +364,11 @@ ORDER BY ingest_status;
 
 /*
 	[E1] TRACK: a duplicate upload is refused -- DISABLED (commented out)
+	>>>>
+	Note: We wanted a use case/test that was designed to throw an error.
+	This has been tested and performs as designed, but since nothing about a test like this
+	was in the requirements. It's left in the deliverable but, commented out.
+	>>>>>
 	STATUS: the INSERT below sits inside its own block comment, so running this
 	file does not execute it and the file finishes without error. It is kept
 	because it shows the database itself enforcing a business rule; it is not a

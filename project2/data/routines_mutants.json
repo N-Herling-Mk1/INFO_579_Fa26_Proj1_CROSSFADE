@@ -9,7 +9,7 @@
    "first_failures": [
     "test_f1_thirty_seconds_is_the_boundary",
     "test_f1_follows_a_rate_change",
-    "test_try_it_block_gives_the_documented_answers"
+    "test_example_usage_gives_the_documented_answers"
    ]
   },
   {
@@ -65,7 +65,7 @@
    "first_failures": [
     "test_p1_records_an_abandoned_skip",
     "test_p1_ledger_survives_a_rate_change",
-    "test_try_it_block_gives_the_documented_answers"
+    "test_example_usage_gives_the_documented_answers"
    ]
   },
   {
@@ -224,6 +224,6 @@
  "caught": 20,
  "total": 20,
  "not_applicable": [],
- "real_file": "========================= 1 failed, 49 passed in 0.83s =========================",
+ "real_file": "========================= 1 failed, 49 passed in 0.85s =========================",
  "already_failing": []
 }

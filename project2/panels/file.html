@@ -60,19 +60,14 @@
         document.getElementById("test-steps").innerHTML = f.test.map(function (t) { return "<li>" + t + "</li>"; }).join("");
         document.getElementById("test").hidden = false;
         var top = document.createElement("div"); top.className = "toolbar";
-        top.innerHTML = '<a class="btn primary" download></a>';
-        top.firstChild.href = url; top.firstChild.textContent = "Download " + f.file;
-        if (f.kit && f.kitLocked) {
-          var kl = document.createElement("span"); kl.className = "btn"; kl.setAttribute("aria-disabled", "true");
-          kl.style.cssText = "color:#8a98a5;border-style:dashed;cursor:not-allowed";
-          kl.textContent = "\uD83D\uDD12 Test kit (locked)"; kl.title = "the answer-key test kit stays in the repo; use the starter kit"; top.appendChild(kl);
-        } else if (f.kit) {
-          var k = document.createElement("a"); k.className = "btn"; k.href = f.kit; k.setAttribute("download", "");
-          k.textContent = "Download test kit"; k.title = "the tests with this answer key"; top.appendChild(k);
-        }
-        if (f.starter) {
-          var sk = document.createElement("a"); sk.className = "btn"; sk.href = f.starter; sk.setAttribute("download", "");
-          sk.textContent = "Download starter kit"; sk.title = "blank slate: every comment, no SQL, plus the tests and both input files"; top.appendChild(sk);
+        top.innerHTML = '<a class="btn primary" download></a><a class="btn" download></a>';
+        if (f.bundle) {
+          top.firstChild.href = f.bundle;
+          top.firstChild.textContent = "Download " + f.file + " + tests, rubric, use cases";
+          top.firstChild.title = f.bundle.split("/").pop() + ": everything the unit tests need to run locally";
+          top.lastChild.href = url; top.lastChild.textContent = f.file + " only";
+        } else {
+          top.firstChild.href = url; top.firstChild.textContent = "Download " + f.file; top.removeChild(top.lastChild);
         }
         document.getElementById("title").after(top);
       }

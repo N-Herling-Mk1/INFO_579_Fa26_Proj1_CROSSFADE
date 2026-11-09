@@ -37,6 +37,7 @@ def pytest_addoption(parser):
     g.addoption("--sql", help="single_table.sql")
     g.addoption("--msql", help="multiple_table.sql")
     g.addoption("--rsql", help="routines.sql")
+    g.addoption("--rex", help="routines_example_usage.sql (example usage, not a deliverable; optional)")
     g.addoption("--use-cases", dest="use_cases", help="use_cases.json")
     g.addoption("--fresh", action="store_true",
                 help="rebuild `crossfade` from database_implementation.sql before testing (default: test the database as it is)")
@@ -50,6 +51,7 @@ CANDIDATES = {
     "sql": ("CROSSFADE_SQL", "single_table.sql", "project2/deliverables/single_table.sql"),
     "msql": ("CROSSFADE_MSQL", "multiple_table.sql", "project2/deliverables/multiple_table.sql"),
     "rsql": ("CROSSFADE_RSQL", "routines.sql", "project2/deliverables/routines.sql"),
+    "rex": ("CROSSFADE_REX", "routines_example_usage.sql", "project2/examples/routines_example_usage.sql"),
     "use_cases": ("CROSSFADE_USE_CASES", "use_cases.json", "project2/data/use_cases.json"),
 }
 
@@ -246,8 +248,8 @@ class Routine:
 
 
 def parse_routines(path):
-    """The routines of routines.sql in file order, plus the statements that are not routines (the DROPs and the
-    "Try it" block) as [(comment, statement)]."""
+    """The routines of routines.sql in file order, plus the statements that are not routines (the
+    DROP ... IF EXISTS statements) as [(comment, statement)]."""
     routines, other, pending = [], [], ""
     for comment, st in split_script(path.read_text(encoding="utf-8")):
         if re.search(r"\[[FP]\d+\]", comment):
@@ -472,7 +474,8 @@ def run(con, sql):
 
 # ----------------------------------------------------------------------------- report header and snapshot
 NEEDED_BY = {"data": "every test file", "impl": "every test file", "sql": "test_single_table.py",
-             "msql": "test_multiple_table.py", "rsql": "test_routines.py", "use_cases": "the query test files"}
+             "msql": "test_multiple_table.py", "rsql": "test_routines.py", "use_cases": "the query test files",
+             "rex": "one optional test in test_routines.py (example usage)"}
 
 
 def pytest_report_header(config):
@@ -514,7 +517,7 @@ def record_case(name, case):
 
 
 def record_demo(steps):
-    """What the "Try it" block of routines.sql returned, statement by statement."""
+    """What routines_example_usage.sql returned, statement by statement."""
     SNAPSHOT_R["demo"] = steps
 
 

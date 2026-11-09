@@ -49,16 +49,13 @@
   var LOCK = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
   var ARROW = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   document.getElementById("rows").innerHTML = P.files.map(function (f) {
-    var kit = (f.starter ? '<a class="dlbtn off" id="s-' + f.id + '" href="' + f.starter + '" download title="Starter kit for ' + f.file + ': every comment, no SQL, tests and input files" aria-label="Download the starter kit for ' + f.file + '">' + ARROW + 'starter</a>' : "") +
-      (f.kit ? (f.kitLocked
-        ? '<span class="dlbtn lock" title="Answer-key test kit: locked (kept in the repo, not downloadable here)" aria-label="Test kit locked">' + LOCK + "kit</span>"
-        : '<a class="dlbtn off" id="k-' + f.id + '" href="' + f.kit + '" download title="Download the test kit for ' + f.file + '" aria-label="Download the test kit for ' + f.file + '">' + ARROW + "kit</a>") : "");
+    var kit = "";                                  /* starter and test-kit downloads removed from this table */
     return '<tr><td><a href="../index.html#' + f.id + '" target="_top"><code>' + f.file + '</code></a>' +
       '<span class="sub">' + f.title + '</span></td><td>' + f.task + '</td><td>' + f.weight + '%</td>' +
       '<td><span class="mark open" id="m-' + f.id + '">not started</span></td>' +
-      '<td class="dl">' + kit + '<a class="dlbtn off" id="d-' + f.id + '" href="../deliverables/' + f.file + '" download title="' + f.file + ' not written yet" aria-label="Download ' + f.file + '" aria-disabled="true" tabindex="-1">' + ARROW + '</a></td></tr>';
+      '<td class="dl">' + kit + '<a class="dlbtn off" id="d-' + f.id + '" href="' + (f.bundle || "../deliverables/" + f.file) + '" download title="' + f.file + ' not written yet" aria-label="Download ' + f.file + ' with its tests, rubric and use cases" aria-disabled="true" tabindex="-1">' + ARROW + (f.bundle ? "file + tests" : "") + '</a></td></tr>';
   }).join("") +
-    '<tr><td><code>' + P.zip + '</code><span class="sub" id="zip-sub">All four files, uploaded to D2L</span></td><td>Submit</td><td></td>' +
+    '<tr><td><code>' + P.zip + '</code><span class="sub" id="zip-sub">The four files only, uploaded to D2L</span></td><td>Submit</td><td></td>' +
     '<td><span class="mark open" id="zip-mark">not built</span></td><td class="dl"><a class="dlbtn off" id="zip-dl" href="../deliverables/' + P.zip +
     '" download title="Not built yet: python project2/scripts/build_submission.py" aria-label="Download ' + P.zip + '" aria-disabled="true" tabindex="-1">' + ARROW + '</a></td></tr>';
   /* the submission zip (project2/scripts/build_submission.py): live once it is in project2/deliverables/ */
@@ -76,7 +73,9 @@
     var m = document.getElementById("m-" + f.id);
     m.textContent = f.state || "draft"; m.className = "mark ready";
     var d = document.getElementById("d-" + f.id);
-    d.className = "dlbtn"; d.title = "Download " + f.file; d.removeAttribute("aria-disabled"); d.removeAttribute("tabindex");
+    d.className = "dlbtn"; d.removeAttribute("aria-disabled"); d.removeAttribute("tabindex");
+    d.title = f.bundle ? "Download " + f.bundle.split("/").pop() + ": " + f.file + ", everything its unit tests need to run locally, " +
+      "its rubric and the use case descriptions" : "Download " + f.file;
     var k = document.getElementById("k-" + f.id); if (k) k.className = "dlbtn";
     var st = document.getElementById("s-" + f.id); if (st) st.className = "dlbtn";
   });

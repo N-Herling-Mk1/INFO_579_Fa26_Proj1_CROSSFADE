@@ -386,9 +386,9 @@ S_RUN = [
      "saw it is on the single_table page (Project 2 → Files).",
      "collected {n} items\ntest_single_table.py::test_comment_contract[S1] PASSED   [  1%]\n...\n"
      "========== {n} passed in 0.3s =========="),
-    ("Write the queries yourself", "The starter kit (Project 2 → single_table → Download starter kit) is the same "
-     "folder with every comment kept and every query removed. Run the tests at any point: unwritten queries are "
-     "reported by name.", None),
+    ("Write the queries yourself", "The starter kit, project2/tests/crossfade_p2_starter_kit.zip in the repo (not "
+     "offered for download on the site), is the same folder with every comment kept and every query removed. Run the "
+     "tests at any point: unwritten queries are reported by name.", None),
 ]
 S_COLS = [  # (key, label, test names, mark?)
     ("contract", "Comment fields", ["comment_contract"]), ("select", "Read-only SELECT", ["read_only_select"]),
@@ -578,8 +578,8 @@ M_RUN = [
      "tests saw it is on the multiple_table page (Project 2 → Files) and on the Use cases page.",
      "collected {n} items\ntest_multiple_table.py::test_comment_contract[M1] PASSED   [  1%]\n...\n"
      "========== {n} passed in 0.3s =========="),
-    ("Write the queries yourself", "The starter kit (Project 2 → single_table → Download starter kit) holds "
-     "multiple_table.sql with every comment kept and every query removed. Run the tests at any point: unwritten "
+    ("Write the queries yourself", "The starter kit, project2/tests/crossfade_p2_starter_kit.zip in the repo (not "
+     "offered for download on the site), holds multiple_table.sql with every comment kept and every query removed. Run the tests at any point: unwritten "
      "queries are reported by name.", None),
 ]
 M_COLS = [  # (key, label, test names)
@@ -674,15 +674,18 @@ R_GROUPS = [   # (group, test names, what it proves)
      "a temporary trigger forces a primary-key clash so the handler's RESIGNAL branch runs."),
     ("coverage", ["brief_routine_mix", "tags_are_unique_and_in_order", "every_routine_use_case_is_served",
                   "declared_columns_are_touched", "no_derived_values_as_input", "no_transaction_control_inside",
-                  "script_reruns_and_leaves_data_unchanged", "try_it_block_gives_the_documented_answers"],
+                  "script_reruns_and_leaves_data_unchanged", "example_usage_gives_the_documented_answers"],
      "The file as a whole: the brief's mix (2 procedures + 1 function, or 1 + 2); tags F1.., P1.. in order; every use "
      "case with routine columns served, and every declared column touched by a routine serving it; the RA's rule that "
      "procedures take no derived values as input; no transaction control inside a routine; and the script itself: it "
-     "re-creates the routines when run again, and its Try it block leaves the data unchanged and returns what its "
+     "re-creates the routines when run again and only creates them; the example usage script "
+     "(project2/examples/routines_example_usage.sql, not a deliverable) leaves the data unchanged and returns what its "
      "comments promise."),
 ]
 R_FILES = [
     ("routines.sql", "the file under test (Task 4)", "../deliverables/routines.sql"),
+    ("routines_example_usage.sql", "example usage, not a deliverable: calls each routine once and rolls back",
+     "../examples/routines_example_usage.sql"),
     ("test_routines.py", "the tests: contract, behaviour cases, file coverage", "../tests/test_routines.py"),
     ("oracle_routines.py", "the independent answers: what each routine must write, return or refuse, in plain Python "
                            "from data.csv", "../tests/oracle_routines.py"),
@@ -942,6 +945,16 @@ if RES_R:
 
 # ================================================================================================ bundles
 def bundle(v, folder, members, readme):
+    """One folder that runs as-is: the file, its tests and inputs, plus its rubric and the use case descriptions."""
+    sql = next(name for _, name in members if name.endswith(".sql") and name != "database_implementation.sql") \
+        if any(name.endswith(".sql") and name != "database_implementation.sql" for _, name in members) else "database_implementation.sql"
+    stem = sql[:-4]
+    have = {name for _, name in members}
+    members = list(members) + [(P2 / "docs" / f"rubric_{stem}.md", f"rubric_{stem}.md")] + \
+        ([] if "use_case_reference.pdf" in have else [(P2 / "docs" / "use_case_reference.pdf", "use_case_reference.pdf")])
+    readme += (f"\nAlso here: rubric_{stem}.md, every condition of the brief that applies to {sql}, quoted word for word and\n"
+               "checked against the last test run; and use_case_reference.pdf, every use case with each query's input,\n"
+               "expected output and test cases.\n")
     out = TESTS / v["bundle"]["file"]
     with zipfile.ZipFile(out, "w") as z:
         for src, name in members + [(None, "README.txt")]:
@@ -953,7 +966,11 @@ def bundle(v, folder, members, readme):
         v["bundle"].update(bytes=out.stat().st_size, contents=[i.filename.split("/", 1)[1] for i in z.infolist()])
 
 
-say(4, "writing project2/tests/crossfade_impl_tests.zip")
+say(4, "writing the rubric for each file (build_rubric.py), then project2/tests/crossfade_impl_tests.zip")
+_spec = importlib.util.spec_from_file_location("build_rubric", ROOT / "project2" / "scripts" / "build_rubric.py")
+_rub = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_rub)
+_rub.main()
+
 bundle(VET["implementation"], "crossfade_impl_tests",
        [(TESTS / "test_implementation.py", "test_implementation.py"), (TESTS / "conftest.py", "conftest.py"),
         (TESTS / "pytest.ini", "pytest.ini"), (TESTS / "requirements.txt", "requirements.txt"),
@@ -1020,6 +1037,7 @@ if RES_R:
             (TESTS / "conftest.py", "conftest.py"), (TESTS / "pytest.ini", "pytest.ini"),
             (TESTS / "requirements.txt", "requirements.txt"),
             (P2 / "deliverables" / "routines.sql", "routines.sql"),
+            (P2 / "examples" / "routines_example_usage.sql", "routines_example_usage.sql"),
             (P2 / "deliverables" / "database_implementation.sql", "database_implementation.sql"),
             (ROOT / "project1" / "data_export" / "data.csv", "data.csv"), (P2 / "data" / "use_cases.json", "use_cases.json"),
             (P2 / "docs" / "test_routines_guide.pdf", "test_routines_guide.pdf")],
@@ -1031,7 +1049,8 @@ if RES_R:
   .venv\\Scripts\\python -m pytest --fresh
 
 --fresh rebuilds the `crossfade` database from database_implementation.sql first; the tests then run routines.sql
-and call each routine; every write is rolled back.
+and call each routine; every write is rolled back. routines_example_usage.sql (example usage, not a
+deliverable) is run too; without it, that one test is skipped.
 Full guide, coverage and what the tests could miss: test_routines_guide.pdf.
 """)
 

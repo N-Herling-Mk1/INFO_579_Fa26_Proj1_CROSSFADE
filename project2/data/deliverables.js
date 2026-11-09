@@ -14,22 +14,19 @@ window.P2 = {
   files: [
     {
       id: "implementation", task: "Task 1", file: "database_implementation.sql",
+      bundle: "../tests/crossfade_impl_tests.zip",   // the file, its tests and inputs, its rubric, the use case reference
       title: "Database implementation", weight: 25, state: "ready to test",
       summary: "Builds the Project 1 physical model as the MySQL database crossfade (10 tables, every key, " +
         "index and CHECK named) and loads the Project 1 sample data unchanged: 401 rows. Each statement's comment is tagged " +
         "[B#], [T#] or [D#] and names the use cases that read its table. " +
         "Drops and rebuilds the database, so it can be run any number of times.",
       test: [
-        "Download the script with the button above.",
-        "MySQL Workbench: File \u2192 Open SQL Script, then Execute (the lightning bolt). " +
-          "Or from a terminal in the download folder (works in PowerShell too): " +
-          "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
-        "Refresh the schema list: <code>crossfade</code> should hold 10 tables. " +
-          "<code>SELECT COUNT(*) FROM crossfade.genre_probability;</code> returns 270.",
-        "Python tests (228): <code>python -m pytest project2/tests/test_implementation.py</code>. They rebuild the database, check every " +
-          "column, key and rule against the physical model, every cell against data.xlsx, and make each constraint refuse a bad write. " +
-          "Files, coverage and what they could miss: <a href=\"../../index.html#p2/vet-implementation\">Vetting &amp; tests \u2192 database_implementation</a>.",
-        "Without Python, from the repo root: <code>python project2/scripts/check_implementation.py</code> (the mysql client only). " +
+        "Download <code>crossfade_impl_tests.zip</code> with the first button above (the second gets <code>database_implementation.sql</code> alone) and unzip it. One folder, <code>crossfade_impl_tests</code>, holds <code>database_implementation.sql</code>, its tests, <code>data.csv</code> (the Project 1 sample data), its rubric (<code>rubric_database_implementation.md</code>) and the use case descriptions (<code>use_case_reference.pdf</code>). Extract it first: Python cannot run files from inside a zip.",
+        "Set up Python once, in that folder: <code>python -m venv .venv</code> then <code>.venv\\Scripts\\python -m pip install -r requirements.txt</code> (macOS / Linux: <code>.venv/bin/python</code>). You also need a running MySQL Server 8.0.16 or later and its root password.",
+        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-root-password\"</code> then <code>.venv\\Scripts\\python -m pytest</code>. Expect 228 passed. The tests drop and rebuild the <code>crossfade</code> database from the script (twice) and leave it loaded.",
+        "By hand instead: MySQL Workbench, File → Open SQL Script, then Execute (the lightning bolt), or <code>mysql -u root -p -e \"source database_implementation.sql\"</code>. <code>crossfade</code> should hold 10 tables; <code>SELECT COUNT(*) FROM crossfade.genre_probability;</code> returns 270.",
+        "Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-implementation\">Vetting &amp; tests → database_implementation</a>.",
+        "Without Python, from a clone of the repo: <code>python project2/scripts/check_implementation.py</code> (the mysql client only). " +
           "It runs the script twice, compares all 401 rows with data.xlsx and checks integrity rules I1, I2, I3, I5 and I7; it ends with PASS."
       ],
       reqs: [
@@ -40,25 +37,18 @@ window.P2 = {
     },
     {
       id: "single", task: "Task 2", file: "single_table.sql",
+      bundle: "../tests/crossfade_single_tests.zip",   // the file, its tests and inputs, its rubric, the use case reference
       title: "Single-table queries", weight: 25, state: "ready to test",
       summary: "Seven queries, S1 to S7, one per question a single table answers: every non-associative table, " +
         "track twice. Each comment names its use cases, the business need it serves, the brief requirements it meets and its " +
         "output columns. The file ends with [E1], kept disabled so the file runs clean: a duplicate upload MySQL must refuse " +
-        "with error 1062 (UC-15). 71 tests check it against an independent Python answer computed from the Project 1 data. " +
-        "The starter kit is the same file with every comment and no SQL, plus the tests and both input files.",
+        "with error 1062 (UC-15). 71 tests check it against an independent Python answer computed from the Project 1 data.",
       results: "single_table_results.js",
-      kit: "../tests/crossfade_p2_test_kit.zip", kitLocked: true,   // answer-key kit: stays in the repo, no download button
-      starter: "../tests/crossfade_p2_starter_kit.zip",
       test: [
-        "Download the starter kit (button above) and unzip it: tests, <code>data.csv</code> and <code>database_implementation.sql</code> are inside. " +
-          "Install once: <code>pip install -r requirements.txt</code>",
-        "Download <code>single_table.sql</code> (button above) and put it in the kit folder, replacing the blank one.",
-        "Build the database: run <code>database_implementation.sql</code> in Workbench, or " +
-          "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
-        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-password\"</code> then " +
-          "<code>python -m pytest test_single_table.py</code>. Expect 71 passed. Results land in <code>results/</code>.",
-        "From a clone of the repo instead: <code>python -m pytest project2/tests/test_single_table.py</code> (it finds every file itself). " +
-          "Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-single\">Vetting &amp; tests \u2192 single_table</a>."
+        "Download <code>crossfade_single_tests.zip</code> with the first button above (the second gets <code>single_table.sql</code> alone) and unzip it. One folder, <code>crossfade_single_tests</code>, holds <code>single_table.sql</code>, its tests, <code>database_implementation.sql</code>, <code>data.csv</code>, <code>use_cases.json</code>, its rubric (<code>rubric_single_table.md</code>) and the use case descriptions (<code>use_case_reference.pdf</code>). Extract it first: Python cannot run files from inside a zip.",
+        "Set up Python once, in that folder: <code>python -m venv .venv</code> then <code>.venv\\Scripts\\python -m pip install -r requirements.txt</code> (macOS / Linux: <code>.venv/bin/python</code>). You also need a running MySQL Server 8.0.16 or later and its root password.",
+        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-root-password\"</code> then <code>.venv\\Scripts\\python -m pytest --fresh</code>. Expect 71 passed. <code>--fresh</code> builds the <code>crossfade</code> database from <code>database_implementation.sql</code> first; every write a test makes is rolled back.",
+        "From a clone of the repo instead: <code>python -m pytest project2/tests/test_single_table.py</code> (it finds every file itself). Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-single\">Vetting &amp; tests → single_table</a>."
       ],
       reqs: [
         "Queries that retrieve data from each non-associative table individually.",
@@ -71,6 +61,7 @@ window.P2 = {
     },
     {
       id: "multiple", task: "Task 3", file: "multiple_table.sql",
+      bundle: "../tests/crossfade_multiple_tests.zip",   // the file, its tests and inputs, its rubric, the use case reference
       title: "Multiple-table queries", weight: 25, state: "ready to test",
       summary: "Seven queries, M1 to M7, each answering business questions a single table " +
         "cannot: listener taste (UC-13, INNER JOIN through play), the royalty run (UC-01, UC-14, LEFT OUTER JOIN), " +
@@ -81,17 +72,11 @@ window.P2 = {
         "track_score); M7 reads each result's full genre distribution for its runner-up genre (UC-11, WITH). " +
         "80 tests check it against an independent Python answer computed from the Project 1 data.",
       results: "multiple_table_results.js", resultsVar: "P2_MULTIPLE",
-      starter: "../tests/crossfade_p2_starter_kit.zip",
       test: [
-        "Download the starter kit (button above) and unzip it: tests, <code>data.csv</code>, <code>use_cases.json</code> and " +
-          "<code>database_implementation.sql</code> are inside. Install once: <code>pip install -r requirements.txt</code>",
-        "Download <code>multiple_table.sql</code> (button above) and put it in the kit folder, replacing the blank one.",
-        "Build the database: run <code>database_implementation.sql</code> in Workbench, or " +
-          "<code>mysql -u root -p -e \"source database_implementation.sql\"</code>",
-        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-password\"</code> then " +
-          "<code>python -m pytest test_multiple_table.py</code>. Expect 80 passed. Results land in <code>results/</code>.",
-        "From a clone of the repo instead: <code>python -m pytest project2/tests/test_multiple_table.py</code>. " +
-          "Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-multiple\">Vetting &amp; tests \u2192 multiple_table</a>."
+        "Download <code>crossfade_multiple_tests.zip</code> with the first button above (the second gets <code>multiple_table.sql</code> alone) and unzip it. One folder, <code>crossfade_multiple_tests</code>, holds <code>multiple_table.sql</code>, its tests, <code>database_implementation.sql</code>, <code>data.csv</code>, <code>use_cases.json</code>, its rubric (<code>rubric_multiple_table.md</code>) and the use case descriptions (<code>use_case_reference.pdf</code>). Extract it first: Python cannot run files from inside a zip.",
+        "Set up Python once, in that folder: <code>python -m venv .venv</code> then <code>.venv\\Scripts\\python -m pip install -r requirements.txt</code> (macOS / Linux: <code>.venv/bin/python</code>). You also need a running MySQL Server 8.0.16 or later and its root password.",
+        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-root-password\"</code> then <code>.venv\\Scripts\\python -m pytest --fresh</code>. Expect 80 passed. <code>--fresh</code> builds the <code>crossfade</code> database from <code>database_implementation.sql</code> first; every write a test makes is rolled back.",
+        "From a clone of the repo instead: <code>python -m pytest project2/tests/test_multiple_table.py</code>. Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-multiple\">Vetting &amp; tests → multiple_table</a>."
       ],
       reqs: [
         "(1) An associative table and two other related tables, all three connected with INNER JOIN.",
@@ -103,6 +88,7 @@ window.P2 = {
     },
     {
       id: "routines", task: "Task 4", file: "routines.sql",
+      bundle: "../tests/crossfade_routines_tests.zip",   // the file, its tests and inputs, its rubric, the use case reference
       title: "Routines", weight: 25, state: "ready to test",
       summary: "One function and two procedures, the write path the business plan gives its two everyday events: " +
         "play_royalty (F1) works out what one play earns the artist (rule I7); record_play (P1) records a play, " +
@@ -111,10 +97,10 @@ window.P2 = {
         "50 tests check each routine against MySQL's catalogue and an independent Python answer computed from the " +
         "Project 1 data.",
       test: [
-        "Build the database: run <code>database_implementation.sql</code>, then <code>routines.sql</code> (Workbench, or " +
-          "<code>mysql -u root -p -e \"source routines.sql\"</code>). Its Try it block calls each routine and rolls back.",
-        "From a clone of the repo: <code>$env:CROSSFADE_DB_PASSWORD = \"your-password\"</code> then " +
-          "<code>python -m pytest project2/tests/test_routines.py</code>. Expect 50 passed."
+        "Download <code>crossfade_routines_tests.zip</code> with the first button above (the second gets <code>routines.sql</code> alone) and unzip it. One folder, <code>crossfade_routines_tests</code>, holds <code>routines.sql</code>, its tests, <code>database_implementation.sql</code>, <code>data.csv</code>, <code>use_cases.json</code> and <code>routines_example_usage.sql</code> (example usage, not a deliverable), its rubric (<code>rubric_routines.md</code>) and the use case descriptions (<code>use_case_reference.pdf</code>). Extract it first: Python cannot run files from inside a zip.",
+        "Set up Python once, in that folder: <code>python -m venv .venv</code> then <code>.venv\\Scripts\\python -m pip install -r requirements.txt</code> (macOS / Linux: <code>.venv/bin/python</code>). You also need a running MySQL Server 8.0.16 or later and its root password.",
+        "Run the tests (PowerShell): <code>$env:CROSSFADE_DB_PASSWORD = \"your-root-password\"</code> then <code>.venv\\Scripts\\python -m pytest --fresh</code>. Expect 50 passed. <code>--fresh</code> builds the <code>crossfade</code> database from <code>database_implementation.sql</code> first; every write a test makes is rolled back.",
+        "By hand: run <code>database_implementation.sql</code>, then <code>routines.sql</code>, then <code>routines_example_usage.sql</code> to see each routine called on the sample data (it rolls back). Files, coverage and what the tests could miss: <a href=\"../../index.html#p2/vet-routines\">Vetting &amp; tests → routines</a>."
       ],
       reqs: [
         "2 procedures and 1 function, or 1 procedure and 2 functions.",

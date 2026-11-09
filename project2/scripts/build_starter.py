@@ -73,7 +73,8 @@ the SQL itself.
 ## Rules the comments fix
 
 - `Output:` is the contract for your column names and their order (`AS usd_per_1000_streams`, ...). The expected rows come from `oracle.py`.
-- `Requirements:` must list exactly the (a)-(e) features your SQL uses: (a) single-row function, (b) aggregate,
+- The first line of `Requirements:` must list exactly the (a)-(e) features your SQL uses (the indented lines
+  under it quote the brief and are not read by the tests): (a) single-row function, (b) aggregate,
   (c) `ORDER BY`, (d) `LIMIT n`, (e) `CASE` or `IF`. If you meet them differently, change the line to match.
 - Read only the columns your use cases list in `use_cases.json`, and only the one table named after the tag.
 - Every day count is measured to the fixed report date `'2026-09-30'`, not `CURDATE()`.

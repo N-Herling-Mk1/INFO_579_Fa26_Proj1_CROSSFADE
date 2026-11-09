@@ -1,34 +1,34 @@
 /* Written by project2/scripts/build_submission.py. Do not edit. */
 window.P2_SUBMISSION = {
  "zip": "project02_info579_group_1.zip",
- "bytes": 30407,
- "sha256": "8a83c37f77f9e27378a12cd110cfac2942c8ab847de6b995bb7784ebd5b3aef4",
- "built": "2026-11-08T13:24:12",
+ "bytes": 32747,
+ "sha256": "545ffe9eb7e8948228c5ef9081d06c48686c8277a573d94fcd1ec3b6f46f636b",
+ "built": "2026-11-08T20:01:19",
  "warnings": [],
  "files": [
   {
    "file": "database_implementation.sql",
    "bytes": 38891,
    "sha256": "6121461e25934ddd70691b1b1caaa76ec7364d3777594827fccaf2f9a50d110d",
-   "tests": "last test run 2026-11-08 13:24:10: 228 passed, 0 failed"
+   "tests": "last test run 2026-11-08 20:01:18: 228 passed, 0 failed"
   },
   {
    "file": "single_table.sql",
-   "bytes": 15929,
-   "sha256": "b4857f7fcb6f9e650f1a8d6619b9cb4fee4123ecbb848100ffbc74efab6dbdaf",
-   "tests": "last test run 2026-11-08 13:24:10: 71 passed, 0 failed"
+   "bytes": 21327,
+   "sha256": "31c2e196a6303705fdf67a66ccf4d0a7e2d42e7b10f33b33f9d27d69affac90c",
+   "tests": "last test run 2026-11-08 20:01:18: 71 passed, 0 failed"
   },
   {
    "file": "multiple_table.sql",
-   "bytes": 20968,
-   "sha256": "4bb4ec8643341d16162c7de611e6910b03924079c27919258368bc15a551bf65",
-   "tests": "last test run 2026-11-08 13:24:10: 80 passed, 0 failed"
+   "bytes": 24130,
+   "sha256": "64b62585e77348bf00f1913709890ffa2df635572a1e808f0991f9a99e16cbb5",
+   "tests": "last test run 2026-11-08 20:01:18: 80 passed, 0 failed"
   },
   {
    "file": "routines.sql",
-   "bytes": 16352,
-   "sha256": "6e2368032c4bad0e3e0020f077aff84b3bfcc8e02868a6ab58c7be7dbf6710b6",
-   "tests": "last test run 2026-11-08 13:24:10: 50 passed, 0 failed"
+   "bytes": 17801,
+   "sha256": "1f6f8c8fcd901ef84538f04f6633164fc180cb2c6c30089b381e22587d19a243",
+   "tests": "last test run 2026-11-08 20:01:18: 50 passed, 0 failed"
   }
  ]
 };

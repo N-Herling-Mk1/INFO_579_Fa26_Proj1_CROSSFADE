@@ -1,7 +1,7 @@
 /* Written by project2/tests (pytest) at the end of a run. Do not edit. */
 window.P2_SINGLE = {
  "file": "single_table.sql",
- "generated": "2026-11-08T13:24:10",
+ "generated": "2026-11-08T20:01:18",
  "passed": 71,
  "failed": 0,
  "queries": {
