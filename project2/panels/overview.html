@@ -9,6 +9,11 @@
 <link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
 <script src="../data/deliverables.js"></script>
 <script src="../data/submission.js"></script>
+<script src="../data/implementation_results.js"></script>
+<script src="../data/single_table_results.js"></script>
+<script src="../data/multiple_table_results.js"></script>
+<script src="../data/routines_results.js"></script>
+<script src="../data/vetting.js"></script>
 <style>
   /* download column: icon buttons, live once the file exists in project2/deliverables/ */
   .deltable th.dl, .deltable td.dl { text-align: right; white-space: nowrap; width: 1%; }
@@ -19,6 +24,10 @@
   .dlbtn:hover, .dlbtn:focus-visible { border-color: var(--cyan); background: var(--cyan-wash); box-shadow: 0 0 0 3px rgba(10, 143, 196, .12); outline: none; }
   .dlbtn.off { color: #b6c2cc; background: #f6f8fa; pointer-events: none; }
   .dlbtn.lock { color: #8a98a5; background: #f6f8fa; border-style: dashed; cursor: not-allowed; }
+  .tr-table td.num, .tr-table th.num { text-align: right; font-family: var(--mono); }
+  .tr-table td { white-space: nowrap; } .tr-table td .dim { color: var(--ink-2); font-size: 13px; }
+  .tr-table td .ok { color: #1f7a3a; font-weight: 600; } .tr-table td .bad { color: var(--ares); font-weight: 600; }
+  .tr-table tfoot td, .tr-table tfoot th { font-weight: 600; border-top: 2px solid var(--rule); }
 </style>
 </head>
 <body>
@@ -31,6 +40,18 @@
     <thead><tr><th>File</th><th>Task</th><th>Weight</th><th>Status</th><th class="dl">Download</th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
+
+  <h2>Tests run and passed</h2>
+  <p class="prose">The brief asks for the SQL, not for tests; we added them ourselves. Every file is checked against an
+    independent answer computed in plain Python from the Project 1 data, and the tests themselves are checked by planting
+    deliberate bugs that must each be caught. How and why: <a href="../docs/unit_test_methodology.pdf" download>unit_test_methodology.pdf</a>
+    (one page).</p>
+  <table class="deltable tr-table">
+    <thead><tr><th>File</th><th class="num">Tests</th><th>Repo run</th><th>Clean run, from this site</th><th class="num">Bugs caught</th></tr></thead>
+    <tbody id="tr-rows"></tbody>
+    <tfoot id="tr-foot"></tfoot>
+  </table>
+  <p class="note" id="tr-note"></p>
 
   <h2>Every file</h2>
   <ul class="prose" id="general"></ul>
@@ -67,6 +88,32 @@
     if (S) document.getElementById("zip-sub").textContent = S.files.length + " files · " + (S.bytes / 1024).toFixed(1) + " KB · built " +
       S.built.replace("T", " ").slice(0, 16) + (S.warnings.length ? " · " + S.warnings.length + " warning(s)" : "") + " · upload to D2L";
   }).catch(function () {});
+  /* ---- tests run and passed: the repo's latest run (live, from the results snapshots), the clean runs from this site
+     (recorded in deliverables.js), and the mutation runs (vetting.js) */
+  (function () {
+    var RES = { implementation: window.P2_IMPL, single: window.P2_SINGLE, multiple: window.P2_MULTIPLE, routines: window.P2_ROUTINES };
+    var V = P.verified || { runs: [] }, VET = window.P2_VET || {};
+    var tot = { tests: 0, repo: 0, clean: 0, mc: 0, mt: 0 };
+    var ok = function (a, b) { return '<span class="' + (a === b ? "ok" : "bad") + '">' + a + "/" + b + "</span>"; };
+    document.getElementById("tr-rows").innerHTML = P.files.map(function (f) {
+      var R = RES[f.id], run = V.runs.filter(function (x) { return x.id === f.id; })[0], m = (VET[f.id] || {}).mutants || {};
+      var n = R ? R.passed + R.failed : (run ? run.passed + run.failed : 0);
+      tot.tests += n; if (R) tot.repo += R.passed; if (run) tot.clean += run.passed; tot.mc += m.caught || 0; tot.mt += m.total || 0;
+      return "<tr><td><code>" + f.file + "</code></td><td class=\"num\">" + n + "</td><td>" +
+        (R ? ok(R.passed, n) + ' <span class="dim">' + R.generated.replace("T", " ").slice(0, 16) + "</span>" : "not run yet") + "</td><td>" +
+        (run ? ok(run.passed, run.passed + run.failed) + ' <span class="dim" title="' + run.zip + '">' + run.zip.replace(".zip", "") +
+          " &middot; " + run.command + " &middot; " + run.seconds + " s</span>" : "&ndash;") +
+        "</td><td class=\"num\">" + (m.total ? ok(m.caught, m.total) : "&ndash;") + "</td></tr>";
+    }).join("");
+    document.getElementById("tr-foot").innerHTML = "<tr><th>All four files</th><td class=\"num\">" + tot.tests + "</td><td>" + ok(tot.repo, tot.tests) +
+      " passed</td><td>" + ok(tot.clean, tot.tests) + " passed (" + V.date + ")</td><td class=\"num\">" + ok(tot.mc, tot.mt) + "</td></tr>";
+    document.getElementById("tr-note").innerHTML = "Clean run: each file's zip downloaded from this site (" + V.date + ") and run as its README says, " +
+      "on " + V.where + "; no file came from the repo. Latest run in the repo: <code>python -m pytest project2/tests</code>, read live from " +
+      "<code>project2/data/&lt;file&gt;_results.js</code>. Bugs planted: <code>project2/scripts/mutate_&lt;file&gt;.py</code> breaks the file one " +
+      "way at a time and reruns its tests; a bug counts as caught when a test that passed now fails. Details per file: " +
+      '<a href="../../index.html#p2/vet-implementation" target="_top">Vetting &amp; tests</a>.';
+  })();
+
   document.getElementById("general").innerHTML = P.general.map(function (g) { return "<li>" + g + "</li>"; }).join("");
   P.present("../", function (f, ok) {
     if (!ok) return;

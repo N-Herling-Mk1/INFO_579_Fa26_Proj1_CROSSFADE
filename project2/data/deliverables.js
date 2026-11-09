@@ -4,6 +4,20 @@
 window.P2 = {
   due: "Nov 8, 2026 11:59 PM",
   zip: "project02_info579_group_1.zip",
+  /* Clean runs of each file's test zip, downloaded from the live site after the final push and run on our own machine
+     (Windows, PowerShell, a new folder and a fresh Python venv per zip, local MySQL). Recorded by hand from the
+     pytest output; the repo's own latest run is read live from project2/data/<file>_results.js. */
+  verified: {
+    date: "2026-11-08",
+    where: "Windows, PowerShell, a new folder and a fresh Python venv per zip, local MySQL server",
+    from: "https://n-herling-mk1.github.io/INFO_579_Fa26_Proj1_CROSSFADE/",
+    runs: [
+      { id: "implementation", zip: "crossfade_impl_tests.zip", command: "pytest", passed: 228, failed: 0, seconds: 1.33 },
+      { id: "single", zip: "crossfade_single_tests.zip", command: "pytest --fresh", passed: 71, failed: 0, seconds: 0.75 },
+      { id: "multiple", zip: "crossfade_multiple_tests.zip", command: "pytest --fresh", passed: 80, failed: 0, seconds: 0.92 },
+      { id: "routines", zip: "crossfade_routines_tests.zip", command: "pytest --fresh", passed: 50, failed: 0, seconds: 1.44 }
+    ]
+  },
   general: [
     "Every statement, query and routine is justified within the logic of the business plan.",
     "Every statement, query and routine is preceded by a comment explaining its purpose.",
