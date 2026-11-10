@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 3 overview</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<style>
+  .deltable th.dl, .deltable td.dl { text-align: right; white-space: nowrap; width: 1%; }
+  .plan-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin: 14px 0 6px; }
+  .plan-cards a { display: block; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 6px; text-decoration: none; color: var(--ink); background: var(--paper); }
+  .plan-cards a:hover { border-color: var(--cyan); background: var(--cyan-wash); }
+  .plan-cards b { display: block; font: 600 15px var(--body); color: var(--cyan); }
+  .plan-cards span { display: block; font-size: 13.5px; color: var(--ink-2); line-height: 1.45; margin-top: 3px; }
+  ol.decisions li { margin: 6px 0; }
+  .tag-ok { font: 12px var(--mono); color: #1f7a3a; }
+  .tag-open { font: 12px var(--mono); color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>Project 3: NoSQL Database</h1>
+  <p class="group-line">INFO 579 &middot; info579_group_1 &middot; Herling, Nathan &middot; Pabari, Nidhi Nilesh &middot; due Dec 13, 2026 11:59 PM</p>
+  <p class="lede">Part of the Project 1 database moved into MongoDB as one denormalized collection, then queried with <code>find</code> and aggregation pipelines.</p>
+  <div class="callout pending"><p><strong>Planning (Nov 10, 2026).</strong> The brief has been read, an aggregate boundary is proposed and the queries, tests and flair are drafted. None of the graded files exist yet.</p></div>
+
+  <h2>Deliverables</h2>
+  <table class="deltable">
+    <thead><tr><th>File</th><th>Task</th><th>Weight</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>collection.json</code><span class="sub">The collection as valid BSON (Extended JSON), at least 5 documents</span></td><td>1</td><td>25%</td><td><span class="mark partial">boundary proposed</span></td></tr>
+      <tr><td><code>collection.pdf</code><span class="sub">Short paragraph: why this boundary fits the business plan</span></td><td>1</td><td>(with the .json)</td><td><span class="mark open">planned</span></td></tr>
+      <tr><td><code>collection_creation.js</code><span class="sub">Statements that create the collection</span></td><td>2</td><td>25%</td><td><span class="mark open">planned</span></td></tr>
+      <tr><td><code>find_queries.js</code><span class="sub">5&ndash;7 <code>find</code> queries with filter and projection</span></td><td>3</td><td>25%</td><td><span class="mark partial">6 drafted</span></td></tr>
+      <tr><td><code>aggregate_pipelines.js</code><span class="sub">5&ndash;7 pipelines, at least 2 counted stages each</span></td><td>4</td><td>25%</td><td><span class="mark partial">6 drafted</span></td></tr>
+      <tr><td><code>project03_info579_group_1.zip</code><span class="sub">The five files only, uploaded to D2L</span></td><td>Submit</td><td></td><td><span class="mark open">not built</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note">Graded files will go in <code>project3/deliverables/</code>; the zip is built from that folder only. The brief says to upload to &ldquo;the assignment of project 1 Dropbox&rdquo;, which looks like a copy-paste slip: check the D2L assignment name before submitting.</p>
+
+  <h2>The plan</h2>
+  <div class="plan-cards">
+    <a href="../../index.html#p3/aggregate" target="_top"><b>Aggregate boundary</b><span>Six tables joined by foreign keys become one <code>tracks</code> collection. Diagram, key mapping and a real example document.</span></a>
+    <a href="../../index.html#p3/queries" target="_top"><b>Draft queries</b><span>Six <code>find</code> queries and six pipelines, each tied to a CROSSFADE use case, with the rubric items each one covers.</span></a>
+    <a href="../../index.html#p3/tests" target="_top"><b>Unit tests</b><span>Our own QC: every query checked against answers computed straight from data.xlsx, plus planted bugs.</span></a>
+    <a href="../../index.html#p3/flair" target="_top"><b>Flair: a small cluster</b><span>Proposed, on one Flask dashboard: a real MongoDB replica set driven from Flask, and Flask servers as peer-to-peer nodes, showing replication, stale reads, lost updates and rollbacks.</span></a>
+  </div>
+  <div class="toolbar">
+    <a class="btn" href="../docs/p3_plan.md" download>Download the plan (p3_plan.md)</a>
+    <a class="btn" href="../brief/info579_project03.pdf" download>Download the brief (PDF)</a>
+  </div>
+
+  <h2>Open decisions</h2>
+  <ol class="prose decisions">
+    <li><span class="tag-ok">[agreed Nov 10]</span> <b>Boundary:</b> six tables, one document per track.</li>
+    <li><span class="tag-open">[open]</span> <b><code>_id</code>:</b> use <code>_id = track_id</code> alone (the lecture allows custom identifiers with no extra field), or also keep a literal <code>track_id</code> field so a grader skimming for primary keys sees it.</li>
+    <li><span class="tag-open">[open]</span> <b>Flair scope:</b> Tier 1 (real replica set, Flask control panel) only, or Tiers 1 and 2 (plus Flask servers as peer-to-peer nodes). Either way it stays out of the graded zip.</li>
+    <li><span class="tag-open">[open]</span> <b>Project 2 pattern:</b> carry over the answer key, the starter kit and the two PDFs (testing guide, use-case reference).</li>
+  </ol>
+</div>
+</body>
+</html>

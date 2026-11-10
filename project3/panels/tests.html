@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit tests (planned)</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<style>
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0; }
+  .flow div { border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; font-size: 14px; background: var(--paper); }
+  .flow b { display: block; font: 600 13px var(--mono); color: var(--cyan); margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>Unit tests</h1>
+  <p class="group-line">Project 3 &middot; our own QC &middot; planned</p>
+  <p class="lede">The brief doesn't ask for tests; as in Project 2, we add them so every graded file is checked against an answer worked out independently.</p>
+  <div class="callout pending"><p><strong>Planned.</strong> No test is written yet. The layers below are what the suite will cover once the four files exist.</p></div>
+
+  <h2>The idea</h2>
+  <div class="flow">
+    <div><b>1 &middot; oracle</b>Plain Python reads the graded <code>data.xlsx</code> and computes every expected answer. No MongoDB involved.</div>
+    <div><b>2 &middot; build</b><code>mongosh</code> runs <code>collection_creation.js</code> against an empty database on a real <code>mongod</code>.</div>
+    <div><b>3 &middot; capture</b>A small shim wraps <code>find</code> and <code>aggregate</code> and records each call's arguments and results as JSON.</div>
+    <div><b>4 &middot; compare</b>pytest compares each captured result with the oracle and checks the rubric rules.</div>
+    <div><b>5 &middot; plant bugs</b>Each file is broken one way at a time; a test that passed must now fail.</div>
+  </div>
+  <p class="prose">Because the expected answers never come from MongoDB, a failing test points at a real fault: either the migration
+    lost or changed data, or a query is wrong.</p>
+
+  <div class="prose">
+  <h2>What each layer checks</h2>
+  <table>
+    <thead><tr><th>Target</th><th>Checks</th></tr></thead>
+    <tbody>
+      <tr><td><code>collection.json</code></td><td>Parses as Extended JSON (<code>bson.json_util</code>). 15 documents. Every column of the 6 tables present at its path with the right BSON type (Decimal128, Date, BinData, boolean). No foreign-key fields remain. Every value equals data.xlsx, decimals at their Project 1 scale.</td></tr>
+      <tr><td><code>collection_creation.js</code></td><td>Runs clean in <code>mongosh</code> and produces exactly <code>collection.json</code>. The <code>$jsonSchema</code> validator rejects bad documents (a probability of 1.2, an unknown <code>ingest_status</code>, a missing title). The planned indexes exist.</td></tr>
+      <tr><td><code>find_queries.js</code></td><td>5&ndash;7 commands. Each has a non-empty filter and projection. Rubric letters (a)&ndash;(e) each used at least once. Each result matches the oracle: same documents, same projected fields, positional <code>$</code> returning one array element.</td></tr>
+      <tr><td><code>aggregate_pipelines.js</code></td><td>5&ndash;7 pipelines. Each has at least 2 stages not counting <code>$limit</code>, <code>$skip</code>, <code>$sort</code>. Letters (a)&ndash;(e) each used. Each result matches the oracle, Decimal128 averages compared exactly.</td></tr>
+      <tr><td>All <code>.js</code> files</td><td>Every command is preceded by a comment carrying its test-sync tag (<code>// F2 &middot; UC-&hellip;</code>), so the tests and the files can't drift apart.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Planted bugs (mutation checks)</h2>
+  <p>As in Project 2, a script breaks each file in small ways and reruns its tests; a bug counts as caught when a test that passed now fails. Examples:</p>
+  <ul>
+    <li>drop one probability from one score, or store a decimal as a double instead of Decimal128;</li>
+    <li>leave <code>artist_id</code> on the track (a foreign key the brief says to drop);</li>
+    <li>turn <code>$elemMatch</code> into two separate conditions, which matches across different array elements;</li>
+    <li>remove the positional <code>$</code> so the whole <code>scores</code> array comes back;</li>
+    <li>change a <code>$push</code> to <code>$addToSet</code>, or a threshold from <code>$gte</code> to <code>$gt</code>.</li>
+  </ul>
+
+  <h2>Running them</h2>
+  <p>The tests need a real MongoDB: Docker <code>mongo:8</code>, or MongoDB Community Server plus <code>mongosh</code>, with Python and <code>pymongo</code>.
+    The cloud sandbox used to build this site can't download MongoDB, so test runs happen locally. As in Project 2, each file will get a
+    step-by-step PDF for running its tests, and this page will show the latest results.</p>
+  </div>
+</div>
+</body>
+</html>

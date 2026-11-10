@@ -11,7 +11,7 @@ CROSSFADE is a streaming service for independent artists where the catalogue is 
 | [`design/`](design/) | Top-level design shared by all three | | |
 | [`project1/`](project1/) | Project 1: Database Design | Sep 27, 2026 | All 4 deliverables; submission zip in `project1/submission/` |
 | [`project2/`](project2/) | Project 2: SQL Database | Nov 8, 2026 | 1 of 4 `.sql` files (Task 1 ready to test), see [`project2/README.md`](project2/README.md) |
-| [`project3/`](project3/) | Project 3: NoSQL Database | Dec 13, 2026 | Not started |
+| [`project3/`](project3/) | Project 3: NoSQL Database | Dec 13, 2026 | Planning: six-table aggregate agreed, queries/tests/flair drafted, see [`project3/README.md`](project3/README.md) |
 
 ## Layout
 
@@ -24,7 +24,9 @@ iframe that every page loads into. Routes are hashes: `#<section>/<page>[/<ancho
 | `#p1/<panel>[/<anchor>]` | `project1/panels/<panel>.html` (unchanged) |
 | `#p2/overview`, `#p2/usecases`, `#p2/brief` | `project2/panels/<panel>.html` |
 | `#p2/implementation`, `#p2/single`, `#p2/multiple`, `#p2/routines` | `project2/panels/file.html?f=<id>` |
-| `#p3`, `#design` | `project3/panel.html`, `design/panel.html` |
+| `#p3/overview`, `#p3/aggregate`, `#p3/queries`, `#p3/tests`, `#p3/flair`, `#p3/brief` | `project3/panels/<panel>.html` |
+| `#home/p3brief` | `project3/panels/brief.html` |
+| `#design` | `design/panel.html` |
 
 `project1/index.html`, `project2/index.html`, `project3/index.html` and `design/index.html` are now redirect
 stubs (`project2/#usecases` → `#p2/usecases`), so old links and bookmarks still work. Links inside a panel that
@@ -38,6 +40,7 @@ add one line to `SECTIONS` in the script at the bottom of `index.html`.
 ```
 index.html       the site shell (top bar, rail, iframe, router)
 home/            front-page panels: overview, Project 1 package, Project 1 data (bulk / per table), Project 2 brief
+                 (the Project 3 brief quick-access entry loads project3/panels/brief.html)
 assets/          site.css (panels), shell.css (index.html chrome), splash.css (home/overview.html), panel.js,
                  logo, favicons, social card (og_crossfade_x.jpg), CROSSFADE artwork
 tools/           stamp_assets.py: tags every link to site.css / shell.css / splash.css / panel.js with a content hash
@@ -48,7 +51,7 @@ project1/        Database Design: deliverables, sources, docs, panels
   data_export/   the graded data.xlsx as data.csv (whole sheet) and csv/<table>.csv, plus crossfade_project1_data.zip
   brief/         (to add) info579_project01.pdf; the Project 1 page shows it once it exists
 project2/        SQL Database: deliverables, panels, use cases, scripts
-project3/        NoSQL Database (panel.html)
+project3/        NoSQL Database: brief, plan (docs/p3_plan.md), aggregate diagrams, example document, panels, scripts
 course_materials/  course zips kept for transport only; not linked from the site (see below)
 boot_site.ps1    local preview server for the whole repo
 ```
@@ -69,7 +72,7 @@ Reads `project1/deliverables/data.xlsx` (the file handed in) and writes two view
 
 | File | Contents |
 |---|---|
-| `lectures.zip` | Lecture slides, units 1 to 10 plus the unit 8 exercises (PDF) |
+| `lectures.zip` | Lecture slides, units 1 to 15 plus the unit 8 exercises and the Unit 11 MongoDB data-design deck (PDF) |
 | `0_unit_4.zip` | Homework units 4 to 10: submitted `.sql`/`.png`, instructor feedback screenshots, the assignment attachments |
 | `project01_info579_group_1.zip` | The Project 1 submission as uploaded; same four files as `project1/submission/project01_info579_group_1.zip` |
 

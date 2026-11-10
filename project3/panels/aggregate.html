@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aggregate boundary</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<style>
+  .figure.diagram { max-height: none; background: #fff; }
+  .figure.diagram.dark { background: #05080d; }
+  .figure.diagram img { width: 100%; height: auto; }
+  .toolbar .sep { width: 1px; align-self: stretch; background: var(--rule); margin: 0 4px; }
+  pre.doc { max-height: 560px; overflow: auto; font: 13px/1.5 var(--mono); background: #f6f8fa; border: 1px solid var(--rule); padding: 12px 14px; }
+  .prose td code, .prose th code { white-space: nowrap; }
+  .gone { color: #8a949c; text-decoration: line-through; text-decoration-color: #d6249f; }
+  .chip { display: inline-block; font: 11.5px var(--mono); padding: 0 6px; border-radius: 3px; border: 1px solid; }
+  .chip.core { color: #067fa8; border-color: #9fdcef; background: var(--cyan-wash); }
+  .chip.ref { color: #a46a0c; border-color: #efd7a8; background: var(--amber-wash); }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+  .stats div { border: 1px solid var(--rule); border-radius: 6px; padding: 8px 14px; min-width: 130px; }
+  .stats b { display: block; font: 600 22px var(--mono); color: var(--cyan); }
+  .stats span { font-size: 13px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="panel wide">
+  <h1>Aggregate boundary</h1>
+  <p class="group-line">Project 3 &middot; Task 1 &middot; proposed Nov 10, 2026 &middot; six tables agreed</p>
+  <p class="lede">One document per track. Six Project 1 tables, joined by foreign keys, are denormalized into a single <code>tracks</code> collection.</p>
+
+  <div class="toolbar">
+    <button class="btn" id="t-light" aria-pressed="true">Light</button>
+    <button class="btn" id="t-dark" aria-pressed="false">Dark</button>
+    <span class="sep"></span>
+    <a class="btn" id="open" href="../design/crossfade_p3_aggregate_light.svg" target="_blank" rel="noopener">Open in a new tab</a>
+    <a class="btn" id="dl" href="../design/crossfade_p3_aggregate_light.svg" download>Download SVG</a>
+  </div>
+  <div class="figure diagram" id="fig"><img id="img" src="../design/crossfade_p3_aggregate_light.svg" alt="Aggregate-boundary diagram: track, artist, track_score, scoring_model, genre_probability and genre inside the boundary, joined by foreign keys; listener, play, station and station_blend outside it."></div>
+  <p class="note">Built by <code>python project3/scripts/build_aggregate_svg.py</code> from the Project 1 schema; columns, types, keys and row counts match <code>crossfade_schema.sql</code> and data.xlsx.</p>
+
+  <div class="prose">
+  <h2>What &ldquo;related&rdquo; means here</h2>
+  <p>The brief asks for at least 3 <em>related</em> tables. In this course that means tables joined by foreign keys in the
+    Project 1 schema: every table in the boundary must reach the others through FK&nbsp;&rarr;&nbsp;PK links, the lines in the physical
+    data model. Denormalizing turns those joins into nesting. All six tables below reach <code>track</code> through such a chain.</p>
+  <table>
+    <thead><tr><th>Table</th><th>Joined by (crossfade_schema.sql)</th><th>Cardinality</th><th>Becomes</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip core">track</span></td><td>root</td><td>&ndash;</td><td>the document, <code>_id</code> = <code>track_id</code></td></tr>
+      <tr><td><span class="chip ref">artist</span></td><td><code>track.artist_id</code> &rarr; <code>artist.artist_id</code> (<code>fk_track_artist</code>)</td><td>N tracks : 1 artist</td><td><code>artist{}</code></td></tr>
+      <tr><td><span class="chip core">track_score</span></td><td><code>track_score.track_id</code> &rarr; <code>track.track_id</code> (<code>fk_track_score_track</code>)</td><td>1 track : N scores</td><td><code>scores[]</code></td></tr>
+      <tr><td><span class="chip ref">scoring_model</span></td><td><code>track_score.model_id</code> &rarr; <code>scoring_model.model_id</code> (<code>fk_track_score_scoring_model</code>)</td><td>N scores : 1 model</td><td><code>scores[].model{}</code></td></tr>
+      <tr><td><span class="chip core">genre_probability</span></td><td><code>(track_id, model_id)</code> &rarr; <code>track_score</code> (<code>fk_genre_probability_track_score</code>, composite)</td><td>1 score : 10 probabilities</td><td><code>scores[].probabilities[]</code></td></tr>
+      <tr><td><span class="chip ref">genre</span></td><td><code>track_score.genre_id</code> &rarr; <code>genre</code> (<code>fk_track_score_genre</code>) and <code>genre_probability.genre_id</code> &rarr; <code>genre</code> (<code>fk_genre_probability_genre</code>)</td><td>N : 1, joined twice</td><td><code>scores[].top_genre{}</code> and <code>scores[].probabilities[].genre{}</code></td></tr>
+    </tbody>
+  </table>
+  <p><span class="chip core">core</span> The chain <code>track</code> &rarr; <code>track_score</code> &rarr; <code>genre_probability</code> becomes nested arrays.
+     <span class="chip ref">reference</span> The other three are copied in as embedded subdocuments.</p>
+
+  <h2>Keys</h2>
+  <p>The brief keeps every primary key and drops every foreign key. Each dropped FK's link survives as nesting or as the embedded table's own PK.</p>
+  <table>
+    <thead><tr><th>Project 1 column</th><th>Role</th><th>In MongoDB</th></tr></thead>
+    <tbody>
+      <tr><td><code>track.track_id</code></td><td>PK</td><td><code>_id</code></td></tr>
+      <tr><td><code class="gone">track.artist_id</code></td><td>FK</td><td>dropped; <code>artist.artist_id</code> is the artist's own PK</td></tr>
+      <tr><td><code class="gone">track_score.track_id</code></td><td>PK&middot;FK</td><td>dropped; implied by the parent document</td></tr>
+      <tr><td><code class="gone">track_score.model_id</code></td><td>PK&middot;FK</td><td>dropped; <code>scores[].model.model_id</code></td></tr>
+      <tr><td><code class="gone">track_score.genre_id</code></td><td>FK</td><td>dropped; <code>scores[].top_genre.genre_id</code></td></tr>
+      <tr><td><code class="gone">genre_probability.(track_id, model_id)</code></td><td>PK&middot;FK</td><td>dropped; implied by the enclosing score</td></tr>
+      <tr><td><code class="gone">genre_probability.genre_id</code></td><td>PK&middot;FK</td><td>dropped; <code>probabilities[].genre.genre_id</code></td></tr>
+    </tbody>
+  </table>
+  <p class="note">Open: keep <code>_id = track_id</code> alone, as the lecture allows for custom identifiers, or also keep a literal <code>track_id</code> field.</p>
+
+  <h2>Why this boundary</h2>
+  <ul>
+    <li><b>It matches how the data is used.</b> At ingest a track is written once with all its scores. Station matching then reads a track together with its score under the station's model: one document read, no joins.</li>
+    <li><b>The copied tables never change.</b> <code>genre</code> (10 rows) and <code>scoring_model</code> (5 rows) are fixed reference data, so duplicating them into every document cannot go stale.</li>
+    <li><b>It stays small.</b> A track is scored by a handful of models and every score has exactly 10 probabilities, so no array grows without limit.</li>
+  </ul>
+
+  <h2>What stays outside</h2>
+  <ul>
+    <li><code>play</code>: one row per listen, growing forever. Embedding it is the unbounded-array anti-pattern from the Unit 11 slides.</li>
+    <li><code>listener</code>, <code>station</code>, <code>station_blend</code>: reached through the listener and joined to <code>track</code> only through <code>play</code>. They form a separate, listener-centred aggregate.</li>
+    <li>Rows no track uses drop out: artist 1049 (Kestrel Ave, no tracks) and scoring model 3 (<code>beardown_rrm_cfg17</code>, scored nothing).</li>
+  </ul>
+  </div>
+
+  <div class="stats">
+    <div><b>15</b><span>documents (one per track)</span></div>
+    <div><b>27</b><span>embedded scores</span></div>
+    <div><b>270</b><span>probability subdocuments</span></div>
+    <div><b>2</b><span>tracks with empty <code>scores</code> (4830, 4831)</span></div>
+  </div>
+
+  <div class="prose">
+  <h2>BSON types</h2>
+  <table>
+    <thead><tr><th>Project 1 type</th><th>BSON</th><th>Columns</th></tr></thead>
+    <tbody>
+      <tr><td><code>DECIMAL(p,s)</code></td><td>Decimal128, scale kept</td><td><code>payout_rate</code>, <code>holdout_accuracy</code>, the four score measures, <code>probability</code></td></tr>
+      <tr><td><code>DATE</code>, <code>DATETIME</code></td><td>Date</td><td><code>release_date</code>, <code>joined_date</code>, <code>deployed_on</code>, <code>scored_on</code></td></tr>
+      <tr><td><code>BINARY(32)</code></td><td>BinData (subtype 0)</td><td><code>audio_checksum</code></td></tr>
+      <tr><td><code>BIT(1)</code></td><td>boolean</td><td><code>verified</code></td></tr>
+      <tr><td>integers, <code>VARCHAR</code>, <code>CHAR</code>, <code>ENUM</code></td><td>int, string</td><td>everything else</td></tr>
+    </tbody>
+  </table>
+  <p><code>collection_creation.js</code> will create the collection with a <code>$jsonSchema</code> validator that carries the Project 1 CHECK constraints and ENUMs, insert the documents and create indexes.</p>
+
+  <h2>Example document: track 4818</h2>
+  <p>Built from the real Project 1 rows by <code>python project3/scripts/build_example_document.py</code>. Track 4818 (<i>Copper Lanterns</i>)
+    was scored by two models that disagree on its top genre (jazz vs blues). This is a preview of the boundary, not <code>collection.json</code>.</p>
+  </div>
+  <div class="toolbar">
+    <a class="btn" href="../design/example_document_4818.json" download>Download example_document_4818.json</a>
+  </div>
+  <pre class="doc" id="doc">Loading ../design/example_document_4818.json&hellip;</pre>
+</div>
+<script>
+(function () {
+  var img = document.getElementById("img"), fig = document.getElementById("fig");
+  var open = document.getElementById("open"), dl = document.getElementById("dl");
+  var bl = document.getElementById("t-light"), bd = document.getElementById("t-dark");
+  function theme(dark) {
+    var f = "../design/crossfade_p3_aggregate" + (dark ? "" : "_light") + ".svg";
+    img.src = f; open.href = f; dl.href = f;
+    fig.classList.toggle("dark", dark);
+    bl.setAttribute("aria-pressed", String(!dark)); bd.setAttribute("aria-pressed", String(dark));
+    try { localStorage.setItem("p3-diagram-theme", dark ? "dark" : "light"); } catch (e) {}
+  }
+  bl.onclick = function () { theme(false); }; bd.onclick = function () { theme(true); };
+  try { if (localStorage.getItem("p3-diagram-theme") === "dark") theme(true); } catch (e) {}
+  fetch("../design/example_document_4818.json", { cache: "no-store" }).then(function (r) {
+    if (!r.ok) throw new Error(r.status); return r.text();
+  }).then(function (t) { document.getElementById("doc").textContent = t; })
+    .catch(function () {
+      document.getElementById("doc").textContent = "Could not load the example document here. Open the site through boot_site.ps1 or GitHub Pages, or use the download button.";
+    });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flair: a small cluster on Flask (proposed)</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<style>
+  .topo { border: 1px solid var(--rule); border-radius: 6px; background: #fff; padding: 8px; margin: 12px 0; }
+  .topo svg { width: 100%; height: auto; display: block; }
+  .tier { display: inline-block; white-space: nowrap; font: 12px var(--mono); padding: 0 7px; border-radius: 3px; border: 1px solid #9fdcef; color: #067fa8; background: var(--cyan-wash); margin-right: 6px; }
+  .tier.t2 { border-color: #efd7a8; color: #a46a0c; background: var(--amber-wash); }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>Flair: a small cluster and its conflicts</h1>
+  <p class="group-line">Project 3 &middot; extra, not graded &middot; proposed</p>
+  <p class="lede">The brief stops at one collection on one server. A real NoSQL deployment replicates that collection across nodes, and
+    replication brings conflicts. This extra shows them on CROSSFADE's own data.</p>
+  <div class="callout pending"><p><strong>Proposed, scope open.</strong> Tier 1 only, or Tiers 1 and 2. Either way it lives in the repo and on this site, never in the graded zip.</p></div>
+
+  <div class="prose">
+  <h2>One Flask dashboard, two backends</h2>
+  <p>Both tiers sit behind one Flask app with a live dashboard. Flask's role differs by tier, and every scenario page says which tier it runs on:</p>
+  <table>
+    <thead><tr><th></th><th>What the nodes are</th><th>What Flask does</th><th>What it proves</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tier">Tier 1</span></td><td>Three real <code>mongod</code> processes (node A, node B, arbiter) on local ports, started with <code>--replSet</code>. Docker optional.</td><td><b>Control panel only.</b> Starts and stops nodes, steps down the primary, sends writes with <code>w: 1</code> or <code>w: "majority"</code>, shows <code>rs.status()</code> live.</td><td>MongoDB's own behaviour: elections, oplog, write concern, rollback.</td></tr>
+      <tr><td><span class="tier t2">Tier 2</span></td><td>Flask apps: <b>each Flask server is one node</b>, with its own copy of the documents.</td><td><b>Is the network.</b> Nodes talk over HTTP; a small Flask proxy between them can cut the link, add delay or drop requests.</td><td>Multi-primary replication as taught in the lectures: vector stamps, revisions, conflicts, merges. A simulation, labelled as one.</td></tr>
+    </tbody>
+  </table>
+  <p>Why not mimic the replica set in Flask too: a Flask copy of elections and rollback would only show our own model of MongoDB, not
+    MongoDB. Tier 1 therefore drives real servers, and Flask stays out of the data path.</p>
+  </div>
+
+  <div class="prose">
+  <h2>Why not just two nodes</h2>
+  <p>A replica set needs a majority to elect a primary. With two data nodes, losing one leaves 1 of 2, which is not a majority: the survivor
+    stays a secondary and writes stop. The fix is the <b>arbiter</b> from the Unit 12 slides, a voting member that stores no data. So the
+    proposed cluster is two data nodes plus an arbiter, and the &ldquo;two nodes, no arbiter&rdquo; failure is shown as a scenario of its own.</p>
+  </div>
+
+  <div class="topo">
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, Segoe UI, sans-serif" role="img" aria-label="Replica set: node A primary, node B secondary, arbiter; app and scoring workers write to the primary; stations read from the secondary.">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4a5a68"/></marker></defs>
+      <rect x="250" y="30" width="400" height="250" rx="12" fill="#f6fbfd" stroke="#0a8fc4" stroke-dasharray="8 5"/>
+      <text x="268" y="54" font-size="13" font-weight="600" fill="#0a8fc4">replica set rs-crossfade</text>
+      <g><rect x="285" y="80" width="150" height="80" rx="8" fill="#fff" stroke="#0a8fc4" stroke-width="2"/>
+        <text x="360" y="108" text-anchor="middle" font-size="15" font-weight="700" fill="#0f1b26">node A</text>
+        <text x="360" y="128" text-anchor="middle" font-size="12.5" fill="#0a8fc4">PRIMARY &middot; priority 2</text>
+        <text x="360" y="146" text-anchor="middle" font-size="11.5" fill="#4a5a68">db.tracks + oplog</text></g>
+      <g><rect x="470" y="80" width="150" height="80" rx="8" fill="#fff" stroke="#0a8fc4" stroke-width="2"/>
+        <text x="545" y="108" text-anchor="middle" font-size="15" font-weight="700" fill="#0f1b26">node B</text>
+        <text x="545" y="128" text-anchor="middle" font-size="12.5" fill="#0a8fc4">SECONDARY &middot; priority 1</text>
+        <text x="545" y="146" text-anchor="middle" font-size="11.5" fill="#4a5a68">db.tracks (copy)</text></g>
+      <g><rect x="395" y="200" width="115" height="56" rx="8" fill="#fff" stroke="#d9921a" stroke-width="2"/>
+        <text x="452" y="225" text-anchor="middle" font-size="14" font-weight="700" fill="#0f1b26">arbiter</text>
+        <text x="452" y="243" text-anchor="middle" font-size="11.5" fill="#a46a0c">votes, no data</text></g>
+      <line x1="435" y1="112" x2="468" y2="112" stroke="#0a8fc4" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="452" y="102" text-anchor="middle" font-size="10.5" paint-order="stroke" stroke="#f6fbfd" stroke-width="4" fill="#4a5a68">oplog</text>
+      <line x1="390" y1="160" x2="430" y2="198" stroke="#d9921a" stroke-dasharray="4 3"/>
+      <line x1="515" y1="160" x2="475" y2="198" stroke="#d9921a" stroke-dasharray="4 3"/>
+      <text x="452" y="186" text-anchor="middle" font-size="10.5" paint-order="stroke" stroke="#f6fbfd" stroke-width="4" fill="#a46a0c">election votes</text>
+      <g><rect x="30" y="70" width="170" height="44" rx="6" fill="#fff" stroke="#4a5a68"/>
+        <text x="115" y="97" text-anchor="middle" font-size="13" fill="#0f1b26">upload / moderation</text></g>
+      <g><rect x="30" y="130" width="170" height="44" rx="6" fill="#fff" stroke="#4a5a68"/>
+        <text x="115" y="157" text-anchor="middle" font-size="13" fill="#0f1b26">scoring workers</text></g>
+      <line x1="200" y1="92" x2="283" y2="108" stroke="#4a5a68" stroke-width="1.6" marker-end="url(#ar)"/>
+      <line x1="200" y1="152" x2="283" y2="132" stroke="#4a5a68" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="228" y="127" text-anchor="middle" font-size="11" paint-order="stroke" stroke="#fff" stroke-width="4" fill="#4a5a68">writes</text>
+      <g><rect x="700" y="96" width="170" height="44" rx="6" fill="#fff" stroke="#4a5a68"/>
+        <text x="785" y="123" text-anchor="middle" font-size="13" fill="#0f1b26">station playback</text></g>
+      <line x1="698" y1="118" x2="622" y2="118" stroke="#4a5a68" stroke-width="1.6" marker-end="url(#ar)"/>
+      <g><rect x="692" y="200" width="196" height="56" rx="6" fill="#fff" stroke="#0a8fc4" stroke-dasharray="5 3"/>
+        <text x="790" y="223" text-anchor="middle" font-size="13" font-weight="600" fill="#0f1b26">Flask control panel</text>
+        <text x="790" y="242" text-anchor="middle" font-size="10.5" fill="#4a5a68">start/stop &middot; step down &middot; rs.status()</text></g>
+      <line x1="690" y1="228" x2="652" y2="228" stroke="#0a8fc4" stroke-dasharray="5 3" marker-end="url(#ar)"/>
+      <text x="678" y="109" text-anchor="middle" font-size="11" paint-order="stroke" stroke="#fff" stroke-width="4" fill="#4a5a68">reads</text>
+    </svg>
+  </div>
+
+  <div class="prose">
+  <h2><span class="tier">Tier 1</span>A real MongoDB replica set, driven from Flask</h2>
+  <p>Three local <code>mongod</code> processes form <code>rs-crossfade</code> (Docker Compose works the same way if preferred). The Flask
+    control panel runs each scenario step by step, printing every step and the state of every node; no scenario needs a real network split.</p>
+  <table>
+    <thead><tr><th>Scenario</th><th>CROSSFADE story</th><th>What it shows</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Replication</td><td>A new upload is inserted on the primary.</td><td>The write goes into the oplog and appears on the secondary.</td><td>&ndash;</td></tr>
+      <tr><td>Stale read<br><small>read-write conflict</small></td><td>Moderation rejects track 4831 on the primary; a station reading a delayed secondary still sees it as playable.</td><td>Eventual consistency: replicas lag.</td><td><code>readConcern: "majority"</code>, reads from the primary, causally consistent sessions.</td></tr>
+      <tr><td>Lost update<br><small>write-write conflict</small></td><td>Two scoring workers each read track 4830, add their model's score and write the whole document back; one score disappears.</td><td>Read-modify-write races.</td><td>Atomic <code>$push</code>; an optimistic version stamp with a conditional update, retried when nothing matched; a pessimistic lock field with an expiry.</td></tr>
+      <tr><td>Failover</td><td>Node A is stopped.</td><td>The arbiter and node B elect node B; writes continue; node A rejoins as a secondary.</td><td>&ndash;</td></tr>
+      <tr><td>Rollback</td><td>With node B stopped, a <code>w: 1</code> write lands on node A only. Stop node A, start node B: node B and the arbiter are a majority, so node B is elected and takes new writes. Restart node A.</td><td>Node A rolls back the write that never reached node B, though the client was told it succeeded.</td><td><code>w: "majority"</code>: a write either survives or the client sees a timeout, never a silent loss.</td></tr>
+      <tr><td>No arbiter</td><td>The failover again with only two data nodes.</td><td>No majority, no primary, writes stop.</td><td>Add the arbiter.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="tier t2">Tier 2</span>A peer-to-peer simulator on Flask servers</h2>
+  <p>MongoDB has one primary per replica set, so the multi-primary replication from the Unit 11 slides is simulated, and the
+    simulator follows CouchDB from Unit 12, which is driven entirely over REST. Each node is a Flask server:</p>
+  </div>
+  <div class="topo">
+    <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, Segoe UI, sans-serif" role="img" aria-label="Two Flask nodes, each with its own copy of the tracks documents, replicating through a Flask network proxy that can cut, delay or drop traffic.">
+      <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4a5a68"/></marker></defs>
+      <g><rect x="40" y="50" width="230" height="130" rx="10" fill="#fff" stroke="#d9921a" stroke-width="2"/>
+        <text x="155" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="#0f1b26">Flask node a</text>
+        <text x="155" y="100" text-anchor="middle" font-size="12" fill="#a46a0c">:5001 &middot; accepts writes</text>
+        <text x="155" y="124" text-anchor="middle" font-size="11.5" fill="#4a5a68">tracks + _rev + vector {a, b}</text>
+        <text x="155" y="144" text-anchor="middle" font-size="11.5" fill="#4a5a68">GET / PUT /tracks/&lt;id&gt;</text>
+        <text x="155" y="162" text-anchor="middle" font-size="11.5" fill="#4a5a68">GET /_changes?since=n</text></g>
+      <g><rect x="630" y="50" width="230" height="130" rx="10" fill="#fff" stroke="#d9921a" stroke-width="2"/>
+        <text x="745" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="#0f1b26">Flask node b</text>
+        <text x="745" y="100" text-anchor="middle" font-size="12" fill="#a46a0c">:5002 &middot; accepts writes</text>
+        <text x="745" y="124" text-anchor="middle" font-size="11.5" fill="#4a5a68">tracks + _rev + vector {a, b}</text>
+        <text x="745" y="144" text-anchor="middle" font-size="11.5" fill="#4a5a68">GET / PUT /tracks/&lt;id&gt;</text>
+        <text x="745" y="162" text-anchor="middle" font-size="11.5" fill="#4a5a68">GET /_changes?since=n</text></g>
+      <g><rect x="360" y="70" width="180" height="90" rx="10" fill="#f6fbfd" stroke="#0a8fc4" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="450" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#0f1b26">network proxy</text>
+        <text x="450" y="117" text-anchor="middle" font-size="11.5" fill="#0a8fc4">Flask :5000</text>
+        <text x="450" y="137" text-anchor="middle" font-size="11.5" fill="#4a5a68">cut &middot; delay &middot; drop %</text></g>
+      <line x1="272" y1="100" x2="358" y2="100" stroke="#4a5a68" stroke-width="1.6" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+      <line x1="542" y1="100" x2="628" y2="100" stroke="#4a5a68" stroke-width="1.6" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+      <text x="315" y="92" text-anchor="middle" font-size="11" fill="#4a5a68">pull</text>
+      <text x="585" y="92" text-anchor="middle" font-size="11" fill="#4a5a68">pull</text>
+      <g><rect x="345" y="196" width="210" height="40" rx="6" fill="#fff" stroke="#4a5a68"/>
+        <text x="450" y="221" text-anchor="middle" font-size="12.5" fill="#0f1b26">Flask dashboard (both tiers)</text></g>
+      <line x1="155" y1="182" x2="343" y2="214" stroke="#4a5a68" stroke-dasharray="4 3"/>
+      <line x1="745" y1="182" x2="557" y2="214" stroke="#4a5a68" stroke-dasharray="4 3"/>
+    </svg>
+  </div>
+  <div class="prose">
+  <ul>
+    <li><b>Nodes.</b> Each Flask server holds its own copy of the <code>tracks</code> documents, seeded from <code>collection.json</code>, and accepts reads and writes. Every document carries a revision (<code>_rev</code>, as in CouchDB) and a vector stamp <code>{a: n, b: m}</code>.</li>
+    <li><b>Same API as the slides.</b> <code>GET</code>/<code>PUT</code> a document with its <code>_rev</code>, and a <code>_changes</code> feed, so the Unit 12 curl commands work almost unchanged against our nodes. A <code>PUT</code> with a stale <code>_rev</code> is refused: read again, then write.</li>
+    <li><b>Replication.</b> A background loop on each node pulls the other's <code>_changes</code>. A stamp ahead on every counter wins and is copied with no conflict; stamps ahead on different counters are a conflict: a deterministic winner is kept and the losing revision goes into <code>_conflicts</code>.</li>
+    <li><b>Merges per field.</b> A stage-name edit on node a and a <code>verified</code> change on node b merge cleanly; two different <code>title</code> edits are flagged for a person.</li>
+    <li><b>The network is a Flask proxy</b> that all node-to-node traffic goes through. The dashboard can cut it (a partition), add delay or drop a share of requests, then heal it and watch the nodes converge.</li>
+    <li><b>Testable anywhere.</b> pytest drives several nodes in one process with Flask's <code>test_client</code>, and scripted orderings make each conflict happen the same way every run. No MongoDB or Docker needed.</li>
+  </ul>
+
+  <h2>Ground rules</h2>
+  <ul>
+    <li>Real Project 1 data only; no invented tracks.</li>
+    <li>Version-stamp and lock fields exist only in the flair, never in <code>collection.json</code>.</li>
+    <li>Every scenario page says whether it runs on real MongoDB (Tier 1) or on the Flask simulator (Tier 2).</li>
+    <li>Every scenario prints progress and node state as it runs, and has its own tests: Tier 1 under <code>@pytest.mark.cluster</code>, skipped when no <code>mongod</code> is available; Tier 2 runs anywhere.</li>
+  </ul>
+  </div>
+</div>
+</body>
+</html>

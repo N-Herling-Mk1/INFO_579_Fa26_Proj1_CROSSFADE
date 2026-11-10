@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assignment brief</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+</head>
+<body>
+<div class="panel wide">
+  <h1>Assignment brief</h1>
+  <p class="group-line">INFO 579 &middot; Project 3 &middot; NoSQL Database Implementation and Querying &middot; due Dec 13, 2026</p>
+  <div class="toolbar">
+    <a class="btn" href="../brief/info579_project03.pdf" target="_blank" rel="noopener">Open in a new tab</a>
+    <a class="btn" href="../brief/info579_project03.pdf" download>Download PDF</a>
+  </div>
+  <iframe class="pdf" src="../brief/info579_project03.pdf" title="Project 3 brief PDF"></iframe>
+  <p class="note">If the PDF doesn't display here (some mobile browsers), use Open in a new tab.</p>
+
+  <h2>In short</h2>
+  <div class="prose">
+    <table>
+      <thead><tr><th>Task</th><th>File</th><th>Asks for</th></tr></thead>
+      <tbody>
+        <tr><td>1 (25%)</td><td><code>collection.json</code>, <code>collection.pdf</code></td><td>An aggregate boundary over at least 3 related tables, denormalized into one collection of at least 5 documents. Every document and subdocument keeps all of its table's fields, primary keys included; foreign keys are dropped. Valid BSON. A short paragraph on why the boundary fits the business plan.</td></tr>
+        <tr><td>2 (25%)</td><td><code>collection_creation.js</code></td><td>The statements that create the collection.</td></tr>
+        <tr><td>3 (25%)</td><td><code>find_queries.js</code></td><td>5&ndash;7 <code>find</code> queries, each with a filter and a projection: (a) <code>$regex</code>, (b) <code>$elemMatch</code>, (c) a query on embedded documents, (d) positional <code>$</code>, (e) <code>$nor</code>.</td></tr>
+        <tr><td>4 (25%)</td><td><code>aggregate_pipelines.js</code></td><td>5&ndash;7 pipelines, at least 2 stages each not counting <code>$limit</code>, <code>$skip</code>, <code>$sort</code>: (a) <code>$unwind</code>, (b) <code>$group</code> with accumulators, (c) <code>$group</code> with <code>$push</code>, (d) <code>$project</code> with <code>$filter</code>, (e) <code>$project</code> that reshapes the output.</td></tr>
+      </tbody>
+    </table>
+    <p>Every command must be justified within the application and preceded by a comment; trivial or generic solutions lose marks. Submit <code>project03_info579_group_1.zip</code>. Late work is capped at 70%.</p>
+  </div>
+</div>
+</body>
+</html>

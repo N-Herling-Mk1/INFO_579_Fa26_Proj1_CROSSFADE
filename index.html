@@ -123,7 +123,8 @@
       ["", [["overview", "Overview", "home/overview.html"]]],
       ["Quick access", [["p1", "Project 1", "home/p1.html", "01", "Instructions + submission"],
                         ["data", "Project 1 data", "home/data.html", "02", "Bulk or per-table CSV"],
-                        ["brief", "Project 2 brief", "home/brief.html", "03", "Assignment PDF"]]]] },
+                        ["brief", "Project 2 brief", "home/brief.html", "03", "Assignment PDF"],
+                        ["p3brief", "Project 3 brief", "project3/panels/brief.html", "04", "Assignment PDF"]]]] },
     p1: { label: "Project 1", short: "P1", sub: "Database Design", ctx: "Project 1 · Database Design", groups: [
       ["Overview", [["home", "Home", "project1/panels/home.html"]]],
       ["Deliverables", [["requirements", "Requirements analysis", "project1/panels/requirements.html", null, null, "requirements_analysis.pdf"],
@@ -153,7 +154,12 @@
                            ["vet-routines", "routines", "project2/panels/vetting.html?f=routines", null, "50 tests"]]],
       ["Reference", [["brief", "Assignment brief", "project2/panels/brief.html"]]]] },
     p3: { label: "Project 3", short: "P3", sub: "NoSQL Database", ctx: "Project 3 · NoSQL Database", groups: [
-      ["", [["overview", "Overview", "project3/panel.html"]]]] },
+      ["Overview", [["overview", "Overview", "project3/panels/overview.html", null, "planning"]]],
+      ["Plan", [["aggregate", "Aggregate boundary", "project3/panels/aggregate.html", null, "6 tables · Task 1"],
+                ["queries", "Draft queries", "project3/panels/queries.html", null, "6 find · 6 pipelines"],
+                ["tests", "Unit tests", "project3/panels/tests.html", null, "planned"],
+                ["flair", "Flair: cluster", "project3/panels/flair.html", null, "proposed · Flask"]]],
+      ["Reference", [["brief", "Assignment brief", "project3/panels/brief.html"]]]] },
     design: { label: "Design", sub: "All projects", ctx: "Top-level design", groups: [
       ["", [["overview", "Top-level design", "design/panel.html"]]]] },
     history: { label: "History", sub: "Provenance", ctx: "Project history and provenance", groups: [

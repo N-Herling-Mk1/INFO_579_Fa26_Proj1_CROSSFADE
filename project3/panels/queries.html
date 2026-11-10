@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draft queries</title>
+<link rel="icon" href="../../assets/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
+<link rel="stylesheet" href="../../assets/site.css?v=3f1e8bb3">
+<style>
+  .q { border: 1px solid var(--rule); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+  .q h3 { margin: 0 0 4px; font: 600 16px var(--body); }
+  .q h3 .id { font-family: var(--mono); color: var(--cyan); margin-right: 8px; }
+  .q p { margin: 4px 0; font-size: 15px; }
+  .q pre { margin: 8px 0 4px; font: 12.5px/1.5 var(--mono); background: #f6f8fa; border: 1px solid var(--rule); padding: 8px 10px; overflow: auto; }
+  .q .meta { font-size: 13.5px; color: var(--ink-2); }
+  .req { display: inline-block; font: 11.5px var(--mono); padding: 0 6px; margin-left: 4px; border-radius: 3px; color: #067fa8; border: 1px solid #9fdcef; background: var(--cyan-wash); }
+  table.cov { border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+  table.cov th, table.cov td { border: 1px solid var(--rule); padding: 5px 10px; text-align: center; }
+  table.cov th { background: #f3f7fa; font: 600 12.5px var(--body); color: var(--ink-2); }
+  table.cov td:first-child, table.cov th:first-child { text-align: left; font-family: var(--mono); }
+  table.cov td.y { background: #dff1f8; color: #067fa8; font-weight: 700; }
+  table.cov tfoot td { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>Draft queries</h1>
+  <p class="group-line">Project 3 &middot; Tasks 3 and 4 &middot; drafts, not the graded files</p>
+  <p class="lede">Each query answers a question CROSSFADE actually asks of its catalogue. Expected results are worked out from the Project 1 sample data; thresholds may still move.</p>
+  <div class="callout pending"><p><strong>Drafts.</strong> The sketches below show the shape of each command. The graded <code>find_queries.js</code> and <code>aggregate_pipelines.js</code> are not written yet; each command there will carry a comment naming the business need and a test-sync tag.</p></div>
+
+  <h2>Rubric coverage</h2>
+  <p class="prose">The brief asks for 5&ndash;7 commands per file and at least one command per requirement letter.</p>
+  <table class="cov">
+    <thead><tr><th>find</th><th>(a) $regex</th><th>(b) $elemMatch</th><th>(c) embedded</th><th>(d) positional $</th><th>(e) $nor</th></tr></thead>
+    <tbody>
+      <tr><td>F1</td><td class="y">&#9679;</td><td></td><td class="y">&#9679;</td><td></td><td></td></tr>
+      <tr><td>F2</td><td></td><td class="y">&#9679;</td><td class="y">&#9679;</td><td class="y">&#9679;</td><td></td></tr>
+      <tr><td>F3</td><td></td><td class="y">&#9679;</td><td class="y">&#9679;</td><td></td><td></td></tr>
+      <tr><td>F4</td><td></td><td></td><td class="y">&#9679;</td><td></td><td></td></tr>
+      <tr><td>F5</td><td></td><td></td><td class="y">&#9679;</td><td></td><td class="y">&#9679;</td></tr>
+      <tr><td>F6</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <table class="cov">
+    <thead><tr><th>aggregate</th><th>(a) $unwind</th><th>(b) $group + accumulators</th><th>(c) $group + $push</th><th>(d) $project + $filter</th><th>(e) $project reshape</th></tr></thead>
+    <tbody>
+      <tr><td>A1</td><td class="y">&#9679;</td><td class="y">&#9679;</td><td></td><td></td><td></td></tr>
+      <tr><td>A2</td><td class="y">&#9679;</td><td></td><td class="y">&#9679;</td><td></td><td></td></tr>
+      <tr><td>A3</td><td></td><td></td><td></td><td class="y">&#9679;</td><td></td></tr>
+      <tr><td>A4</td><td></td><td></td><td></td><td></td><td class="y">&#9679;</td></tr>
+      <tr><td>A5</td><td class="y">&#9679;</td><td class="y">&#9679;</td><td></td><td></td><td></td></tr>
+      <tr><td>A6</td><td class="y">&#9679;</td><td class="y">&#9679;</td><td></td><td></td><td class="y">&#9679;</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Find (d) and (e) are covered once each; a second query for either can be added if wanted. F6 covers no letter: it is there because the scoring backlog is a real need.</p>
+
+  <h2>find queries (Task 3)</h2>
+
+  <div class="q"><h3><span class="id">F1</span>Catalogue search box <span class="req">a</span><span class="req">c</span></h3>
+    <p>A listener types part of a name; match track titles or artist stage names, case-insensitive.</p>
+<pre>db.tracks.find(
+  { $or: [ { title: { $regex: "static", $options: "i" } },
+           { "artist.stage_name": { $regex: "static", $options: "i" } } ] },
+  { _id: 1, title: 1, "artist.stage_name": 1 })</pre>
+    <p class="meta">Expected: 4817, 4818 (artist <i>Velvet Static</i>), 4821 (<i>Cathedral Static</i>).</p></div>
+
+  <div class="q"><h3><span class="id">F2</span>Station candidates under the station's model <span class="req">b</span><span class="req">c</span><span class="req">d</span></h3>
+    <p>Stations want tracks that genuinely sit between genres under the model the station uses. Return only that model's score.</p>
+<pre>db.tracks.find(
+  { scores: { $elemMatch: { "model.version_label": "beardown_rrm",
+                            posterior_entropy: { $gte: 0.6 } } } },
+  { title: 1, "scores.$": 1 })</pre>
+    <p class="meta">Expected: 4825, 4826, each with its <code>beardown_rrm</code> score only.</p></div>
+
+  <div class="q"><h3><span class="id">F3</span>Jazz&ndash;hip-hop crossovers <span class="req">b</span><span class="req">c</span></h3>
+    <p>For the &ldquo;Late Jazz Hop&rdquo; station: any score in which hip-hop carries real weight. <code>$elemMatch</code> nested two levels, so genre and probability must hold in the same element.</p>
+<pre>db.tracks.find(
+  { scores: { $elemMatch: { probabilities: { $elemMatch: {
+      "genre.name": "hiphop", probability: { $gte: 0.30 } } } } } },
+  { title: 1, "artist.stage_name": 1 })</pre>
+    <p class="meta">Expected: 4817 (hip-hop 0.3426 under <code>beardown</code>).</p></div>
+
+  <div class="q"><h3><span class="id">F4</span>Payout console <span class="req">c</span></h3>
+    <p>Finance pays verified artists by country; list their tracks and the payout rate on the embedded artist.</p>
+<pre>db.tracks.find(
+  { "artist.verified": true, "artist.country": { $in: ["GB", "DE"] } },
+  { _id: 0, title: 1, "artist.stage_name": 1, "artist.payout_rate": 1 })</pre>
+    <p class="meta">Expected: 4819, 4820 (Mara Quell, GB), 4827, 4828 (Juno Fleet, DE).</p></div>
+
+  <div class="q"><h3><span class="id">F5</span>Featured shelf <span class="req">c</span><span class="req">e</span></h3>
+    <p>The home page only features tracks that are scored and come from verified artists.</p>
+<pre>db.tracks.find(
+  { $nor: [ { ingest_status: "rejected" },
+            { ingest_status: "awaiting scoring" },
+            { "artist.verified": false } ] },
+  { title: 1, "artist.stage_name": 1 })</pre>
+    <p class="meta">Expected: 10 tracks (all but Tin Harbour's 4823, 4824 and Saltmarsh Tapes' 4829&ndash;4831).</p></div>
+
+  <div class="q"><h3><span class="id">F6</span>Scoring backlog</h3>
+    <p>Operations watches for uploads that no model has scored yet.</p>
+<pre>db.tracks.find({ scores: { $size: 0 } }, { title: 1, ingest_status: 1 })</pre>
+    <p class="meta">Expected: 4830 (awaiting scoring), 4831 (rejected).</p></div>
+
+  <h2>Aggregation pipelines (Task 4)</h2>
+
+  <div class="q"><h3><span class="id">A1</span>Compare BEARDOWN versions <span class="req">a</span><span class="req">b</span></h3>
+    <p>Which classifier version leaves tracks most ambiguous, and how confident is it on average?</p>
+<pre>db.tracks.aggregate([
+  { $unwind: "$scores" },
+  { $group: { _id: "$scores.model.version_label",
+              tracks: { $sum: 1 },
+              mean_entropy: { $avg: "$scores.posterior_entropy" },
+              mean_top_probability: { $avg: "$scores.top_probability" },
+              holdout_accuracy: { $first: "$scores.model.holdout_accuracy" } } },
+  { $sort: { mean_entropy: -1 } }])</pre>
+    <p class="meta">Expected: 4 models. Model 3 (<code>beardown_rrm_cfg17</code>) scored nothing, so it cannot appear: a limit of this boundary worth saying in the comment.</p></div>
+
+  <div class="q"><h3><span class="id">A2</span>Genre shelves <span class="req">a</span><span class="req">c</span></h3>
+    <p>Browse shelves: under the production model, which tracks sit on each top genre?</p>
+<pre>db.tracks.aggregate([
+  { $unwind: "$scores" },
+  { $match: { "scores.model.version_label": "beardown_rrm" } },
+  { $group: { _id: "$scores.top_genre.name", tracks: { $push: "$title" } } },
+  { $sort: { _id: 1 } }])</pre>
+    <p class="meta">Expected: 8 shelves holding 10 tracks.</p></div>
+
+  <div class="q"><h3><span class="id">A3</span>Genre fingerprint chips <span class="req">d</span></h3>
+    <p>The track page shows, per model, only the genres with at least 10% probability.</p>
+<pre>db.tracks.aggregate([
+  { $match: { ingest_status: "scored" } },
+  { $project: { title: 1, fingerprint: { $map: { input: "$scores", as: "s", in: {
+      model: "$$s.model.version_label",
+      genres: { $filter: { input: "$$s.probabilities", as: "p",
+                           cond: { $gte: ["$$p.probability", 0.10] } } } } } } } }])</pre>
+    <p class="meta">Expected: 13 tracks.</p></div>
+
+  <div class="q"><h3><span class="id">A4</span>Artist-facing track card <span class="req">e</span></h3>
+    <p>The artist dashboard wants a flat card, not the stored document.</p>
+<pre>db.tracks.aggregate([
+  { $match: { ingest_status: "scored" } },
+  { $project: { _id: 0, artist: "$artist.stage_name", track: "$title",
+                minutes: { $round: [{ $divide: ["$duration", 60] }, 2] },
+                models_scored: { $size: "$scores" },
+                released: { $dateToString: { format: "%Y-%m", date: "$release_date" } } } }])</pre>
+    <p class="meta">Expected: 13 cards.</p></div>
+
+  <div class="q"><h3><span class="id">A5</span>Review queue: models disagree <span class="req">a</span><span class="req">b</span></h3>
+    <p>Tracks whose models name different top genres go to a human for review before retraining.</p>
+<pre>db.tracks.aggregate([
+  { $unwind: "$scores" },
+  { $group: { _id: "$_id", title: { $first: "$title" },
+              top_genres: { $addToSet: "$scores.top_genre.name" },
+              max_divergence: { $max: "$scores.model_divergence" } } },
+  { $match: { "top_genres.1": { $exists: true } } }])</pre>
+    <p class="meta">Expected: 4818 (jazz/blues), 4821 (metal/classical), 4828 (pop/disco).</p></div>
+
+  <div class="q"><h3><span class="id">A6</span>Most between-genre artists <span class="req">a</span><span class="req">b</span><span class="req">e</span></h3>
+    <p>Editorial picks artists whose catalogue sits furthest between genres.</p>
+<pre>db.tracks.aggregate([
+  { $unwind: "$scores" },
+  { $group: { _id: "$artist.artist_id", artist: { $first: "$artist.stage_name" },
+              mean_entropy: { $avg: "$scores.posterior_entropy" },
+              tracks: { $addToSet: "$title" } } },
+  { $project: { _id: 0, artist: 1, mean_entropy: 1, track_count: { $size: "$tracks" } } },
+  { $sort: { mean_entropy: -1 } }])</pre>
+    <p class="meta">Expected: 7 artists.</p></div>
+</div>
+</body>
+</html>

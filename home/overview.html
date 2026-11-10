@@ -91,9 +91,9 @@
         <span class="ix" aria-hidden="true">03</span>
         <span class="tag">Project 3</span>
         <span class="ti">NoSQL Database</span>
-        <span class="de">The same business modelled in a NoSQL database.</span>
+        <span class="de">The same business moved into MongoDB: one track-centred collection, queried with find and aggregation pipelines.</span>
         <span class="bar"><i></i></span>
-        <span class="ft"><span>Due Dec 13, 2026</span><span class="st idle">Not started</span></span>
+        <span class="ft"><span>Due Dec 13, 2026</span><span class="st todo">Planning</span></span>
       </a>
       <a class="pc ds rise" style="--d:7" href="../design/">
         <span class="ix" aria-hidden="true">&#9671;</span>
@@ -234,10 +234,10 @@
       var tests = R ? R.passed + "/" + (R.passed + R.failed) + " tests pass" : "tests not run";
       var nf = P ? P.files.length : 4;
       switch (sec) {
-        case "home": return ["One business, three databases", tables + " tables · " + rows + " sample rows", "next: Project 2, " + dueIn("2026-11-08")];
+        case "home": return ["One business, three databases", tables + " tables · " + rows + " sample rows", "next: Project 3, " + dueIn("2026-12-13")];
         case "p1": return ["Database Design", (ks.length ? done + "/" + ks.length : "4/4") + " deliverables · graded", "due 09/27 · submitted"];
         case "p2": return ["SQL Database", (p2files === null ? "–" : p2files) + "/" + nf + " files · " + tests, dueIn("2026-11-08")];
-        case "p3": return ["NoSQL Database", "not started", dueIn("2026-12-13")];
+        case "p3": return ["NoSQL Database", "planning · 6-table aggregate proposed", dueIn("2026-12-13")];
         case "design": return ["Top-level design", tables + " entities · 59 columns", "feeds P1 → P2 → P3"];
         case "history": return ["Provenance", "INFO 510 → INFO 698 → INFO 579", "sources · data chain · checks"];
       }

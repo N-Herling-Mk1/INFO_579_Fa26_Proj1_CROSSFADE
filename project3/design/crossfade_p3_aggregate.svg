@@ -1,0 +1,391 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1000" width="1500" height="1000" font-family="JetBrains Mono, Consolas, 'DejaVu Sans Mono', monospace">
+<defs>
+  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+    <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0H0V24" fill="none" stroke="#0e1a24" stroke-width="1"/>
+  </pattern>
+  <linearGradient id="hc" x1="0" x2="1"><stop offset="0" stop-color="#22e5ff" stop-opacity="0.3"/><stop offset="1" stop-color="#22e5ff" stop-opacity="0.06"/></linearGradient>
+  <linearGradient id="hr" x1="0" x2="1"><stop offset="0" stop-color="#ffb43c" stop-opacity="0.3"/><stop offset="1" stop-color="#ffb43c" stop-opacity="0.06"/></linearGradient>
+  <linearGradient id="he" x1="0" x2="1"><stop offset="0" stop-color="#5d6b7c" stop-opacity="0.3"/><stop offset="1" stop-color="#5d6b7c" stop-opacity="0.06"/></linearGradient>
+</defs>
+<rect width="1500" height="1000" fill="#05080d"/><rect width="1500" height="1000" fill="url(#grid)"/>
+<text x="40" y="44" fill="#d8f6ff" font-size="22" font-weight="700" letter-spacing="3">CROSSFADE · PROJECT 3 · AGGREGATE BOUNDARY</text>
+<text x="40" y="68" fill="#6f8796" font-size="12.5">Six tables joined by foreign keys in the Project 1 schema, denormalized into one MongoDB collection: <tspan fill="#22e5ff" font-weight="700">tracks</tspan> (15 documents, one per track)</text>
+<rect x="18" y="104" width="1470" height="648" rx="14" fill="#22e5ff" fill-opacity=".025" stroke="#22e5ff" stroke-opacity=".75" stroke-width="1.6" stroke-dasharray="10 6" filter="url(#glow)"/>
+<rect x="36" y="94" width="318" height="20" fill="#05080d"/>
+<text x="44" y="109" fill="#22e5ff" font-size="12.5" font-weight="700" letter-spacing="2">AGGREGATE BOUNDARY · db.tracks</text>
+<rect x="36" y="742" width="412" height="20" fill="#05080d"/>
+<text x="44" y="757" fill="#5d6b7c" font-size="12" letter-spacing="2">OUTSIDE · listener-side tables (keys only)</text>
+<path d="M420,242.0 H350.0 V220.0 H280" fill="none" stroke="#ffb43c" stroke-width="1.7" stroke-opacity="1"/>
+<line x1="406" y1="242.0" x2="420" y2="235.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="406" y1="242.0" x2="420" y2="242.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="406" y1="242.0" x2="420" y2="249.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="400.0" y1="236.05" x2="400.0" y2="247.95" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="288" y1="226.0" x2="288" y2="214.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="293" y1="226.0" x2="293" y2="214.0" stroke="#ffb43c" stroke-width="1.8"/>
+<rect x="328.4625" y="184.5" width="43.074999999999996" height="16.5" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="350.0" y="196" fill="#ffb43c" font-size="11.5" text-anchor="middle">N : 1</text>
+<rect x="300.25" y="290" width="99.5" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="350.0" y="300" fill="#6f8796" font-size="10" text-anchor="middle">fk_track_artist</text>
+<path d="M660,220.0 H800" fill="none" stroke="#22e5ff" stroke-width="1.7" stroke-opacity="1"/>
+<line x1="668" y1="226.0" x2="668" y2="214.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="673" y1="226.0" x2="673" y2="214.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="786" y1="220.0" x2="800" y2="213.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="786" y1="220.0" x2="800" y2="220.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="786" y1="220.0" x2="800" y2="227.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="780.0" y1="214.05" x2="780.0" y2="225.95" stroke="#22e5ff" stroke-width="1.8"/>
+<rect x="708.4625" y="184.5" width="43.074999999999996" height="16.5" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="730.0" y="196" fill="#22e5ff" font-size="11.5" text-anchor="middle">1 : N</text>
+<rect x="665.0" y="290" width="130.0" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="730.0" y="300" fill="#6f8796" font-size="10" text-anchor="middle">fk_track_score_track</text>
+<path d="M1040,220.0 H1070" fill="none" stroke="#22e5ff" stroke-width="1.3" stroke-opacity="1"/>
+<path d="M1150,220.0 H1180" fill="none" stroke="#22e5ff" stroke-width="1.3" stroke-opacity="1"/>
+<path d="M1040,242.0 H1070" fill="none" stroke="#22e5ff" stroke-width="1.3" stroke-opacity="1"/>
+<path d="M1150,242.0 H1180" fill="none" stroke="#22e5ff" stroke-width="1.3" stroke-opacity="1"/>
+<path d="M1070,220.0 V242.0 M1150,220.0 V242.0 M1070,231.0 H1150" fill="none" stroke="#22e5ff" stroke-width="1.7" stroke-opacity="1"/>
+<line x1="1048" y1="226.0" x2="1048" y2="214.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="1053" y1="226.0" x2="1053" y2="214.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="1166" y1="242.0" x2="1180" y2="235.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="1166" y1="242.0" x2="1180" y2="242.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="1166" y1="242.0" x2="1180" y2="249.0" stroke="#22e5ff" stroke-width="1.8"/>
+<line x1="1160.0" y1="236.05" x2="1160.0" y2="247.95" stroke="#22e5ff" stroke-width="1.8"/>
+<rect x="1084.955" y="184.5" width="50.089999999999996" height="16.5" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1110.0" y="196" fill="#22e5ff" font-size="11.5" text-anchor="middle">1 : 10</text>
+<rect x="1069.4" y="126" width="81.2" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1110.0" y="136" fill="#6f8796" font-size="10" text-anchor="middle">composite FK</text>
+<rect x="1045.0" y="141" width="130.0" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1110.0" y="151" fill="#6f8796" font-size="10" text-anchor="middle">(track_id, model_id)</text>
+<path d="M975,390 V500" fill="none" stroke="#ffb43c" stroke-width="1.7" stroke-opacity="1"/>
+<line x1="975" y1="404" x2="982" y2="390" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="975" y1="404" x2="975" y2="390" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="975" y1="404" x2="968" y2="390" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="980.95" y1="410.0" x2="969.05" y2="410.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="969" y1="492" x2="981" y2="492" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="969" y1="487" x2="981" y2="487" stroke="#ffb43c" stroke-width="1.8"/>
+<rect x="925.925" y="418.5" width="43.074999999999996" height="16.5" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="965" y="430" fill="#ffb43c" font-size="11.5" text-anchor="end">N : 1</text>
+<rect x="790.2" y="438" width="178.79999999999998" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="965" y="448" fill="#6f8796" font-size="10" text-anchor="end">fk_track_score_scoring_model</text>
+<path d="M1040,264.0 H1085 V550.0 H1180" fill="none" stroke="#ffb43c" stroke-width="1.7" stroke-opacity="1"/>
+<line x1="1054" y1="264.0" x2="1040" y2="271.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1054" y1="264.0" x2="1040" y2="264.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1054" y1="264.0" x2="1040" y2="257.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1060.0" y1="269.95" x2="1060.0" y2="258.05" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1172" y1="544.0" x2="1172" y2="556.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1167" y1="544.0" x2="1167" y2="556.0" stroke="#ffb43c" stroke-width="1.8"/>
+<rect x="1091" y="388.5" width="43.074999999999996" height="16.5" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1095" y="400" fill="#ffb43c" font-size="11.5" text-anchor="start">N : 1</text>
+<rect x="1091" y="408" width="130.0" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1095" y="418" fill="#6f8796" font-size="10" text-anchor="start">fk_track_score_genre</text>
+<rect x="1091" y="423" width="75.1" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1095" y="433" fill="#6f8796" font-size="10" text-anchor="start">(top genre)</text>
+<path d="M1420,264.0 H1454 V572.0 H1420" fill="none" stroke="#ffb43c" stroke-width="1.7" stroke-opacity="1"/>
+<line x1="1434" y1="264.0" x2="1420" y2="271.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1434" y1="264.0" x2="1420" y2="264.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1434" y1="264.0" x2="1420" y2="257.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1440.0" y1="269.95" x2="1440.0" y2="258.05" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1428" y1="578.0" x2="1428" y2="566.0" stroke="#ffb43c" stroke-width="1.8"/>
+<line x1="1433" y1="578.0" x2="1433" y2="566.0" stroke="#ffb43c" stroke-width="1.8"/>
+<rect x="1432.4625" y="388.5" width="43.074999999999996" height="16.5" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="1454" y="400" fill="#ffb43c" font-size="11.5" text-anchor="middle">N : 1</text>
+<text transform="translate(1462,440) rotate(90)" fill="#6f8796" font-size="10">fk_genre_probability_genre</text>
+<path d="M540,800 V368" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="540" y1="814" x2="547" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="540" y1="814" x2="540" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="540" y1="814" x2="533" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="545.95" y1="820.0" x2="534.05" y2="820.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="534" y1="360" x2="546" y2="360" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="534" y1="355" x2="546" y2="355" stroke="#5d6b7c" stroke-width="1.8"/>
+<rect x="546" y="549" width="142.2" height="16" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="550" y="560" fill="#5d6b7c" font-size="11" text-anchor="start">play → track   N : 1</text>
+<rect x="546" y="568" width="184.9" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="550" y="578" fill="#8a97a6" font-size="10" text-anchor="start">excluded: one row per listen,</text>
+<rect x="546" y="583" width="178.79999999999998" height="15" rx="3" fill="#05080d" fill-opacity=".92"/>
+<text x="550" y="593" fill="#8a97a6" font-size="10" text-anchor="start">unbounded-array anti-pattern</text>
+<path d="M420,850.0 H280" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="406" y1="850.0" x2="420" y2="843.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="406" y1="850.0" x2="420" y2="850.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="406" y1="850.0" x2="420" y2="857.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="400.0" y1="844.05" x2="400.0" y2="855.95" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="288" y1="856.0" x2="288" y2="844.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="293" y1="856.0" x2="293" y2="844.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<path d="M660,916.0 H730.0 V850.0 H800" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="674" y1="916.0" x2="660" y2="923.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="674" y1="916.0" x2="660" y2="916.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="674" y1="916.0" x2="660" y2="909.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="680.0" y1="921.95" x2="680.0" y2="910.05" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="792" y1="844.0" x2="792" y2="856.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="787" y1="844.0" x2="787" y2="856.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<path d="M920,910 V975 H160 V866" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="920" y1="924" x2="927" y2="910" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="920" y1="924" x2="920" y2="910" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="920" y1="924" x2="913" y2="910" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="925.95" y1="930.0" x2="914.05" y2="930.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="166" y1="874" x2="154" y2="874" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="166" y1="879" x2="154" y2="879" stroke="#5d6b7c" stroke-width="1.8"/>
+<path d="M860,800 V720" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="860" y1="814" x2="867" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="860" y1="814" x2="860" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="860" y1="814" x2="853" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="865.95" y1="820.0" x2="854.05" y2="820.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="854" y1="712" x2="866" y2="712" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="854" y1="707" x2="866" y2="707" stroke="#5d6b7c" stroke-width="1.8"/>
+<path d="M1180,850.0 H1040" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="1166" y1="850.0" x2="1180" y2="843.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1166" y1="850.0" x2="1180" y2="850.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1166" y1="850.0" x2="1180" y2="857.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1160.0" y1="844.05" x2="1160.0" y2="855.95" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1048" y1="856.0" x2="1048" y2="844.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1053" y1="856.0" x2="1053" y2="844.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<path d="M1300,800 V610" fill="none" stroke="#5d6b7c" stroke-width="1.7" stroke-opacity="1" stroke-dasharray="6 5"/>
+<line x1="1300" y1="814" x2="1307" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1300" y1="814" x2="1300" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1300" y1="814" x2="1293" y2="800" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1305.95" y1="820.0" x2="1294.05" y2="820.0" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1294" y1="602" x2="1306" y2="602" stroke="#5d6b7c" stroke-width="1.8"/>
+<line x1="1294" y1="597" x2="1306" y2="597" stroke="#5d6b7c" stroke-width="1.8"/>
+<text x="42" y="161" fill="#ffb43c" font-size="11" font-style="italic" opacity=".95">→ artist{}  (embedded)</text>
+<g opacity="1">
+<rect x="40" y="170" width="240" height="176" rx="6" fill="#08111a" stroke="#ffb43c" stroke-width="1.5" filter="url(#glow)"/>
+<path d="M40 204 V176 Q40 170 46 170 H274 Q280 170 280 176 V204 Z" fill="url(#hr)"/>
+<line x1="40" y1="204" x2="280" y2="204" stroke="#ffb43c" stroke-opacity=".6"/>
+<text x="52" y="192" fill="#ffb43c" font-size="14" font-weight="700" letter-spacing="1">artist</text>
+<text x="270" y="192" fill="#6f8796" font-size="10.5" text-anchor="end">8 rows</text>
+<text x="50" y="224.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="90" y="224.0" fill="#d8f6ff" font-size="11">artist_id</text>
+<text x="270" y="224.0" fill="#6f8796" font-size="9.5" text-anchor="end">MEDIUMINT</text>
+<rect x="41" y="231.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="90" y="246.0" fill="#d8f6ff" font-size="11">stage_name</text>
+<text x="270" y="246.0" fill="#6f8796" font-size="9.5" text-anchor="end">VARCHAR(64)</text>
+<text x="90" y="268.0" fill="#d8f6ff" font-size="11">country</text>
+<text x="270" y="268.0" fill="#6f8796" font-size="9.5" text-anchor="end">CHAR(2)</text>
+<rect x="41" y="275.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="90" y="290.0" fill="#d8f6ff" font-size="11">joined_date</text>
+<text x="270" y="290.0" fill="#6f8796" font-size="9.5" text-anchor="end">DATE</text>
+<text x="90" y="312.0" fill="#d8f6ff" font-size="11">payout_rate</text>
+<text x="270" y="312.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(5,5)</text>
+<rect x="41" y="319.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="90" y="334.0" fill="#d8f6ff" font-size="11">verified</text>
+<text x="270" y="334.0" fill="#6f8796" font-size="9.5" text-anchor="end">BIT(1)</text>
+</g>
+<text x="422" y="161" fill="#22e5ff" font-size="11" font-style="italic" opacity=".95">→ document root  (_id = track_id)</text>
+<g opacity="1">
+<rect x="420" y="170" width="240" height="198" rx="6" fill="#08111a" stroke="#22e5ff" stroke-width="1.5" filter="url(#glow)"/>
+<path d="M420 204 V176 Q420 170 426 170 H654 Q660 170 660 176 V204 Z" fill="url(#hc)"/>
+<line x1="420" y1="204" x2="660" y2="204" stroke="#22e5ff" stroke-opacity=".6"/>
+<text x="432" y="192" fill="#22e5ff" font-size="14" font-weight="700" letter-spacing="1">track</text>
+<text x="650" y="192" fill="#6f8796" font-size="10.5" text-anchor="end">15 rows</text>
+<text x="430" y="224.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="470" y="224.0" fill="#d8f6ff" font-size="11">track_id</text>
+<text x="650" y="224.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<rect x="421" y="231.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="430" y="246.0" fill="#ff6ad5" font-size="9.5" font-weight="700">FK</text>
+<text x="470" y="246.0" fill="#56707f" font-size="11">artist_id</text>
+<line x1="468" y1="242.0" x2="531.4" y2="242.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="650" y="246.0" fill="#6f8796" font-size="9.5" text-anchor="end">MEDIUMINT</text>
+<text x="470" y="268.0" fill="#d8f6ff" font-size="11">title</text>
+<text x="650" y="268.0" fill="#6f8796" font-size="9.5" text-anchor="end">VARCHAR(128)</text>
+<rect x="421" y="275.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="470" y="290.0" fill="#d8f6ff" font-size="11">duration</text>
+<text x="650" y="290.0" fill="#6f8796" font-size="9.5" text-anchor="end">SMALLINT</text>
+<text x="470" y="312.0" fill="#d8f6ff" font-size="11">release_date</text>
+<text x="650" y="312.0" fill="#6f8796" font-size="9.5" text-anchor="end">DATE</text>
+<rect x="421" y="319.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="470" y="334.0" fill="#d8f6ff" font-size="11">audio_checksum</text>
+<text x="650" y="334.0" fill="#6f8796" font-size="9.5" text-anchor="end">BINARY(32)</text>
+<text x="470" y="356.0" fill="#d8f6ff" font-size="11">ingest_status</text>
+<text x="650" y="356.0" fill="#6f8796" font-size="9.5" text-anchor="end">ENUM</text>
+</g>
+<text x="802" y="161" fill="#22e5ff" font-size="11" font-style="italic" opacity=".95">→ scores[]</text>
+<g opacity="1">
+<rect x="800" y="170" width="240" height="220" rx="6" fill="#08111a" stroke="#22e5ff" stroke-width="1.5" filter="url(#glow)"/>
+<path d="M800 204 V176 Q800 170 806 170 H1034 Q1040 170 1040 176 V204 Z" fill="url(#hc)"/>
+<line x1="800" y1="204" x2="1040" y2="204" stroke="#22e5ff" stroke-opacity=".6"/>
+<text x="812" y="192" fill="#22e5ff" font-size="14" font-weight="700" letter-spacing="1">track_score</text>
+<text x="1030" y="192" fill="#6f8796" font-size="10.5" text-anchor="end">27 rows</text>
+<text x="810" y="224.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="850" y="224.0" fill="#56707f" font-size="11">track_id</text>
+<line x1="848" y1="220.0" x2="904.8" y2="220.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="1030" y="224.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<rect x="801" y="231.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="810" y="246.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="850" y="246.0" fill="#56707f" font-size="11">model_id</text>
+<line x1="848" y1="242.0" x2="904.8" y2="242.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="1030" y="246.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<text x="810" y="268.0" fill="#ff6ad5" font-size="9.5" font-weight="700">FK</text>
+<text x="850" y="268.0" fill="#56707f" font-size="11">genre_id</text>
+<line x1="848" y1="264.0" x2="904.8" y2="264.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="1030" y="268.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<rect x="801" y="275.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="290.0" fill="#d8f6ff" font-size="11">top_probability</text>
+<text x="1030" y="290.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(5,4)</text>
+<text x="850" y="312.0" fill="#d8f6ff" font-size="11">posterior_entropy</text>
+<text x="1030" y="312.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(5,4)</text>
+<rect x="801" y="319.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="334.0" fill="#d8f6ff" font-size="11">model_divergence</text>
+<text x="1030" y="334.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(5,4)</text>
+<text x="850" y="356.0" fill="#d8f6ff" font-size="11">segment_variance</text>
+<text x="1030" y="356.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(4,4)</text>
+<rect x="801" y="363.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="378.0" fill="#d8f6ff" font-size="11">scored_on</text>
+<text x="1030" y="378.0" fill="#6f8796" font-size="9.5" text-anchor="end">DATETIME</text>
+</g>
+<text x="1182" y="161" fill="#22e5ff" font-size="11" font-style="italic" opacity=".95">→ scores[].probabilities[]</text>
+<g opacity="1">
+<rect x="1180" y="170" width="240" height="132" rx="6" fill="#08111a" stroke="#22e5ff" stroke-width="1.5" filter="url(#glow)"/>
+<path d="M1180 204 V176 Q1180 170 1186 170 H1414 Q1420 170 1420 176 V204 Z" fill="url(#hc)"/>
+<line x1="1180" y1="204" x2="1420" y2="204" stroke="#22e5ff" stroke-opacity=".6"/>
+<text x="1192" y="192" fill="#22e5ff" font-size="14" font-weight="700" letter-spacing="1">genre_probability</text>
+<text x="1410" y="192" fill="#6f8796" font-size="10.5" text-anchor="end">270 rows</text>
+<text x="1190" y="224.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="1230" y="224.0" fill="#56707f" font-size="11">track_id</text>
+<line x1="1228" y1="220.0" x2="1284.8" y2="220.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="1410" y="224.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<rect x="1181" y="231.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="1190" y="246.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="1230" y="246.0" fill="#56707f" font-size="11">model_id</text>
+<line x1="1228" y1="242.0" x2="1284.8" y2="242.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="1410" y="246.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<text x="1190" y="268.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="1230" y="268.0" fill="#56707f" font-size="11">genre_id</text>
+<line x1="1228" y1="264.0" x2="1284.8" y2="264.0" stroke="#ff6ad5" stroke-opacity=".7" stroke-width="1.1"/>
+<text x="1410" y="268.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<rect x="1181" y="275.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="1230" y="290.0" fill="#d8f6ff" font-size="11">probability</text>
+<text x="1410" y="290.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(5,4)</text>
+</g>
+<text x="802" y="491" fill="#ffb43c" font-size="11" font-style="italic" opacity=".95">→ scores[].model{}</text>
+<g opacity="1">
+<rect x="800" y="500" width="240" height="220" rx="6" fill="#08111a" stroke="#ffb43c" stroke-width="1.5" filter="url(#glow)"/>
+<path d="M800 534 V506 Q800 500 806 500 H1034 Q1040 500 1040 506 V534 Z" fill="url(#hr)"/>
+<line x1="800" y1="534" x2="1040" y2="534" stroke="#ffb43c" stroke-opacity=".6"/>
+<text x="812" y="522" fill="#ffb43c" font-size="14" font-weight="700" letter-spacing="1">scoring_model</text>
+<text x="1030" y="522" fill="#6f8796" font-size="10.5" text-anchor="end">5 rows</text>
+<text x="810" y="554.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="850" y="554.0" fill="#d8f6ff" font-size="11">model_id</text>
+<text x="1030" y="554.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<rect x="801" y="561.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="576.0" fill="#d8f6ff" font-size="11">version_label</text>
+<text x="1030" y="576.0" fill="#6f8796" font-size="9.5" text-anchor="end">VARCHAR(32)</text>
+<text x="850" y="598.0" fill="#d8f6ff" font-size="11">fusion_type</text>
+<text x="1030" y="598.0" fill="#6f8796" font-size="9.5" text-anchor="end">ENUM</text>
+<rect x="801" y="605.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="620.0" fill="#d8f6ff" font-size="11">embedding_dimension</text>
+<text x="1030" y="620.0" fill="#6f8796" font-size="9.5" text-anchor="end">SMALLINT</text>
+<text x="850" y="642.0" fill="#d8f6ff" font-size="11">segment_length</text>
+<text x="1030" y="642.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<rect x="801" y="649.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="664.0" fill="#d8f6ff" font-size="11">training_corpus</text>
+<text x="1030" y="664.0" fill="#6f8796" font-size="9.5" text-anchor="end">VARCHAR(16)</text>
+<text x="850" y="686.0" fill="#d8f6ff" font-size="11">holdout_accuracy</text>
+<text x="1030" y="686.0" fill="#6f8796" font-size="9.5" text-anchor="end">DEC(5,4)</text>
+<rect x="801" y="693.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="850" y="708.0" fill="#d8f6ff" font-size="11">deployed_on</text>
+<text x="1030" y="708.0" fill="#6f8796" font-size="9.5" text-anchor="end">DATE</text>
+</g>
+<text x="1182" y="476" fill="#ffb43c" font-size="11" font-style="italic" opacity=".95">→ scores[].top_genre{}</text>
+<text x="1182" y="491" fill="#ffb43c" font-size="11" font-style="italic" opacity=".95">→ scores[].probabilities[].genre{}</text>
+<g opacity="1">
+<rect x="1180" y="500" width="240" height="110" rx="6" fill="#08111a" stroke="#ffb43c" stroke-width="1.5" filter="url(#glow)"/>
+<path d="M1180 534 V506 Q1180 500 1186 500 H1414 Q1420 500 1420 506 V534 Z" fill="url(#hr)"/>
+<line x1="1180" y1="534" x2="1420" y2="534" stroke="#ffb43c" stroke-opacity=".6"/>
+<text x="1192" y="522" fill="#ffb43c" font-size="14" font-weight="700" letter-spacing="1">genre</text>
+<text x="1410" y="522" fill="#6f8796" font-size="10.5" text-anchor="end">10 rows</text>
+<text x="1190" y="554.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="1230" y="554.0" fill="#d8f6ff" font-size="11">genre_id</text>
+<text x="1410" y="554.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+<rect x="1181" y="561.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="1230" y="576.0" fill="#d8f6ff" font-size="11">name</text>
+<text x="1410" y="576.0" fill="#6f8796" font-size="9.5" text-anchor="end">VARCHAR(9)</text>
+<text x="1230" y="598.0" fill="#d8f6ff" font-size="11">description</text>
+<text x="1410" y="598.0" fill="#6f8796" font-size="9.5" text-anchor="end">VARCHAR(80)</text>
+</g>
+<g opacity="0.8">
+<rect x="40" y="800" width="240" height="66" rx="6" fill="#08111a" stroke="#5d6b7c" stroke-width="1.5"/>
+<path d="M40 834 V806 Q40 800 46 800 H274 Q280 800 280 806 V834 Z" fill="url(#he)"/>
+<line x1="40" y1="834" x2="280" y2="834" stroke="#5d6b7c" stroke-opacity=".6"/>
+<text x="52" y="822" fill="#5d6b7c" font-size="14" font-weight="700" letter-spacing="1">listener</text>
+<text x="270" y="822" fill="#6f8796" font-size="10.5" text-anchor="end">8 rows</text>
+<text x="50" y="854.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="90" y="854.0" fill="#d8f6ff" font-size="11">listener_id</text>
+<text x="270" y="854.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+</g>
+<g opacity="0.8">
+<rect x="420" y="800" width="240" height="132" rx="6" fill="#08111a" stroke="#5d6b7c" stroke-width="1.5"/>
+<path d="M420 834 V806 Q420 800 426 800 H654 Q660 800 660 806 V834 Z" fill="url(#he)"/>
+<line x1="420" y1="834" x2="660" y2="834" stroke="#5d6b7c" stroke-opacity=".6"/>
+<text x="432" y="822" fill="#5d6b7c" font-size="14" font-weight="700" letter-spacing="1">play</text>
+<text x="650" y="822" fill="#6f8796" font-size="10.5" text-anchor="end">31 rows</text>
+<text x="430" y="854.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="470" y="854.0" fill="#d8f6ff" font-size="11">listener_id</text>
+<text x="650" y="854.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<rect x="421" y="861.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="430" y="876.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="470" y="876.0" fill="#d8f6ff" font-size="11">track_id</text>
+<text x="650" y="876.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<text x="430" y="898.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="470" y="898.0" fill="#d8f6ff" font-size="11">played_at</text>
+<text x="650" y="898.0" fill="#6f8796" font-size="9.5" text-anchor="end">DATETIME</text>
+<rect x="421" y="905.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="430" y="920.0" fill="#ff6ad5" font-size="9.5" font-weight="700">FK</text>
+<text x="470" y="920.0" fill="#d8f6ff" font-size="11">station_id</text>
+<text x="650" y="920.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+</g>
+<g opacity="0.8">
+<rect x="800" y="800" width="240" height="110" rx="6" fill="#08111a" stroke="#5d6b7c" stroke-width="1.5"/>
+<path d="M800 834 V806 Q800 800 806 800 H1034 Q1040 800 1040 806 V834 Z" fill="url(#he)"/>
+<line x1="800" y1="834" x2="1040" y2="834" stroke="#5d6b7c" stroke-opacity=".6"/>
+<text x="812" y="822" fill="#5d6b7c" font-size="14" font-weight="700" letter-spacing="1">station</text>
+<text x="1030" y="822" fill="#6f8796" font-size="10.5" text-anchor="end">8 rows</text>
+<text x="810" y="854.0" fill="#ffe27a" font-size="9.5" font-weight="700">PK</text>
+<text x="850" y="854.0" fill="#d8f6ff" font-size="11">station_id</text>
+<text x="1030" y="854.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<rect x="801" y="861.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="810" y="876.0" fill="#ff6ad5" font-size="9.5" font-weight="700">FK</text>
+<text x="850" y="876.0" fill="#d8f6ff" font-size="11">listener_id</text>
+<text x="1030" y="876.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<text x="810" y="898.0" fill="#ff6ad5" font-size="9.5" font-weight="700">FK</text>
+<text x="850" y="898.0" fill="#d8f6ff" font-size="11">model_id</text>
+<text x="1030" y="898.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+</g>
+<g opacity="0.8">
+<rect x="1180" y="800" width="240" height="88" rx="6" fill="#08111a" stroke="#5d6b7c" stroke-width="1.5"/>
+<path d="M1180 834 V806 Q1180 800 1186 800 H1414 Q1420 800 1420 806 V834 Z" fill="url(#he)"/>
+<line x1="1180" y1="834" x2="1420" y2="834" stroke="#5d6b7c" stroke-opacity=".6"/>
+<text x="1192" y="822" fill="#5d6b7c" font-size="14" font-weight="700" letter-spacing="1">station_blend</text>
+<text x="1410" y="822" fill="#6f8796" font-size="10.5" text-anchor="end">19 rows</text>
+<text x="1190" y="854.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="1230" y="854.0" fill="#d8f6ff" font-size="11">station_id</text>
+<text x="1410" y="854.0" fill="#6f8796" font-size="9.5" text-anchor="end">INT</text>
+<rect x="1181" y="861.0" width="238" height="22" fill="#ffffff" fill-opacity="0.025"/>
+<text x="1190" y="876.0" fill="#ffb3f0" font-size="9.5" font-weight="700">PK·FK</text>
+<text x="1230" y="876.0" fill="#d8f6ff" font-size="11">genre_id</text>
+<text x="1410" y="876.0" fill="#6f8796" font-size="9.5" text-anchor="end">TINYINT</text>
+</g>
+<rect x="28" y="456" width="440" height="232" rx="8" fill="#08111a" fill-opacity=".9" stroke="#16303f"/>
+<text x="40" y="478" fill="#d8f6ff" font-size="12" font-weight="700" letter-spacing="2">LEGEND</text>
+<rect x="40" y="492" width="22" height="12" rx="2" fill="none" stroke="#22e5ff" stroke-width="1.6"/>
+<text x="72" y="502" fill="#d8f6ff" font-size="11.5">core chain → nested arrays</text>
+<rect x="40" y="514" width="22" height="12" rx="2" fill="none" stroke="#ffb43c" stroke-width="1.6"/>
+<text x="72" y="524" fill="#d8f6ff" font-size="11.5">reference tables → embedded subdocuments</text>
+<rect x="40" y="536" width="22" height="12" rx="2" fill="none" stroke="#5d6b7c" stroke-width="1.6"/>
+<text x="72" y="546" fill="#d8f6ff" font-size="11.5">outside the boundary</text>
+<text x="40" y="568" fill="#ffe27a" font-size="10" font-weight="700">PK</text><text x="64" y="568" fill="#ff6ad5" font-size="10" font-weight="700">FK</text><text x="88" y="568" fill="#ffb3f0" font-size="10" font-weight="700">PK·FK</text><text x="132" y="568" fill="#d8f6ff" font-size="11.5">key role in Project 1</text>
+<text x="40" y="590" fill="#56707f" font-size="11.5">fk_col</text><line x1="38" y1="586" x2="84" y2="586" stroke="#ff6ad5" stroke-opacity=".7"/><text x="100" y="590" fill="#d8f6ff" font-size="11.5">FK dropped in MongoDB; nesting</text>
+<text x="100" y="606" fill="#d8f6ff" font-size="11.5">or the embedded PK carries the link</text>
+<text x="40" y="628" fill="#ffb43c" font-size="11.5" font-weight="400">genre · scoring_model</text><text x="190" y="628" fill="#d8f6ff" font-size="11.5">: static reference data, also</text>
+<text x="40" y="644" fill="#d8f6ff" font-size="11.5">used by station / station_blend — copied in, never</text>
+<text x="40" y="660" fill="#d8f6ff" font-size="11.5">updated, so the duplication is safe</text>
+<line x1="56" y1="682" x2="70" y2="675" stroke="#d8f6ff" stroke-width="1.8"/>
+<line x1="56" y1="682" x2="70" y2="682" stroke="#d8f6ff" stroke-width="1.8"/>
+<line x1="56" y1="682" x2="70" y2="689" stroke="#d8f6ff" stroke-width="1.8"/>
+<line x1="50.0" y1="676.05" x2="50.0" y2="687.95" stroke="#d8f6ff" stroke-width="1.8"/>
+<path d="M40,682 H70" fill="none" stroke="#d8f6ff" stroke-width="1.4" stroke-opacity="1"/>
+<text x="82" y="686" fill="#d8f6ff" font-size="11.5">many</text>
+<path d="M140,682 H170" fill="none" stroke="#d8f6ff" stroke-width="1.4" stroke-opacity="1"/>
+<line x1="162" y1="676" x2="162" y2="688" stroke="#d8f6ff" stroke-width="1.8"/>
+<line x1="157" y1="676" x2="157" y2="688" stroke="#d8f6ff" stroke-width="1.8"/>
+<text x="182" y="686" fill="#d8f6ff" font-size="11.5">one   ·   line = FK → PK join</text>
+</svg>

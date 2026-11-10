@@ -1,0 +1,305 @@
+{
+  "_id": 4818,
+  "title": "Copper Lanterns",
+  "duration": 187,
+  "release_date": {
+    "$date": "2026-04-20T00:00:00Z"
+  },
+  "audio_checksum": {
+    "$binary": {
+      "base64": "WYPFAqfccp3hMJ2zRyEUySjpDi5xJ57bkKMnmKMJGIQ=",
+      "subType": "00"
+    }
+  },
+  "ingest_status": "scored",
+  "artist": {
+    "artist_id": 1042,
+    "stage_name": "Velvet Static",
+    "country": "US",
+    "joined_date": {
+      "$date": "2026-03-14T00:00:00Z"
+    },
+    "payout_rate": {
+      "$numberDecimal": "0.00400"
+    },
+    "verified": true
+  },
+  "scores": [
+    {
+      "model": {
+        "model_id": 1,
+        "version_label": "beardown",
+        "fusion_type": "gated",
+        "embedding_dimension": 512,
+        "segment_length": 30,
+        "training_corpus": "GTZAN",
+        "holdout_accuracy": {
+          "$numberDecimal": "0.7000"
+        },
+        "deployed_on": {
+          "$date": "2026-01-12T00:00:00Z"
+        }
+      },
+      "top_genre": {
+        "genre_id": 5,
+        "name": "jazz",
+        "description": "Swing, improvisation and extended harmony"
+      },
+      "top_probability": {
+        "$numberDecimal": "0.4819"
+      },
+      "posterior_entropy": {
+        "$numberDecimal": "0.5463"
+      },
+      "model_divergence": {
+        "$numberDecimal": "0.0283"
+      },
+      "segment_variance": {
+        "$numberDecimal": "0.0111"
+      },
+      "scored_on": {
+        "$date": "2026-03-15T18:53:49Z"
+      },
+      "probabilities": [
+        {
+          "genre": {
+            "genre_id": 0,
+            "name": "blues",
+            "description": "Twelve-bar forms, blue notes and call-and-response phrasing"
+          },
+          "probability": {
+            "$numberDecimal": "0.3774"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 1,
+            "name": "classical",
+            "description": "Orchestral and chamber writing in the Western art-music tradition"
+          },
+          "probability": {
+            "$numberDecimal": "0.0133"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 2,
+            "name": "country",
+            "description": "Narrative songwriting with steel guitar, fiddle and twang"
+          },
+          "probability": {
+            "$numberDecimal": "0.0211"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 3,
+            "name": "disco",
+            "description": "Four-on-the-floor dance grooves with lush strings and bass"
+          },
+          "probability": {
+            "$numberDecimal": "0.0146"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 4,
+            "name": "hiphop",
+            "description": "Rhythmic vocal delivery over sampled or programmed beats"
+          },
+          "probability": {
+            "$numberDecimal": "0.0132"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 5,
+            "name": "jazz",
+            "description": "Swing, improvisation and extended harmony"
+          },
+          "probability": {
+            "$numberDecimal": "0.4819"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 6,
+            "name": "metal",
+            "description": "Distorted guitars, heavy drums and aggressive dynamics"
+          },
+          "probability": {
+            "$numberDecimal": "0.0490"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 7,
+            "name": "pop",
+            "description": "Hook-driven songs built for broad appeal"
+          },
+          "probability": {
+            "$numberDecimal": "0.0036"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 8,
+            "name": "reggae",
+            "description": "Offbeat skank rhythm and prominent bass lines"
+          },
+          "probability": {
+            "$numberDecimal": "0.0131"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 9,
+            "name": "rock",
+            "description": "Guitar-led songs with a driving backbeat"
+          },
+          "probability": {
+            "$numberDecimal": "0.0128"
+          }
+        }
+      ]
+    },
+    {
+      "model": {
+        "model_id": 4,
+        "version_label": "beardown_rrm",
+        "fusion_type": "concat",
+        "embedding_dimension": 768,
+        "segment_length": 30,
+        "training_corpus": "GTZAN",
+        "holdout_accuracy": {
+          "$numberDecimal": "0.7600"
+        },
+        "deployed_on": {
+          "$date": "2026-03-23T00:00:00Z"
+        }
+      },
+      "top_genre": {
+        "genre_id": 0,
+        "name": "blues",
+        "description": "Twelve-bar forms, blue notes and call-and-response phrasing"
+      },
+      "top_probability": {
+        "$numberDecimal": "0.5077"
+      },
+      "posterior_entropy": {
+        "$numberDecimal": "0.4628"
+      },
+      "model_divergence": {
+        "$numberDecimal": "0.0283"
+      },
+      "segment_variance": {
+        "$numberDecimal": "0.0109"
+      },
+      "scored_on": {
+        "$date": "2026-04-26T10:47:01Z"
+      },
+      "probabilities": [
+        {
+          "genre": {
+            "genre_id": 0,
+            "name": "blues",
+            "description": "Twelve-bar forms, blue notes and call-and-response phrasing"
+          },
+          "probability": {
+            "$numberDecimal": "0.5077"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 1,
+            "name": "classical",
+            "description": "Orchestral and chamber writing in the Western art-music tradition"
+          },
+          "probability": {
+            "$numberDecimal": "0.0119"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 2,
+            "name": "country",
+            "description": "Narrative songwriting with steel guitar, fiddle and twang"
+          },
+          "probability": {
+            "$numberDecimal": "0.0089"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 3,
+            "name": "disco",
+            "description": "Four-on-the-floor dance grooves with lush strings and bass"
+          },
+          "probability": {
+            "$numberDecimal": "0.0060"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 4,
+            "name": "hiphop",
+            "description": "Rhythmic vocal delivery over sampled or programmed beats"
+          },
+          "probability": {
+            "$numberDecimal": "0.0144"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 5,
+            "name": "jazz",
+            "description": "Swing, improvisation and extended harmony"
+          },
+          "probability": {
+            "$numberDecimal": "0.4133"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 6,
+            "name": "metal",
+            "description": "Distorted guitars, heavy drums and aggressive dynamics"
+          },
+          "probability": {
+            "$numberDecimal": "0.0049"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 7,
+            "name": "pop",
+            "description": "Hook-driven songs built for broad appeal"
+          },
+          "probability": {
+            "$numberDecimal": "0.0058"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 8,
+            "name": "reggae",
+            "description": "Offbeat skank rhythm and prominent bass lines"
+          },
+          "probability": {
+            "$numberDecimal": "0.0195"
+          }
+        },
+        {
+          "genre": {
+            "genre_id": 9,
+            "name": "rock",
+            "description": "Guitar-led songs with a driving backbeat"
+          },
+          "probability": {
+            "$numberDecimal": "0.0076"
+          }
+        }
+      ]
+    }
+  ]
+}
